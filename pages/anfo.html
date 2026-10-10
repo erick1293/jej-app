@@ -137,199 +137,253 @@
                 <button type="button" onclick="abrirModalPersonal()" class="btn-primary" style="padding: 6px 12px; font-size: 12px; background-color: #0284c7;">⚙️ Ingreso / Editar Datos</button>
             </div>
 
-            <!-- RESUMEN UNIFICADO -->
             <div id="resumenUnificado" class="resumen-box">
                 <em>Seleccione un turno e ingrese los datos en la ventana emergente.</em>
             </div>
 
             <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
                 <a href="../index.html" class="btn-primary" style="background-color: #64748b; text-decoration: none; text-align: center; width: 45%;">Volver al Menú</a>
-                <button type="button" onclick="irAPaso2()" class="btn-primary" style="width: 50%; background-color: #2563eb;">Ir a Registro de Tiros ➔</button>
+                <button type="button" onclick="irAPaso2()" class="btn-primary" style="width: 50%; background-color: #2563eb;">Ir a Gestión de ID ➔</button>
             </div>
         </div>
 
-        <!-- PASO 2: ASISTENTE PASO A PASO (INGRESO DE PARADAS Y TIROS) -->
+        <!-- PASO 2: GESTIÓN DE ID DE TRABAJO -->
         <div id="paso2" style="display: none;">
-            
-            <!-- SUB-PASO 2.1: DEFINIR PARADA Y CANTIDAD DE TIROS -->
-            <div id="subPasoConfigParada">
-                <h2>Paso 2: Registro de Parada</h2>
-                <p class="subtitle">Defina la parada y la cantidad de tiros a registrar</p>
+            <h2>Paso 2: Gestión de ID de Trabajo</h2>
+            <p class="subtitle">Cree un nuevo ID o seleccione uno ya existente</p>
 
-                <div class="wizard-card">
+            <div class="wizard-card" style="margin-bottom: 15px;">
+                <div class="form-group-field">
+                    <label>➕ CREAR NUEVO ID DE TRABAJO:</label>
+                    <input type="text" id="nuevoIdInput" placeholder="Ej. TRABAJO-01" autocomplete="off" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    <button type="button" onclick="crearNuevoIdTrabajo()" class="btn-primary" style="background-color: #16a34a; width: 100%; font-size: 13px; padding: 10px;">Crear e Ir a Paradas</button>
+                </div>
+            </div>
+
+            <div class="wizard-card">
+                <div class="form-group-field">
+                    <label>📂 SELECCIONAR ID DE TRABAJO EXISTENTE:</label>
+                    <select id="selectIdExistente" style="margin-bottom: 10px; width: 100%; box-sizing: border-box;">
+                        <option value="" disabled selected>-- Seleccione un ID guardado --</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="seleccionarIdExistente()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">Usar Seleccionado ➔</button>
+                    <button type="button" onclick="eliminarIdSeleccionado()" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">🗑️ Eliminar</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-start; margin-top: 25px;">
+                <button type="button" onclick="irAPaso1()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Volver al Paso 1</button>
+            </div>
+        </div>
+
+        <!-- PASO 3: GESTIÓN DE PARADAS PARA EL TRABAJO SELECCIONADO -->
+        <div id="paso3" style="display: none;">
+            <h2>Paso 3: Gestión de Paradas</h2>
+            <p class="subtitle" id="subtituloPaso3">ID Trabajo: -</p>
+
+            <div class="wizard-card" style="margin-bottom: 15px;">
+                <div class="form-group-field">
+                    <label>➕ CREAR NUEVA PARADA:</label>
+                    <input type="text" id="idParadaInput" placeholder="Ej. P1 o PARADA 1" autocomplete="off" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    <button type="button" onclick="irAPaso4DesdeCrearParada()" class="btn-primary" style="background-color: #16a34a; width: 100%; font-size: 13px; padding: 10px;">Crear Parada y Configurar Tiros ➔</button>
+                </div>
+            </div>
+
+            <div class="wizard-card">
+                <div class="form-group-field">
+                    <label>📂 PARADAS REGISTRADAS EN ESTE TRABAJO:</label>
+                    <select id="selectParadaExistente" style="margin-bottom: 10px; width: 100%; box-sizing: border-box;">
+                        <option value="" disabled selected>-- Seleccione una parada guardada --</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="seleccionarParadaExistente()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">Editar / Ver Tiros ➔</button>
+                    <button type="button" onclick="eliminarParadaSeleccionada()" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">🗑️ Eliminar</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
+                <button type="button" onclick="volverAPaso2()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Volver</button>
+                <button type="button" onclick="irAResumenFinalDesdeParadas()" class="btn-primary" style="background-color: #d97706; width: 50%;">Ver Resumen General ➔</button>
+            </div>
+        </div>
+
+        <!-- PASO 4: CONFIGURACIÓN DE CANTIDAD DE TIROS -->
+        <div id="paso4" style="display: none;">
+            <h2>Paso 4: Configurar Tiros</h2>
+            <p class="subtitle" id="subtituloPaso4">Parada: -</p>
+
+            <div class="wizard-card">
+                <div class="form-group-field">
+                    <label>CANTIDAD DE TIROS (RANGO: 1 - 50):</label>
+                    <input type="number" id="cantTirosInput" value="3" min="1" max="50" style="width: 100%; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
+                <button type="button" onclick="volverAPaso3()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Volver</button>
+                <button type="button" onclick="iniciarRegistroTiros()" class="btn-primary" style="background-color: #2563eb; width: 50%;">Siguiente: Capturar Tiros ➔</button>
+            </div>
+        </div>
+
+        <!-- PASO 5: CAPTURA INDIVIDUAL DE CADA TIRO -->
+        <div id="paso5" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="tituloTiroActual">Captura de Tiro</h2>
+                <span id="badgeProgreso" style="background: #2563eb; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 12px;">Tiro 1 de 3</span>
+            </div>
+            <p class="subtitle" id="subtituloParadaActual">ID Trabajo / Parada: -</p>
+
+            <div class="wizard-card">
+                <div class="grid-2">
                     <div class="form-group-field">
-                        <label>INGRESE ID PARADA:</label>
-                        <input type="text" id="idParadaInput" value="PARADA 1" placeholder="Ej. P1 o PARADA 1">
+                        <label>Long. Diseño [m]:</label>
+                        <input type="number" step="0.1" id="tiroLongDiseno" value="12.9">
                     </div>
-
                     <div class="form-group-field">
-                        <label>INGRESE CANTIDAD DE TIROS (RANGO: 1 - 16):</label>
-                        <input type="number" id="cantTirosInput" value="3" min="1" max="16">
+                        <label>Taco [m]:</label>
+                        <input type="number" step="0.1" id="tiroTaco" value="8.0">
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
-                    <button type="button" onclick="irAPaso1()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Volver al Paso 1</button>
-                    <button type="button" onclick="iniciarRegistroTiros()" class="btn-primary" style="background-color: #2563eb; width: 50%;">Siguiente ➔</button>
-                </div>
-            </div>
-
-            <!-- SUB-PASO 2.2: CAPTURA INDIVIDUAL DE CADA TIRO (SIN CAMPO AUTOCALCULADO) -->
-            <div id="subPasoCapturaTiro" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2 id="tituloTiroActual">Captura de Tiro</h2>
-                    <span id="badgeProgreso" style="background: #2563eb; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 12px;">Tiro 1 de 3</span>
-                </div>
-                <p class="subtitle" id="subtituloParadaActual">Parada: P1</p>
-
-                <div class="wizard-card">
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Long. Diseño [m]:</label>
-                            <input type="number" step="0.1" id="tiroLongDiseno" value="12.9">
-                        </div>
-                        <div class="form-group-field">
-                            <label>Taco [m]:</label>
-                            <input type="number" step="0.1" id="tiroTaco" value="8.0">
-                        </div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Largo Momento Cargar [m]:</label>
+                        <input type="number" step="0.1" id="tiroLargoMomento" value="13.0">
                     </div>
-
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Largo Momento Cargar [m]:</label>
-                            <input type="number" step="0.1" id="tiroLargoMomento" value="13.0">
-                        </div>
-                        <div class="form-group-field">
-                            <label>Taco Real [m]:</label>
-                            <input type="number" step="0.1" id="tiroTacoReal" value="8.0">
-                        </div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Estado Tiro:</label>
-                            <select id="tiroEstado" onchange="toggleIntentosDestape()">
-                                <option value="Sano" selected>Sano</option>
-                                <option value="Tapado">Tapado</option>
-                            </select>
-                        </div>
-                        <div class="form-group-field">
-                            <label>Intentos Destape (solo tapados):</label>
-                            <input type="number" id="tiroIntentosDestape" placeholder="Cant." disabled>
-                        </div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Tiro con Agua:</label>
-                            <select id="tiroAgua">
-                                <option value="Seco" selected>Seco</option>
-                                <option value="Agua">Agua</option>
-                            </select>
-                        </div>
-                        <div class="form-group-field">
-                            <label>Tiro Negativo / Positivo:</label>
-                            <select id="tiroPosNeg">
-                                <option value="Positivo" selected>Positivo</option>
-                                <option value="Negativo">Negativo</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Núm. Pera:</label>
-                            <input type="number" id="tiroNumPera" value="7">
-                        </div>
-                        <div class="form-group-field">
-                            <label>Cama Explosivo [m]:</label>
-                            <input type="number" step="0.1" id="tiroCamaExplosivo" placeholder="Opcional">
-                        </div>
-                    </div>
-
-                    <div class="section-title" style="font-size: 14px; margin-top: 10px;">Cebo Superior e Inferior</div>
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Cebo Superior:</label>
-                            <input type="text" id="tiroCeboSup" value="150.0">
-                        </div>
-                        <div class="form-group-field">
-                            <label>Araña Cebo Sup.:</label>
-                            <select id="tiroAranaSup">
-                                <option value="Si" selected>Si</option>
-                                <option value="No">No</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Cant. Cartuchos Sup.:</label>
-                            <input type="number" id="tiroCantCartuchos" value="1">
-                        </div>
-                        <div class="form-group-field">
-                            <label>Cebo Inferior:</label>
-                            <input type="text" id="tiroCeboInf" placeholder="Opcional">
-                        </div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Araña Cebo Inf.:</label>
-                            <select id="tiroAranaInf">
-                                <option value="No" selected>No</option>
-                                <option value="Si">Si</option>
-                            </select>
-                        </div>
-                        <div class="form-group-field">
-                            <label>Cant. Cartuchos Inf.:</label>
-                            <input type="number" id="tiroCantCartuchosInf" placeholder="0">
-                        </div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group-field">
-                            <label>Núm. Retenedores:</label>
-                            <input type="number" id="tiroNumRetenedores" value="1">
-                        </div>
-                        <div class="form-group-field">
-                            <label>Tipo Retenedor:</label>
-                            <input type="text" id="tiroTipoRetenedor" value="Greda">
-                        </div>
+                    <div class="form-group-field">
+                        <label>Taco Real [m]:</label>
+                        <input type="number" step="0.1" id="tiroTacoReal" value="8.0">
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
-                    <button type="button" onclick="anteriorTiroWizard()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Anterior Tiro</button>
-                    <button type="button" id="btnSiguienteTiro" onclick="siguienteTiroWizard()" class="btn-primary" style="background-color: #16a34a; width: 50%;">Siguiente Tiro ➔</button>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Estado Tiro:</label>
+                        <select id="tiroEstado" onchange="toggleIntentosDestape()">
+                            <option value="Sano" selected>Sano</option>
+                            <option value="Tapado">Tapado</option>
+                        </select>
+                    </div>
+                    <div class="form-group-field">
+                        <label>Intentos Destape (solo tapados):</label>
+                        <input type="number" id="tiroIntentosDestape" placeholder="Cant." disabled>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Tiro con Agua:</label>
+                        <select id="tiroAgua">
+                            <option value="Seco" selected>Seco</option>
+                            <option value="Agua">Agua</option>
+                        </select>
+                    </div>
+                    <div class="form-group-field">
+                        <label>Tiro Negativo / Positivo:</label>
+                        <select id="tiroPosNeg">
+                            <option value="Positivo" selected>Positivo</option>
+                            <option value="Negativo">Negativo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Núm. Pera:</label>
+                        <input type="number" id="tiroNumPera" value="7">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Cama Explosivo [m]:</label>
+                        <input type="number" step="0.1" id="tiroCamaExplosivo" placeholder="Opcional">
+                    </div>
+                </div>
+
+                <div class="section-title" style="font-size: 14px; margin-top: 10px;">Cebo Superior e Inferior</div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Cebo Superior:</label>
+                        <input type="text" id="tiroCeboSup" value="150.0">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Araña Cebo Sup.:</label>
+                        <select id="tiroAranaSup">
+                            <option value="Si" selected>Si</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Cant. Cartuchos Sup.:</label>
+                        <input type="number" id="tiroCantCartuchos" value="1">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Cebo Inferior:</label>
+                        <input type="text" id="tiroCeboInf" placeholder="Opcional">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Araña Cebo Inf.:</label>
+                        <select id="tiroAranaInf">
+                            <option value="No" selected>No</option>
+                            <option value="Si">Si</option>
+                        </select>
+                    </div>
+                    <div class="form-group-field">
+                        <label>Cant. Cartuchos Inf.:</label>
+                        <input type="number" id="tiroCantCartuchosInf" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Núm. Retenedores:</label>
+                        <input type="number" id="tiroNumRetenedores" value="1">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Tipo Retenedor:</label>
+                        <input type="text" id="tiroTipoRetenedor" value="Greda">
+                    </div>
                 </div>
             </div>
 
-            <!-- SUB-PASO 2.3: RESUMEN, BÚSQUEDA Y EDICIÓN DE PARADAS -->
-            <div id="subPasoResumenFinal" style="display: none;">
-                <h2>Resumen de Paradas Cargadas</h2>
-                <p class="subtitle">Revise las paradas ingresadas, busque o agregue otra</p>
+            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
+                <button type="button" onclick="anteriorTiroWizard()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Anterior Tiro</button>
+                <button type="button" id="btnSiguienteTiro" onclick="siguienteTiroWizard()" class="btn-primary" style="background-color: #16a34a; width: 50%;">Siguiente Tiro ➔</button>
+            </div>
+        </div>
 
-                <!-- CAMPO SEARCH Y AUTOSAVE STATUS -->
-                <div class="form-group-field" style="margin-bottom: 15px;">
-                    <input type="text" id="searchParada" placeholder="🔍 Buscar parada (Ej: PARADA 1)..." oninput="filtrarParadasResumen()">
-                </div>
+        <!-- PASO 6: RESUMEN Y BÚSQUEDA FINAL -->
+        <div id="paso6" style="display: none;">
+            <h2>Resumen General de Paradas y Trabajos</h2>
+            <p class="subtitle">Revise sus registros guardados</p>
 
-                <div id="listaParadasRegistradas" class="wizard-card" style="background: #ffffff; max-height: 300px; overflow-y: auto;">
-                    <!-- Se puebla dinámicamente -->
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                    <button type="button" onclick="prepararNuevaParada()" class="btn-primary" style="background-color: #0284c7;">+ Registrar Otra Parada</button>
-                    <button type="button" onclick="guardarFormularioAnfo()" class="btn-primary" style="background-color: #16a34a; font-size: 16px; padding: 12px;">💾 Guardar Registro Completo</button>
-                </div>
+            <div class="form-group-field" style="margin-bottom: 15px;">
+                <input type="text" id="searchParada" placeholder="🔍 Buscar ID de trabajo o parada..." oninput="filtrarParadasResumen()">
             </div>
 
+            <div id="listaParadasRegistradas" class="wizard-card" style="background: #ffffff; max-height: 300px; overflow-y: auto;">
+                <!-- Se puebla dinámicamente -->
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="irAPaso2()" class="btn-primary" style="background-color: #0284c7;">+ Registrar Otro ID de Trabajo</button>
+                <button type="button" onclick="abrirModalObservaciones()" class="btn-primary" style="background-color: #d97706;">📝 Agregar Observación / Pérdida Operacional</button>
+                <button type="button" onclick="guardarFormularioAnfo()" class="btn-primary" style="background-color: #16a34a; font-size: 16px; padding: 12px;">💾 Guardar Registro Completo</button>
+            </div>
         </div>
 
     </main>
 
-    <!-- VENTANA EMERGENTE (MODAL) PARA DATOS DE POSTURA Y PERSONAL -->
+    <!-- MODAL PERSONAL -->
     <div id="modalPersonal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Configuración de Postura y Personal</h3>
@@ -397,46 +451,293 @@
         </div>
     </div>
 
-   <script src="../js/components.js"></script>
+    <!-- MODAL OBSERVACIONES Y PÉRDIDAS -->
+    <div id="modalObservaciones" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Observaciones y Pérdidas Operacionales</h3>
+
+            <div class="form-group-field">
+                <label>Pérdida Operacional Durante el Carguío:</label>
+                <input type="text" id="obsPerdidaCarguio" placeholder="Ej. Espera de camión / Falla de equipo">
+            </div>
+
+            <div class="form-group-field">
+                <label>Tiempo Pérdida Carguío (hh:mm / min):</label>
+                <input type="text" id="tiempoPerdidaCarguio" placeholder="Ej. 15 min o 00:15">
+            </div>
+
+            <div class="form-group-field" style="margin-top: 10px;">
+                <label>Pérdida Operacional Durante el Amarre:</label>
+                <input type="text" id="obsPerdidaAmarre" placeholder="Ej. Bloqueo de vía / Ventilación">
+            </div>
+
+            <div class="form-group-field">
+                <label>Tiempo Pérdida Amarre (hh:mm / min):</label>
+                <input type="text" id="tiempoPerdidaAmarre" placeholder="Ej. 20 min o 00:20">
+            </div>
+
+            <div class="form-group-field" style="margin-top: 10px;">
+                <label>Observaciones Generales Adicionales:</label>
+                <textarea id="obsGenerales" rows="3" placeholder="Comentarios adicionales de la postura..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="cerrarModalObservaciones()" class="btn-primary" style="background-color: #64748b;">Cancelar</button>
+                <button type="button" onclick="guardarModalObservaciones()" class="btn-primary" style="background-color: #16a34a;">Guardar Observaciones</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
     <script>
         cargarBarMenu(true);
 
-        // ESTRUCTURA GLOBAL DE DATOS
-        let paradasGuardadas = [];
+        let trabajosGuardados = []; 
+        let idTrabajoActual = "";
+        let idParadaActual = "";
         let tirosTemporales = [];
         let indiceTiroActual = 0;
         let totalTirosParadaActual = 0;
-        let idParadaActual = "";
         let indiceEdicionParada = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Fecha
             const hoy = new Date();
             const fechaFormateada = String(hoy.getDate()).padStart(2, '0') + '/' + 
                                     String(hoy.getMonth() + 1).padStart(2, '0') + '/' + 
                                     hoy.getFullYear();
             document.getElementById("fechaAnfo").value = fechaFormateada;
 
-            // Usuario
             const usuarioActivo = localStorage.getItem("jej_usuario_activo");
             if (usuarioActivo) {
                 document.getElementById("modalEncargado").value = usuarioActivo;
             }
 
-            // Escuchar turno
             document.getElementById("turnoAnfo").addEventListener("change", () => {
                 actualizarListasPorTurno();
                 actualizarResumenUnificado();
                 ejecutarAutosave();
             });
 
-            // Cargar borrador previo si existe
             cargarBorradorAutosave();
+            actualizarResumenUnificado();
+            actualizarSelectIdsTrabajo();
         });
+
+        /* --- CONTROL DE PANTALLAS (WIZARD) --- */
+        function ocultarTodosPasos() {
+            document.getElementById("paso1").style.display = "none";
+            document.getElementById("paso2").style.display = "none";
+            document.getElementById("paso3").style.display = "none";
+            document.getElementById("paso4").style.display = "none";
+            document.getElementById("paso5").style.display = "none";
+            document.getElementById("paso6").style.display = "none";
+        }
+
+        function irAPaso1() {
+            ocultarTodosPasos();
+            document.getElementById("paso1").style.display = "block";
+        }
+
+        function irAPaso2() {
+            const turno = document.getElementById("turnoAnfo").value;
+            if (!turno) {
+                alert("Por favor seleccione un Turno antes de continuar.");
+                return;
+            }
+            ocultarTodosPasos();
+            document.getElementById("paso2").style.display = "block";
+            actualizarSelectIdsTrabajo();
+        }
+
+        function crearNuevoIdTrabajo() {
+            const nuevoId = document.getElementById("nuevoIdInput").value.trim();
+            if (!nuevoId) {
+                alert("Ingrese un nombre para el nuevo ID de Trabajo.");
+                return;
+            }
+
+            let trabajo = trabajosGuardados.find(t => t.idTrabajo === nuevoId);
+            if (!trabajo) {
+                trabajo = { idTrabajo: nuevoId, paradas: [] };
+                trabajosGuardados.push(trabajo);
+            }
+
+            idTrabajoActual = nuevoId;
+            document.getElementById("nuevoIdInput").value = "";
+            actualizarSelectIdsTrabajo();
+            ejecutarAutosave();
+
+            cargarSelectParadas();
+            document.getElementById("subtituloPaso3").innerText = `ID Trabajo: ${idTrabajoActual}`;
+            ocultarTodosPasos();
+            document.getElementById("paso3").style.display = "block";
+        }
+
+        function seleccionarIdExistente() {
+            const select = document.getElementById("selectIdExistente");
+            const seleccionado = select.value;
+            if (!seleccionado) {
+                alert("Seleccione un ID de Trabajo existente de la lista.");
+                return;
+            }
+
+            idTrabajoActual = seleccionado;
+            cargarSelectParadas();
+            document.getElementById("subtituloPaso3").innerText = `ID Trabajo: ${idTrabajoActual}`;
+            ocultarTodosPasos();
+            document.getElementById("paso3").style.display = "block";
+        }
+
+        function eliminarIdSeleccionado() {
+            const select = document.getElementById("selectIdExistente");
+            const seleccionado = select.value;
+            if (!seleccionado) {
+                alert("Seleccione un ID de la lista para eliminar.");
+                return;
+            }
+
+            if (confirm(`¿Desea eliminar el ID de Trabajo "${seleccionado}" y todas sus paradas?`)) {
+                trabajosGuardados = trabajosGuardados.filter(t => t.idTrabajo !== seleccionado);
+                actualizarSelectIdsTrabajo();
+                guardarHistoricoTrabajos(); // Actualizar almacenamiento histórico
+                ejecutarAutosave();
+                alert(`ID "${seleccionado}" eliminado con éxito.`);
+            }
+        }
+
+        function volverAPaso2() {
+            ocultarTodosPasos();
+            document.getElementById("paso2").style.display = "block";
+        }
+
+        function volverAPaso3() {
+            ocultarTodosPasos();
+            document.getElementById("paso3").style.display = "block";
+            cargarSelectParadas();
+        }
+
+        /* --- GESTIÓN DE PARADAS (PASO 3) --- */
+        function cargarSelectParadas() {
+            const select = document.getElementById("selectParadaExistente");
+            if (!select) return;
+            select.innerHTML = '<option value="" disabled selected>-- Seleccione una parada guardada --</option>';
+            
+            let trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+            if (!trabajo) {
+                trabajo = { idTrabajo: idTrabajoActual, paradas: [] };
+                trabajosGuardados.push(trabajo);
+            }
+
+            if (trabajo.paradas) {
+                trabajo.paradas.forEach(p => {
+                    select.innerHTML += `<option value="${p.idParada}">${p.idParada} (${p.tiros.length} tiros)</option>`;
+                });
+            }
+        }
+
+        function irAPaso4DesdeCrearParada() {
+            const idParadaInput = document.getElementById("idParadaInput").value.trim();
+            if (!idParadaInput) {
+                alert("Ingrese un nombre o código para la Parada.");
+                return;
+            }
+
+            idParadaActual = idParadaInput;
+            document.getElementById("idParadaInput").value = "";
+
+            const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+            if (trabajo) {
+                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
+                if (paradaExistente) {
+                    document.getElementById("cantTirosInput").value = paradaExistente.tiros.length;
+                } else {
+                    document.getElementById("cantTirosInput").value = 3;
+                }
+            }
+
+            document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
+            ocultarTodosPasos();
+            document.getElementById("paso4").style.display = "block";
+        }
+
+        function seleccionarParadaExistente() {
+            const select = document.getElementById("selectParadaExistente");
+            const seleccionado = select.value;
+            if (!seleccionado) {
+                alert("Seleccione una Parada de la lista.");
+                return;
+            }
+
+            idParadaActual = seleccionado;
+            const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+            if (trabajo) {
+                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
+                if (paradaExistente) {
+                    document.getElementById("cantTirosInput").value = paradaExistente.tiros.length;
+                }
+            }
+
+            document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
+            ocultarTodosPasos();
+            document.getElementById("paso4").style.display = "block";
+        }
+
+        function eliminarParadaSeleccionada() {
+            const select = document.getElementById("selectParadaExistente");
+            const seleccionado = select.value;
+            if (!seleccionado) {
+                alert("Seleccione una Parada para eliminar.");
+                return;
+            }
+
+            if (confirm(`¿Desea eliminar la Parada "${seleccionado}"?`)) {
+                const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+                if (trabajo) {
+                    trabajo.paradas = trabajo.paradas.filter(p => p.idParada !== seleccionado);
+                }
+                cargarSelectParadas();
+                guardarHistoricoTrabajos();
+                ejecutarAutosave();
+                alert(`Parada "${seleccionado}" eliminada con éxito.`);
+            }
+        }
+
+        function irAResumenFinalDesdeParadas() {
+            mostrarResumenParadasFinal();
+        }
+
+        /* --- ALMACENAMIENTO HISTÓRICO Y PERSISTENTE --- */
+        function guardarHistoricoTrabajos() {
+            localStorage.setItem("jej_trabajos_historicos", JSON.stringify(trabajosGuardados));
+        }
+
+        function cargarHistoricoTrabajos() {
+            const historico = localStorage.getItem("jej_trabajos_historicos");
+            if (historico) {
+                try {
+                    const parsed = JSON.parse(historico);
+                    if (Array.isArray(parsed)) {
+                        trabajosGuardados = parsed;
+                    }
+                } catch(e) {
+                    console.error("Error al cargar histórico", e);
+                }
+            }
+        }
+
+        function actualizarSelectIdsTrabajo() {
+            const select = document.getElementById("selectIdExistente");
+            if (!select) return;
+            select.innerHTML = '<option value="" disabled selected>-- Seleccione un ID guardado --</option>';
+            trabajosGuardados.forEach(t => {
+                select.innerHTML += `<option value="${t.idTrabajo}">${t.idTrabajo} (${t.paradas.length} paradas)</option>`;
+            });
+        }
 
         /* --- AUTOSAVE & STORAGE --- */
         function ejecutarAutosave() {
+            guardarHistoricoTrabajos(); // Guardar en histórico siempre
             const borrador = {
                 fecha: document.getElementById("fechaAnfo").value,
                 turno: document.getElementById("turnoAnfo").value,
@@ -447,7 +748,12 @@
                 supJeJ: document.getElementById("modalSupJeJ").value,
                 supsDet: Array.from(document.querySelectorAll('#modalPersonal input[name="supervisorDet"]')).map(i => i.value),
                 respsDet: Array.from(document.querySelectorAll('#modalPersonal input[name="responsableDet"]')).map(i => i.value),
-                paradas: paradasGuardadas
+                obsPerdidaCarguio: document.getElementById("obsPerdidaCarguio") ? document.getElementById("obsPerdidaCarguio").value : "",
+                tiempoPerdidaCarguio: document.getElementById("tiempoPerdidaCarguio") ? document.getElementById("tiempoPerdidaCarguio").value : "",
+                obsPerdidaAmarre: document.getElementById("obsPerdidaAmarre") ? document.getElementById("obsPerdidaAmarre").value : "",
+                tiempoPerdidaAmarre: document.getElementById("tiempoPerdidaAmarre") ? document.getElementById("tiempoPerdidaAmarre").value : "",
+                obsGenerales: document.getElementById("obsGenerales") ? document.getElementById("obsGenerales").value : "",
+                trabajos: trabajosGuardados
             };
 
             localStorage.setItem("jej_anfo_draft", JSON.stringify(borrador));
@@ -460,52 +766,38 @@
         }
 
         function cargarBorradorAutosave() {
+            cargarHistoricoTrabajos(); // Cargar primero los trabajos históricos
             const borradorRaw = localStorage.getItem("jej_anfo_draft");
             if (!borradorRaw) return;
 
             try {
                 const b = JSON.parse(borradorRaw);
-                if (b.turno) {
-                    document.getElementById("turnoAnfo").value = b.turno;
-                }
+                if (b.turno) document.getElementById("turnoAnfo").value = b.turno;
                 if (b.mina) document.getElementById("modalMina").value = b.mina;
                 if (b.nivel) document.getElementById("modalNivel").value = b.nivel;
                 if (b.bloque) document.getElementById("modalBloque").value = b.bloque;
                 if (b.idTronadura) document.getElementById("modalIdTronadura").value = b.idTronadura;
                 if (b.supJeJ) document.getElementById("modalSupJeJ").value = b.supJeJ;
-                if (b.paradas && Array.isArray(b.paradas)) {
-                    paradasGuardadas = b.paradas;
+                if (b.obsPerdidaCarguio) document.getElementById("obsPerdidaCarguio").value = b.obsPerdidaCarguio;
+                if (b.tiempoPerdidaCarguio) document.getElementById("tiempoPerdidaCarguio").value = b.tiempoPerdidaCarguio;
+                if (b.obsPerdidaAmarre) document.getElementById("obsPerdidaAmarre").value = b.obsPerdidaAmarre;
+                if (b.tiempoPerdidaAmarre) document.getElementById("tiempoPerdidaAmarre").value = b.tiempoPerdidaAmarre;
+                if (b.obsGenerales) document.getElementById("obsGenerales").value = b.obsGenerales;
+
+                if (b.trabajos && Array.isArray(b.trabajos)) {
+                    trabajosGuardados = b.trabajos;
                 }
                 actualizarListasPorTurno();
-                actualizarResumenUnificado();
+                actualizarSelectIdsTrabajo();
             } catch (e) {
                 console.error("Error al cargar borrador", e);
             }
         }
 
-        /* --- PASOS & MODAL --- */
-        function irAPaso2() {
-            const turno = document.getElementById("turnoAnfo").value;
-            if (!turno) {
-                alert("Por favor seleccione un Turno antes de continuar.");
-                return;
-            }
-            document.getElementById("paso1").style.display = "none";
-            document.getElementById("paso2").style.display = "block";
-
-            if (paradasGuardadas.length > 0) {
-                mostrarResumenParadasFinal();
-            }
-        }
-
-        function irAPaso1() {
-            document.getElementById("paso2").style.display = "none";
-            document.getElementById("paso1").style.display = "block";
-        }
-
+        /* --- MODALES --- */
         function abrirModalPersonal() {
             document.getElementById("modalPersonal").style.display = "flex";
-            actualizarListasPorTurno(); // Asegura que carguen los datos al abrir
+            actualizarListasPorTurno();
         }
 
         function cerrarModalPersonal() {
@@ -516,6 +808,20 @@
             actualizarResumenUnificado();
             ejecutarAutosave();
             cerrarModalPersonal();
+        }
+
+        function abrirModalObservaciones() {
+            document.getElementById("modalObservaciones").style.display = "flex";
+        }
+
+        function cerrarModalObservaciones() {
+            document.getElementById("modalObservaciones").style.display = "none";
+        }
+
+        function guardarModalObservaciones() {
+            ejecutarAutosave();
+            cerrarModalObservaciones();
+            alert("Observaciones guardadas localmente.");
         }
 
         function agregarCampoModal(contenedorId, nameInput) {
@@ -616,28 +922,33 @@
             }
         }
 
-        /* --- ASISTENTE WIZARD PASO A PASO --- */
+        /* --- ASISTENTE WIZARD (CAPTURA TIROS) --- */
         function iniciarRegistroTiros() {
-            idParadaActual = document.getElementById("idParadaInput").value.trim() || "PARADA 1";
             totalTirosParadaActual = parseInt(document.getElementById("cantTirosInput").value) || 1;
             
-            if (indiceEdicionParada === null) {
-                tirosTemporales = [];
+            const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+            if (trabajo) {
+                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
+                if (paradaExistente) {
+                    tirosTemporales = [...paradaExistente.tiros];
+                } else {
+                    tirosTemporales = [];
+                }
             } else {
-                tirosTemporales = [...paradasGuardadas[indiceEdicionParada].tiros];
+                tirosTemporales = [];
             }
 
             indiceTiroActual = 1;
 
-            document.getElementById("subPasoConfigParada").style.display = "none";
-            document.getElementById("subPasoCapturaTiro").style.display = "block";
+            ocultarTodosPasos();
+            document.getElementById("paso5").style.display = "block";
             
             cargarFormularioTiroWizard(indiceTiroActual);
         }
 
         function cargarFormularioTiroWizard(numeroTiro) {
             document.getElementById("tituloTiroActual").innerText = `Captura de Tiro ${numeroTiro}`;
-            document.getElementById("subtituloParadaActual").innerText = `Parada: ${idParadaActual}`;
+            document.getElementById("subtituloParadaActual").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
             document.getElementById("badgeProgreso").innerText = `Tiro ${numeroTiro} de ${totalTirosParadaActual}`;
 
             const tiroExistente = tirosTemporales[numeroTiro - 1];
@@ -711,21 +1022,24 @@
                 indiceTiroActual++;
                 cargarFormularioTiroWizard(indiceTiroActual);
             } else {
-                if (indiceEdicionParada !== null) {
-                    paradasGuardadas[indiceEdicionParada] = {
-                        idParada: idParadaActual,
-                        tiros: [...tirosTemporales]
-                    };
-                    indiceEdicionParada = null;
-                } else {
-                    paradasGuardadas.push({
-                        idParada: idParadaActual,
-                        tiros: [...tirosTemporales]
-                    });
+                let trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+                if (trabajo) {
+                    let paradaIndex = trabajo.paradas.findIndex(p => p.idParada === idParadaActual);
+                    if (paradaIndex >= 0) {
+                        trabajo.paradas[paradaIndex].tiros = [...tirosTemporales];
+                    } else {
+                        trabajo.paradas.push({
+                            idParada: idParadaActual,
+                            tiros: [...tirosTemporales]
+                        });
+                    }
                 }
 
                 ejecutarAutosave();
-                mostrarResumenParadasFinal();
+                
+                ocultarTodosPasos();
+                document.getElementById("paso3").style.display = "block";
+                cargarSelectParadas();
             }
         }
 
@@ -735,16 +1049,16 @@
                 indiceTiroActual--;
                 cargarFormularioTiroWizard(indiceTiroActual);
             } else {
-                document.getElementById("subPasoCapturaTiro").style.display = "none";
-                document.getElementById("subPasoConfigParada").style.display = "block";
+                ocultarTodosPasos();
+                document.getElementById("paso4").style.display = "block";
             }
         }
 
-        function mostrarResumenParadasFinal() {
-            document.getElementById("subPasoConfigParada").style.display = "none";
-            document.getElementById("subPasoCapturaTiro").style.display = "none";
-            document.getElementById("subPasoResumenFinal").style.display = "block";
-
+      function mostrarResumenParadasFinal() {
+            ocultarTodosPasos();
+            document.getElementById("paso6").style.display = "block";
+            // Actualizamos el título del resumen para indicar el trabajo actual
+            document.querySelector("#paso6 h2").innerText = `Resumen de Paradas - Trabajo: ${idTrabajoActual}`;
             filtrarParadasResumen();
         }
 
@@ -753,65 +1067,84 @@
             const contenedor = document.getElementById("listaParadasRegistradas");
             contenedor.innerHTML = "";
 
-            if (paradasGuardadas.length === 0) {
-                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay paradas registradas aún.</p>";
+            // Buscamos únicamente el trabajo seleccionado actualmente
+            const trabajoActualObj = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+            
+            if (!trabajoActualObj || !trabajoActualObj.paradas || trabajoActualObj.paradas.length === 0) {
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay paradas registradas para este trabajo aún.</p>";
                 return;
             }
 
-            paradasGuardadas.forEach((parada, idx) => {
+            let totalParadasCount = 0;
+            trabajoActualObj.paradas.forEach(parada => {
                 if (parada.idParada.toLowerCase().includes(filtro)) {
+                    totalParadasCount++;
                     contenedor.innerHTML += `
                         <div class="item-parada-card">
                             <div>
-                                <strong>📍 ${parada.idParada}</strong><br>
+                                <strong>📍 Parada: ${parada.idParada}</strong><br>
                                 <span style="font-size: 12px; color: #64748b;">${parada.tiros.length} tiros cargados</span>
                             </div>
                             <div style="display: flex; gap: 6px;">
-                                <button type="button" onclick="editarParada(${idx})" style="background: #e0f2fe; color: #0369a1; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">✏️ Editar</button>
-                                <button type="button" onclick="eliminarParada(${idx})" style="background: #fee2e2; color: #991b1b; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">🗑️</button>
+                                <button type="button" onclick="editarParadaDesdeResumen('${trabajoActualObj.idTrabajo}', '${parada.idParada}')" style="background: #e0f2fe; color: #0369a1; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">✏️ Editar</button>
+                                <button type="button" onclick="eliminarParadaDesdeResumen('${trabajoActualObj.idTrabajo}', '${parada.idParada}')" style="background: #fee2e2; color: #991b1b; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">🗑️</button>
                             </div>
                         </div>
                     `;
                 }
             });
-        }
 
-        function editarParada(index) {
-            indiceEdicionParada = index;
-            const parada = paradasGuardadas[index];
-            
-            document.getElementById("idParadaInput").value = parada.idParada;
-            document.getElementById("cantTirosInput").value = parada.tiros.length;
-
-            document.getElementById("subPasoResumenFinal").style.display = "none";
-            document.getElementById("subPasoConfigParada").style.display = "block";
-        }
-
-        function eliminarParada(index) {
-            if (confirm("¿Desea eliminar esta parada y todos sus tiros?")) {
-                paradasGuardadas.splice(index, 1);
-                ejecutarAutosave();
-                mostrarResumenParadasFinal();
+            if (totalParadasCount === 0) {
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No se encontraron paradas con ese filtro.</p>";
             }
         }
 
-        function prepararNuevaParada() {
-            indiceEdicionParada = null;
-            document.getElementById("subPasoResumenFinal").style.display = "none";
-            document.getElementById("subPasoConfigParada").style.display = "block";
+        function editarParadaDesdeResumen(idTrabajo, idParada) {
+            idTrabajoActual = idTrabajo;
+            idParadaActual = idParada;
             
-            document.getElementById("idParadaInput").value = `PARADA ${paradasGuardadas.length + 1}`;
-            document.getElementById("cantTirosInput").value = 3;
+            const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+            const parada = trabajo ? trabajo.paradas.find(p => p.idParada === idParadaActual) : null;
+
+            if (parada) {
+                document.getElementById("cantTirosInput").value = parada.tiros.length;
+            }
+
+            document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
+            ocultarTodosPasos();
+            document.getElementById("paso4").style.display = "block";
+        }
+
+        function eliminarParadaDesdeResumen(idTrabajo, idParada) {
+            if (confirm(`¿Desea eliminar la parada "${idParada}" del trabajo "${idTrabajo}"?`)) {
+                const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajo);
+                if (trabajo) {
+                    trabajo.paradas = trabajo.paradas.filter(p => p.idParada !== idParada);
+                }
+                guardarHistoricoTrabajos();
+                ejecutarAutosave();
+                filtrarParadasResumen();
+            }
         }
 
         function guardarFormularioAnfo() {
-            if (paradasGuardadas.length === 0) {
-                alert("Por favor registre al menos una parada antes de guardar.");
+            let totalParadas = 0;
+            trabajosGuardados.forEach(t => totalParadas += t.paradas.length);
+
+            if (totalParadas === 0) {
+                alert("Por favor registre al menos un ID de trabajo con su respectiva parada y tiros antes de guardar.");
                 return;
             }
 
+            // Aseguramos que los trabajos queden guardados en el histórico permanente
+            guardarHistoricoTrabajos();
+            
+            // Limpiamos únicamente el borrador temporal actual
             localStorage.removeItem("jej_anfo_draft");
+            
             alert("¡Registro completo de ANFO guardado con éxito!");
             window.location.href = "../index.html";
         }
     </script>
+</body>
+</html>
