@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguimiento ANFO - App JEJ</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         .card-wide {
             background: #ffffff;
@@ -374,10 +375,16 @@
                 <!-- Se puebla dinámicamente -->
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="irAPaso2()" class="btn-primary" style="background-color: #0284c7;">+ Registrar Otro ID de Trabajo</button>
-                <button type="button" onclick="abrirModalObservaciones()" class="btn-primary" style="background-color: #d97706;">📝 Agregar Observación / Pérdida Operacional</button>
-                <button type="button" onclick="guardarFormularioAnfo()" class="btn-primary" style="background-color: #16a34a; font-size: 16px; padding: 12px;">💾 Guardar Registro Completo</button>
+            <!-- BOTONES EN LÍNEA PARA LOS DOS PRIMEROS -->
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="irAPaso2()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">+ Registrar Otro ID de Trabajo</button>
+                <button type="button" onclick="abrirModalObservaciones()" class="btn-primary" style="background-color: #d97706; flex: 1; font-size: 13px;">📝 Agregar Observación</button>
+            </div>
+
+            <!-- BOTÓN EXTRA Y BOTÓN DE GUARDAR ACTUALIZADO -->
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="abrirModalPlantillaFinal()" class="btn-primary" style="background-color: #0d9488; font-size: 14px; padding: 10px;">📋 Rellenar Datos Faltantes de Plantilla (Tiempos/Presiones)</button>
+                <button type="button" onclick="guardarFormularioAnfoYExportarExcel()" class="btn-primary" style="background-color: #16a34a; font-size: 16px; padding: 12px;">💾 Guardar Registro Completo</button>
             </div>
         </div>
 
@@ -451,6 +458,108 @@
         </div>
     </div>
 
+    <!-- MODAL DATOS FALTANTES PLANTILLA -->
+    <div id="modalPlantillaFinal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Completar Datos de Plantilla (Horarios y Operación)</h3>
+
+            <div class="section-title">1. Tiempos de Postura y Carguío</div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>H. Llegada JeJ a Postura:</label>
+                    <input type="time" id="hLlegadaJeJ">
+                </div>
+                <div class="form-group-field">
+                    <label>H. Salida JeJ de Postura:</label>
+                    <input type="time" id="hSalidaJeJ">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>H. Llegada PyT a Postura:</label>
+                    <input type="time" id="hLlegadaPyT">
+                </div>
+                <div class="form-group-field">
+                    <label>H. Salida PyT de Postura:</label>
+                    <input type="time" id="hSalidaPyT">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>H. Inicio Carguío:</label>
+                    <input type="time" id="hInicioCarguio">
+                </div>
+                <div class="form-group-field">
+                    <label>H. Fin Carguío:</label>
+                    <input type="time" id="hFinCarguio">
+                </div>
+            </div>
+
+            <div class="section-title">2. Parámetros de Presión y Equipos</div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>Presión en Compresor [bar]:</label>
+                    <input type="number" step="0.1" id="presionCompresor" placeholder="Ej. 7.0">
+                </div>
+                <div class="form-group-field">
+                    <label>Presión en Pera [bar]:</label>
+                    <input type="number" step="0.1" id="presionPera" placeholder="Ej. 5.0">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>Diámetro Tiros [pulg]:</label>
+                    <input type="number" step="0.1" id="diametroTiros" placeholder="Ej. 3.5">
+                </div>
+                <div class="form-group-field">
+                    <label>Tiro con VoD:</label>
+                    <select id="tiroVod">
+                        <option value="No" selected>No</option>
+                        <option value="Si">Si</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">3. Zanja, Fase y Geófono</div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>Núm. Zanja:</label>
+                    <input type="text" id="numZanja" placeholder="Ej. Z-01">
+                </div>
+                <div class="form-group-field">
+                    <label>Fase:</label>
+                    <input type="text" id="faseZanja" placeholder="Ej. Fase 2">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>Calle UCL:</label>
+                    <input type="text" id="calleUcl" placeholder="Ej. UCL-01">
+                </div>
+                <div class="form-group-field">
+                    <label>Parada Inicial / Final:</label>
+                    <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>Ubicación Geófono:</label>
+                    <input type="text" id="ubicacionGeofono" placeholder="Opcional">
+                </div>
+                <div class="form-group-field">
+                    <label>Altura / Distancia Geófono [m]:</label>
+                    <input type="text" id="distanciaGeofono" placeholder="Opcional">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="cerrarModalPlantillaFinal()" class="btn-primary" style="background-color: #64748b;">Cancelar</button>
+                <button type="button" onclick="guardarModalPlantillaFinal()" class="btn-primary" style="background-color: #16a34a;">Guardar Datos Plantilla</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- MODAL OBSERVACIONES Y PÉRDIDAS -->
     <div id="modalObservaciones" class="modal-overlay">
         <div class="modal-content">
@@ -491,8 +600,9 @@
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
     <script>
-        cargarBarMenu(true);
 
+
+        cargarBarMenu(true);
         let trabajosGuardados = []; 
         let idTrabajoActual = "";
         let idParadaActual = "";
@@ -738,21 +848,25 @@
         /* --- AUTOSAVE & STORAGE --- */
         function ejecutarAutosave() {
             guardarHistoricoTrabajos(); // Guardar en histórico siempre
-            const borrador = {
-                fecha: document.getElementById("fechaAnfo").value,
-                turno: document.getElementById("turnoAnfo").value,
-                mina: document.getElementById("modalMina").value,
-                nivel: document.getElementById("modalNivel").value,
-                bloque: document.getElementById("modalBloque").value,
-                idTronadura: document.getElementById("modalIdTronadura").value,
-                supJeJ: document.getElementById("modalSupJeJ").value,
-                supsDet: Array.from(document.querySelectorAll('#modalPersonal input[name="supervisorDet"]')).map(i => i.value),
-                respsDet: Array.from(document.querySelectorAll('#modalPersonal input[name="responsableDet"]')).map(i => i.value),
-                obsPerdidaCarguio: document.getElementById("obsPerdidaCarguio") ? document.getElementById("obsPerdidaCarguio").value : "",
-                tiempoPerdidaCarguio: document.getElementById("tiempoPerdidaCarguio") ? document.getElementById("tiempoPerdidaCarguio").value : "",
-                obsPerdidaAmarre: document.getElementById("obsPerdidaAmarre") ? document.getElementById("obsPerdidaAmarre").value : "",
-                tiempoPerdidaAmarre: document.getElementById("tiempoPerdidaAmarre") ? document.getElementById("tiempoPerdidaAmarre").value : "",
-                obsGenerales: document.getElementById("obsGenerales") ? document.getElementById("obsGenerales").value : "",
+            
+           const borrador = {
+                // ... (propiedades anteriores) ...
+                hLlegadaJeJ: document.getElementById("hLlegadaJeJ") ? document.getElementById("hLlegadaJeJ").value : "",
+                hSalidaJeJ: document.getElementById("hSalidaJeJ") ? document.getElementById("hSalidaJeJ").value : "",
+                hLlegadaPyT: document.getElementById("hLlegadaPyT") ? document.getElementById("hLlegadaPyT").value : "",
+                hSalidaPyT: document.getElementById("hSalidaPyT") ? document.getElementById("hSalidaPyT").value : "",
+                hInicioCarguio: document.getElementById("hInicioCarguio") ? document.getElementById("hInicioCarguio").value : "",
+                hFinCarguio: document.getElementById("hFinCarguio") ? document.getElementById("hFinCarguio").value : "",
+                presionCompresor: document.getElementById("presionCompresor") ? document.getElementById("presionCompresor").value : "",
+                presionPera: document.getElementById("presionPera") ? document.getElementById("presionPera").value : "",
+                diametroTiros: document.getElementById("diametroTiros") ? document.getElementById("diametroTiros").value : "",
+                tiroVod: document.getElementById("tiroVod") ? document.getElementById("tiroVod").value : "",
+                numZanja: document.getElementById("numZanja") ? document.getElementById("numZanja").value : "",
+                faseZanja: document.getElementById("faseZanja") ? document.getElementById("faseZanja").value : "",
+                calleUcl: document.getElementById("calleUcl") ? document.getElementById("calleUcl").value : "",
+                paradasInicioFin: document.getElementById("paradasInicioFin") ? document.getElementById("paradasInicioFin").value : "",
+                ubicacionGeofono: document.getElementById("ubicacionGeofono") ? document.getElementById("ubicacionGeofono").value : "",
+                distanciaGeofono: document.getElementById("distanciaGeofono") ? document.getElementById("distanciaGeofono").value : "",
                 trabajos: trabajosGuardados
             };
 
@@ -1145,6 +1259,123 @@
             alert("¡Registro completo de ANFO guardado con éxito!");
             window.location.href = "../index.html";
         }
+
+        function abrirModalPlantillaFinal() {
+            document.getElementById("modalPlantillaFinal").style.display = "flex";
+        }
+
+        function cerrarModalPlantillaFinal() {
+            document.getElementById("modalPlantillaFinal").style.display = "none";
+        }
+
+        function guardarModalPlantillaFinal() {
+            ejecutarAutosave();
+            cerrarModalPlantillaFinal();
+            alert("Datos de la plantilla guardados correctamente.");
+        }
+
+        // NUEVA FUNCIÓN DE GUARDADO Y EXPORTACIÓN A EXCEL BASADA EN PLANTILLA
+        async function guardarFormularioAnfoYExportarExcel() {
+            let totalParadas = 0;
+            trabajosGuardados.forEach(t => totalParadas += t.paradas.length);
+
+            if (totalParadas === 0) {
+                alert("Por favor registre al menos un ID de trabajo con su respectiva parada y tiros antes de generar el archivo.");
+                return;
+            }
+
+            try {
+                // 1. Cargamos la plantilla base desde la ruta de tu proyecto
+                const response = await fetch('../plantilla.xlsx');
+                const arrayBuffer = await response.arrayBuffer();
+                
+                // 2. Leemos el libro de Excel con SheetJS
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                // 3. Rellenamos los datos generales de cabecera en las celdas correspondientes
+                worksheet['B5'] = { t: 's', v: document.getElementById("fechaAnfo").value };
+                worksheet['B6'] = { t: 's', v: document.getElementById("turnoAnfo").value };
+                worksheet['B7'] = { t: 's', v: document.getElementById("modalMina").value };
+                worksheet['B8'] = { t: 's', v: document.getElementById("modalNivel").value };
+                worksheet['B9'] = { t: 's', v: document.getElementById("modalBloque").value };
+                worksheet['B10'] = { t: 's', v: document.getElementById("modalIdTronadura").value };
+                worksheet['B11'] = { t: 's', v: document.getElementById("modalSupJeJ").value };
+                worksheet['B12'] = { t: 's', v: document.getElementById("modalEncargado").value };
+
+                // Datos de la plantilla (Horarios y presiones)
+                worksheet['F5'] = { t: 's', v: document.getElementById("hLlegadaJeJ")?.value || "" };
+                worksheet['F6'] = { t: 's', v: document.getElementById("hSalidaJeJ")?.value || "" };
+                worksheet['F7'] = { t: 's', v: document.getElementById("hLlegadaPyT")?.value || "" };
+                worksheet['F8'] = { t: 's', v: document.getElementById("hInicioCarguio")?.value || "" };
+                worksheet['F9'] = { t: 's', v: document.getElementById("hFinCarguio")?.value || "" };
+                worksheet['F10'] = { t: 's', v: document.getElementById("hSalidaPyT")?.value || "" };
+
+                worksheet['I5'] = { t: 'n', v: parseFloat(document.getElementById("presionCompresor")?.value) || 0 };
+                worksheet['I6'] = { t: 'n', v: parseFloat(document.getElementById("presionPera")?.value) || 0 };
+
+                // 4. Inserción de la tabla de Paradas y Tiros a partir de la fila 15
+                let rowIndex = 15; 
+                
+                trabajosGuardados.forEach(trabajo => {
+                    trabajo.paradas.forEach(parada => {
+                        parada.tiros.forEach(tiro => {
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 1})] = { t: 's', v: parada.idParada };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 2})] = { t: 'n', v: parseInt(tiro.tiroNum) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 3})] = { t: 'n', v: parseFloat(tiro.longDiseno) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 4})] = { t: 'n', v: parseFloat(tiro.taco) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 5})] = { t: 'n', v: parseFloat(tiro.largoMomento) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 6})] = { t: 'n', v: parseFloat(tiro.tacoReal) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 7})] = { t: 'n', v: parseFloat(tiro.longCargada) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 8})] = { t: 's', v: tiro.estado };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 9})] = { t: 's', v: tiro.intentosDestape || "" };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 10})] = { t: 's', v: tiro.agua };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 11})] = { t: 's', v: tiro.posNeg };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 12})] = { t: 'n', v: parseInt(tiro.numPera) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 13})] = { t: 's', v: tiro.camaExplosivo || "" };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 14})] = { t: 's', v: tiro.ceboSup };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 15})] = { t: 's', v: tiro.aranaSup };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 16})] = { t: 'n', v: parseInt(tiro.cantCartuchos) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 17})] = { t: 's', v: tiro.ceboInf || "" };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 18})] = { t: 's', v: tiro.aranaInf };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 19})] = { t: 'n', v: parseInt(tiro.cantCartuchosInf) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 20})] = { t: 'n', v: parseInt(tiro.numRetenedores) };
+                            worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 21})] = { t: 's', v: tiro.tipoRetenedor };
+
+                            rowIndex++;
+                        });
+                    });
+                });
+
+                // 5. Descarga el nuevo archivo Excel generado
+                XLSX.writeFile(workbook, `Seguimiento_ANFO_Turno_${document.getElementById("turnoAnfo").value}_${Date.now()}.xlsx`);
+
+                localStorage.removeItem("jej_anfo_draft");
+                alert("¡Archivo Excel generado y descargado con éxito!");
+                window.location.href = "../index.html";
+
+            } catch (error) {
+                console.error("Error al generar el Excel:", error);
+                alert("Hubo un error al procesar la plantilla. Asegúrate de que plantilla.xlsx esté accesible.");
+            }
+        }
+
+        // Funciones para el Modal de Datos de Plantilla
+        function abrirModalPlantillaFinal() {
+            document.getElementById("modalPlantillaFinal").style.display = "flex";
+        }
+
+        function cerrarModalPlantillaFinal() {
+            document.getElementById("modalPlantillaFinal").style.display = "none";
+        }
+
+        function guardarModalPlantillaFinal() {
+            ejecutarAutosave();
+            cerrarModalPlantillaFinal();
+            alert("Datos de la plantilla guardados correctamente.");
+        }
+        
     </script>
 </body>
 </html>
