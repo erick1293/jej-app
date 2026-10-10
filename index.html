@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -59,4 +60,67 @@
         cargarBarMenu(false); // Carga la barra superior única de forma limpia
     </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App JEJ - Gestión Offline</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- CONTENIDO PRINCIPAL CENTRADO -->
+    <main class="container-center">
+
+        <!-- SECCIÓN 1: VISTA DE LOGIN -->
+        <section id="seccionLogin" class="card login-card">
+            <h2>Identificación de Usuario</h2>
+            <p class="subtitle">Ingrese o seleccione su usuario responsable (sin clave)</p>
+            
+            <div class="form-group">
+                <label for="usuarioInput">Usuario Responsable:</label>
+                <input type="text" id="usuarioInput" list="listaUsuarios" placeholder="Escriba su nombre..." autocomplete="off">
+                <datalist id="listaUsuarios">
+                    <!-- JavaScript insertará los usuarios almacenados en localStorage -->
+                </datalist>
+            </div>
+
+            <button class="btn-primary" onclick="ingresarApp()">Ingresar</button>
+        </section>
+
+        <!-- SECCIÓN 2: VISTA DE MENÚ (Primero usuario, luego selección de proceso) -->
+        <section id="seccionMenu" class="card login-card" style="display: none;">
+            <div class="user-info-header">
+                <p>Usuario Activo: <strong id="usuarioLogueado">Cargando...</strong></p>
+            </div>
+
+            <h2>Selección de Proceso</h2>
+            <p class="subtitle">Seleccione el tipo de seguimiento que desea realizar</p>
+
+            <div class="form-group">
+                <label for="opcionesSelect">Seleccione de archivo:</label>
+                <select id="opcionesSelect" onchange="navegarA(this.value)">
+                    <option value="" disabled selected>-- Seleccione una opción --</option>
+                    <option value="anfo.html">Seguimiento al carguio con anfo</option>
+                    <option value="emulsion.html">Seguimiento al carguio con Emulsion</option>
+                    <option value="reduccion.html">Seguimiento a la reduccion secundaria</option>
+                    <option value="perforacion.html">Seguimiento a la perforacion</option>
+                    <option value="proximamente.html">Proximamente.</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" style="background-color: #64748b; margin-top: 10px;" onclick="cerrarSesionUnica()">Cerrar Sesión / Cambiar Usuario</button>
+        </section>
+
+    </main>
+
+    <script src="js/components.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        cargarBarMenu(false); // Carga la barra superior única de forma limpia
+    </script>
+</body>
+>>>>>>> eb42dfb43210826a96705e8302e0027b7ff12aff
 </html>
