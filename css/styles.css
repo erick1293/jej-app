@@ -1,0 +1,167 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: #f4f6f8;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- BARRA SUPERIOR --- */
+.bar-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 10px 15px;
+    border-bottom: 2px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
+    width: 100%;
+}
+
+.logo-container img {
+    height: 38px;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #1e3a8a;
+}
+
+.hamburger-container {
+    position: relative;
+}
+
+#hamburgerBtn {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #1e3a8a;
+    padding: 5px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 180px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu ul {
+    list-style: none;
+}
+
+.dropdown-menu ul li a {
+    display: block;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.dropdown-menu ul li a:hover {
+    background-color: #f8fafc;
+    color: #2563eb;
+}
+
+/* --- CONTENEDOR CENTRADO PARA TARJETAS GRANDES --- */
+.container-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* --- TARJETA PRINCIPAL (Login y Menú estéticamente iguales) --- */
+.login-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 450px; /* Tamaño del recuadro central más amplio */
+}
+
+.login-card h2 {
+    font-size: 1.3rem;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+/* INPUT Y SELECT CON EXACTAMENTE EL MISMO ANCHO Y ESTILO */
+input[type="text"], select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+    background-color: #fff;
+    outline: none;
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: #2563eb;
+}
+
+/* BOTÓN DE INGRESAR */
+.btn-primary {
+    width: 100%;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.btn-primary:active {
+    opacity: 0.9;
+}
+
+.user-info-header {
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    color: #475569;
+}
