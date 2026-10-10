@@ -73,7 +73,7 @@
             margin-bottom: 20px;
         }
 
-        /* ASISTENTE PASO A PASO (WIZARD) */
+        /* WIZARD & CARDS */
         .wizard-card {
             background: #f1f5f9;
             padding: 18px;
@@ -81,14 +81,28 @@
             border: 1px solid #cbd5e1;
             margin-top: 15px;
         }
-        .auto-calc {
-            background-color: #fef08a !important;
-            font-weight: bold;
-        }
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
+        }
+        .badge-autosave {
+            font-size: 11px;
+            color: #16a34a;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .item-parada-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
@@ -98,7 +112,10 @@
         
         <!-- PASO 1: SELECCIÓN DE TURNO Y RESUMEN GENERAL -->
         <div id="paso1">
-            <h2>Paso 1: Datos Generales y Turno</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Paso 1: Datos Generales y Turno</h2>
+                <span id="indicadorAutosave" class="badge-autosave" style="display:none;">✔ AutoGuardado</span>
+            </div>
             <p class="subtitle">Ingrese los datos básicos del seguimiento</p>
 
             <div class="form-group-field">
@@ -157,7 +174,7 @@
                 </div>
             </div>
 
-            <!-- SUB-PASO 2.2: CAPTURA INDIVIDUAL DE CADA TIRO -->
+            <!-- SUB-PASO 2.2: CAPTURA INDIVIDUAL DE CADA TIRO (SIN CAMPO AUTOCALCULADO) -->
             <div id="subPasoCapturaTiro" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h2 id="tituloTiroActual">Captura de Tiro</h2>
@@ -180,27 +197,29 @@
                     <div class="grid-2">
                         <div class="form-group-field">
                             <label>Largo Momento Cargar [m]:</label>
-                            <input type="number" step="0.1" id="tiroLargoMomento" value="13.0" oninput="calcularLongitudCargadaWizard()">
+                            <input type="number" step="0.1" id="tiroLargoMomento" value="13.0">
                         </div>
                         <div class="form-group-field">
                             <label>Taco Real [m]:</label>
-                            <input type="number" step="0.1" id="tiroTacoReal" value="8.0" oninput="calcularLongitudCargadaWizard()">
+                            <input type="number" step="0.1" id="tiroTacoReal" value="8.0">
                         </div>
-                    </div>
-
-                    <div class="form-group-field">
-                        <label>Longitud Cargada [m] (Autocalculado):</label>
-                        <input type="text" id="tiroLongCargada" class="auto-calc" value="5.0" readonly>
                     </div>
 
                     <div class="grid-2">
                         <div class="form-group-field">
                             <label>Estado Tiro:</label>
-                            <select id="tiroEstado">
+                            <select id="tiroEstado" onchange="toggleIntentosDestape()">
                                 <option value="Sano" selected>Sano</option>
                                 <option value="Tapado">Tapado</option>
                             </select>
                         </div>
+                        <div class="form-group-field">
+                            <label>Intentos Destape (solo tapados):</label>
+                            <input type="number" id="tiroIntentosDestape" placeholder="Cant." disabled>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
                         <div class="form-group-field">
                             <label>Tiro con Agua:</label>
                             <select id="tiroAgua">
@@ -208,9 +227,6 @@
                                 <option value="Agua">Agua</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="grid-2">
                         <div class="form-group-field">
                             <label>Tiro Negativo / Positivo:</label>
                             <select id="tiroPosNeg">
@@ -218,23 +234,56 @@
                                 <option value="Negativo">Negativo</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="grid-2">
                         <div class="form-group-field">
                             <label>Núm. Pera:</label>
                             <input type="number" id="tiroNumPera" value="7">
+                        </div>
+                        <div class="form-group-field">
+                            <label>Cama Explosivo [m]:</label>
+                            <input type="number" step="0.1" id="tiroCamaExplosivo" placeholder="Opcional">
+                        </div>
+                    </div>
+
+                    <div class="section-title" style="font-size: 14px; margin-top: 10px;">Cebo Superior e Inferior</div>
+                    <div class="grid-2">
+                        <div class="form-group-field">
+                            <label>Cebo Superior:</label>
+                            <input type="text" id="tiroCeboSup" value="150.0">
+                        </div>
+                        <div class="form-group-field">
+                            <label>Araña Cebo Sup.:</label>
+                            <select id="tiroAranaSup">
+                                <option value="Si" selected>Si</option>
+                                <option value="No">No</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="grid-2">
                         <div class="form-group-field">
-                            <label>Cebo Superior:</label>
-                            <select id="tiroCeboSup">
-                                <option value="Si" selected>Si</option>
-                                <option value="No">No</option>
+                            <label>Cant. Cartuchos Sup.:</label>
+                            <input type="number" id="tiroCantCartuchos" value="1">
+                        </div>
+                        <div class="form-group-field">
+                            <label>Cebo Inferior:</label>
+                            <input type="text" id="tiroCeboInf" placeholder="Opcional">
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group-field">
+                            <label>Araña Cebo Inf.:</label>
+                            <select id="tiroAranaInf">
+                                <option value="No" selected>No</option>
+                                <option value="Si">Si</option>
                             </select>
                         </div>
                         <div class="form-group-field">
-                            <label>Cant. Cartuchos:</label>
-                            <input type="number" id="tiroCantCartuchos" value="1">
+                            <label>Cant. Cartuchos Inf.:</label>
+                            <input type="number" id="tiroCantCartuchosInf" placeholder="0">
                         </div>
                     </div>
 
@@ -256,13 +305,18 @@
                 </div>
             </div>
 
-            <!-- SUB-PASO 2.3: RESUMEN DE PARADAS GUARDADAS Y FINALIZACIÓN -->
+            <!-- SUB-PASO 2.3: RESUMEN, BÚSQUEDA Y EDICIÓN DE PARADAS -->
             <div id="subPasoResumenFinal" style="display: none;">
                 <h2>Resumen de Paradas Cargadas</h2>
-                <p class="subtitle">Revise las paradas ingresadas o agregue otra</p>
+                <p class="subtitle">Revise las paradas ingresadas, busque o agregue otra</p>
 
-                <div id="listaParadasRegistradas" class="wizard-card" style="background: #ffffff;">
-                    <!-- Aquí se listarán las paradas registradas -->
+                <!-- CAMPO SEARCH Y AUTOSAVE STATUS -->
+                <div class="form-group-field" style="margin-bottom: 15px;">
+                    <input type="text" id="searchParada" placeholder="🔍 Buscar parada (Ej: PARADA 1)..." oninput="filtrarParadasResumen()">
+                </div>
+
+                <div id="listaParadasRegistradas" class="wizard-card" style="background: #ffffff; max-height: 300px; overflow-y: auto;">
+                    <!-- Se puebla dinámicamente -->
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
@@ -343,27 +397,28 @@
         </div>
     </div>
 
-    <script src="../js/components.js"></script>
+   <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
     <script>
         cargarBarMenu(true);
 
-        // ESTRUCTURA DE DATOS PARA GUARDAR EL SEGUIMIENTO
+        // ESTRUCTURA GLOBAL DE DATOS
         let paradasGuardadas = [];
         let tirosTemporales = [];
         let indiceTiroActual = 0;
         let totalTirosParadaActual = 0;
         let idParadaActual = "";
+        let indiceEdicionParada = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Fecha actual
+            // Fecha
             const hoy = new Date();
             const fechaFormateada = String(hoy.getDate()).padStart(2, '0') + '/' + 
                                     String(hoy.getMonth() + 1).padStart(2, '0') + '/' + 
                                     hoy.getFullYear();
             document.getElementById("fechaAnfo").value = fechaFormateada;
 
-            // Usuario activo
+            // Usuario
             const usuarioActivo = localStorage.getItem("jej_usuario_activo");
             if (usuarioActivo) {
                 document.getElementById("modalEncargado").value = usuarioActivo;
@@ -373,10 +428,62 @@
             document.getElementById("turnoAnfo").addEventListener("change", () => {
                 actualizarListasPorTurno();
                 actualizarResumenUnificado();
+                ejecutarAutosave();
             });
+
+            // Cargar borrador previo si existe
+            cargarBorradorAutosave();
         });
 
-        /* --- CONTROL DE PASOS GENERALES --- */
+        /* --- AUTOSAVE & STORAGE --- */
+        function ejecutarAutosave() {
+            const borrador = {
+                fecha: document.getElementById("fechaAnfo").value,
+                turno: document.getElementById("turnoAnfo").value,
+                mina: document.getElementById("modalMina").value,
+                nivel: document.getElementById("modalNivel").value,
+                bloque: document.getElementById("modalBloque").value,
+                idTronadura: document.getElementById("modalIdTronadura").value,
+                supJeJ: document.getElementById("modalSupJeJ").value,
+                supsDet: Array.from(document.querySelectorAll('#modalPersonal input[name="supervisorDet"]')).map(i => i.value),
+                respsDet: Array.from(document.querySelectorAll('#modalPersonal input[name="responsableDet"]')).map(i => i.value),
+                paradas: paradasGuardadas
+            };
+
+            localStorage.setItem("jej_anfo_draft", JSON.stringify(borrador));
+            
+            const badge = document.getElementById("indicadorAutosave");
+            if (badge) {
+                badge.style.display = "inline-flex";
+                setTimeout(() => { badge.style.display = "none"; }, 1500);
+            }
+        }
+
+        function cargarBorradorAutosave() {
+            const borradorRaw = localStorage.getItem("jej_anfo_draft");
+            if (!borradorRaw) return;
+
+            try {
+                const b = JSON.parse(borradorRaw);
+                if (b.turno) {
+                    document.getElementById("turnoAnfo").value = b.turno;
+                }
+                if (b.mina) document.getElementById("modalMina").value = b.mina;
+                if (b.nivel) document.getElementById("modalNivel").value = b.nivel;
+                if (b.bloque) document.getElementById("modalBloque").value = b.bloque;
+                if (b.idTronadura) document.getElementById("modalIdTronadura").value = b.idTronadura;
+                if (b.supJeJ) document.getElementById("modalSupJeJ").value = b.supJeJ;
+                if (b.paradas && Array.isArray(b.paradas)) {
+                    paradasGuardadas = b.paradas;
+                }
+                actualizarListasPorTurno();
+                actualizarResumenUnificado();
+            } catch (e) {
+                console.error("Error al cargar borrador", e);
+            }
+        }
+
+        /* --- PASOS & MODAL --- */
         function irAPaso2() {
             const turno = document.getElementById("turnoAnfo").value;
             if (!turno) {
@@ -385,6 +492,10 @@
             }
             document.getElementById("paso1").style.display = "none";
             document.getElementById("paso2").style.display = "block";
+
+            if (paradasGuardadas.length > 0) {
+                mostrarResumenParadasFinal();
+            }
         }
 
         function irAPaso1() {
@@ -392,9 +503,9 @@
             document.getElementById("paso1").style.display = "block";
         }
 
-        /* --- VENTANA EMERGENTE (MODAL) --- */
         function abrirModalPersonal() {
             document.getElementById("modalPersonal").style.display = "flex";
+            actualizarListasPorTurno(); // Asegura que carguen los datos al abrir
         }
 
         function cerrarModalPersonal() {
@@ -403,6 +514,7 @@
 
         function guardarModalPersonal() {
             actualizarResumenUnificado();
+            ejecutarAutosave();
             cerrarModalPersonal();
         }
 
@@ -411,8 +523,13 @@
             const div = document.createElement("div");
             div.style.display = "flex";
             div.style.gap = "8px";
+            
+            const listId = nameInput === 'supervisorDet' ? 'listaSupDet' : 'listaRespDet';
+            const nuevoListId = listId + "_" + Date.now();
+
             div.innerHTML = `
-                <input type="text" name="${nameInput}" placeholder="Seleccione o escriba..." style="flex: 1;">
+                <input type="text" name="${nameInput}" list="${nuevoListId}" placeholder="Seleccione o escriba..." style="flex: 1;">
+                <datalist id="${nuevoListId}"></datalist>
                 <button type="button" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button>
             `;
             contenedor.appendChild(div);
@@ -446,40 +563,70 @@
             const turnoSeleccionado = document.getElementById("turnoAnfo").value;
             let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
 
-            function poblarGrupo(rolKey, selectorNombre) {
+            function poblarGrupo(rolKey, selectorNombre, baseListId) {
                 const inputs = document.querySelectorAll(`input[name="${selectorNombre}"]`);
-                inputs.forEach(input => {
-                    let datalist = document.getElementById(input.getAttribute("list"));
-                    if (datalist) {
-                        datalist.innerHTML = "";
-                        let primerNombre = "";
-                        if (personalMap[rolKey]) {
-                            personalMap[rolKey].forEach(item => {
-                                const nombre = typeof item === 'object' ? item.nombre : item;
-                                const turno = typeof item === 'object' ? item.turno : "Ambos";
-                                if (!turnoSeleccionado || turno === turnoSeleccionado || turno === "Ambos") {
-                                    datalist.innerHTML += `<option value="${nombre}">`;
-                                    if (!primerNombre) primerNombre = nombre;
-                                }
-                            });
-                        }
-                        if (primerNombre && !input.value) input.value = primerNombre;
+                inputs.forEach((input, index) => {
+                    let datalistId = input.getAttribute("list") || baseListId;
+                    let datalist = document.getElementById(datalistId);
+
+                    if (!datalist) {
+                        datalistId = baseListId + "_dinamico_" + index;
+                        input.setAttribute("list", datalistId);
+                        datalist = document.createElement("datalist");
+                        datalist.id = datalistId;
+                        document.body.appendChild(datalist);
+                    }
+
+                    datalist.innerHTML = "";
+                    let primerNombre = "";
+
+                    if (personalMap[rolKey] && Array.isArray(personalMap[rolKey])) {
+                        personalMap[rolKey].forEach(item => {
+                            const nombre = typeof item === 'object' ? item.nombre : item;
+                            const turno = typeof item === 'object' ? item.turno : "Ambos";
+
+                            if (!turnoSeleccionado || turno === turnoSeleccionado || turno === "Ambos") {
+                                datalist.innerHTML += `<option value="${nombre}">`;
+                                if (!primerNombre) primerNombre = nombre;
+                            }
+                        });
+                    }
+
+                    if (index === 0 && input && primerNombre && !input.value) {
+                        input.value = primerNombre;
                     }
                 });
             }
 
-            poblarGrupo("supervisorJeJ", "supervisorJeJ");
-            poblarGrupo("supervisorDet", "supervisorDet");
-            poblarGrupo("responsableDet", "responsableDet");
+            poblarGrupo("supervisorJeJ", "supervisorJeJ", "listaSupJeJ");
+            poblarGrupo("supervisorDet", "supervisorDet", "listaSupDet");
+            poblarGrupo("responsableDet", "responsableDet", "listaRespDet");
             actualizarResumenUnificado();
         }
 
-        /* --- ASISTENTE WIZARD PASO A PASO (TIROS) --- */
+        function toggleIntentosDestape() {
+            const estado = document.getElementById("tiroEstado").value;
+            const inputIntentos = document.getElementById("tiroIntentosDestape");
+            if (estado === "Tapado") {
+                inputIntentos.disabled = false;
+                inputIntentos.focus();
+            } else {
+                inputIntentos.disabled = true;
+                inputIntentos.value = "";
+            }
+        }
+
+        /* --- ASISTENTE WIZARD PASO A PASO --- */
         function iniciarRegistroTiros() {
             idParadaActual = document.getElementById("idParadaInput").value.trim() || "PARADA 1";
             totalTirosParadaActual = parseInt(document.getElementById("cantTirosInput").value) || 1;
             
-            tirosTemporales = [];
+            if (indiceEdicionParada === null) {
+                tirosTemporales = [];
+            } else {
+                tirosTemporales = [...paradasGuardadas[indiceEdicionParada].tiros];
+            }
+
             indiceTiroActual = 1;
 
             document.getElementById("subPasoConfigParada").style.display = "none";
@@ -493,7 +640,6 @@
             document.getElementById("subtituloParadaActual").innerText = `Parada: ${idParadaActual}`;
             document.getElementById("badgeProgreso").innerText = `Tiro ${numeroTiro} de ${totalTirosParadaActual}`;
 
-            // Si ya existían datos guardados temporalmente para este tiro, los carga; de lo contrario usa valores por defecto
             const tiroExistente = tirosTemporales[numeroTiro - 1];
 
             document.getElementById("tiroLongDiseno").value = tiroExistente ? tiroExistente.longDiseno : 12.9;
@@ -501,15 +647,21 @@
             document.getElementById("tiroLargoMomento").value = tiroExistente ? tiroExistente.largoMomento : 13.0;
             document.getElementById("tiroTacoReal").value = tiroExistente ? tiroExistente.tacoReal : 8.0;
             document.getElementById("tiroEstado").value = tiroExistente ? tiroExistente.estado : "Sano";
+            document.getElementById("tiroIntentosDestape").value = tiroExistente ? tiroExistente.intentosDestape : "";
             document.getElementById("tiroAgua").value = tiroExistente ? tiroExistente.agua : "Seco";
             document.getElementById("tiroPosNeg").value = tiroExistente ? tiroExistente.posNeg : "Positivo";
             document.getElementById("tiroNumPera").value = tiroExistente ? tiroExistente.numPera : 7;
-            document.getElementById("tiroCeboSup").value = tiroExistente ? tiroExistente.ceboSup : "Si";
+            document.getElementById("tiroCamaExplosivo").value = tiroExistente ? tiroExistente.camaExplosivo : "";
+            document.getElementById("tiroCeboSup").value = tiroExistente ? tiroExistente.ceboSup : "150.0";
+            document.getElementById("tiroAranaSup").value = tiroExistente ? tiroExistente.aranaSup : "Si";
             document.getElementById("tiroCantCartuchos").value = tiroExistente ? tiroExistente.cantCartuchos : 1;
+            document.getElementById("tiroCeboInf").value = tiroExistente ? tiroExistente.ceboInf : "";
+            document.getElementById("tiroAranaInf").value = tiroExistente ? tiroExistente.aranaInf : "No";
+            document.getElementById("tiroCantCartuchosInf").value = tiroExistente ? tiroExistente.cantCartuchosInf : 0;
             document.getElementById("tiroNumRetenedores").value = tiroExistente ? tiroExistente.numRetenedores : 1;
             document.getElementById("tiroTipoRetenedor").value = tiroExistente ? tiroExistente.tipoRetenedor : "Greda";
 
-            calcularLongitudCargadaWizard();
+            toggleIntentosDestape();
 
             const btnSig = document.getElementById("btnSiguienteTiro");
             if (numeroTiro === totalTirosParadaActual) {
@@ -521,26 +673,30 @@
             }
         }
 
-        function calcularLongitudCargadaWizard() {
+        function guardarDatosTiroActual() {
             const largoMomento = parseFloat(document.getElementById("tiroLargoMomento").value) || 0;
             const tacoReal = parseFloat(document.getElementById("tiroTacoReal").value) || 0;
-            document.getElementById("tiroLongCargada").value = (largoMomento - tacoReal).toFixed(1);
-        }
+            const longCargadaCalc = (largoMomento - tacoReal).toFixed(1);
 
-        function guardarDatosTiroActual() {
             const datosTiro = {
                 tiroNum: indiceTiroActual,
                 longDiseno: document.getElementById("tiroLongDiseno").value,
                 taco: document.getElementById("tiroTaco").value,
                 largoMomento: document.getElementById("tiroLargoMomento").value,
                 tacoReal: document.getElementById("tiroTacoReal").value,
-                longCargada: document.getElementById("tiroLongCargada").value,
+                longCargada: longCargadaCalc,
                 estado: document.getElementById("tiroEstado").value,
+                intentosDestape: document.getElementById("tiroIntentosDestape").value,
                 agua: document.getElementById("tiroAgua").value,
                 posNeg: document.getElementById("tiroPosNeg").value,
                 numPera: document.getElementById("tiroNumPera").value,
+                camaExplosivo: document.getElementById("tiroCamaExplosivo").value,
                 ceboSup: document.getElementById("tiroCeboSup").value,
+                aranaSup: document.getElementById("tiroAranaSup").value,
                 cantCartuchos: document.getElementById("tiroCantCartuchos").value,
+                ceboInf: document.getElementById("tiroCeboInf").value,
+                aranaInf: document.getElementById("tiroAranaInf").value,
+                cantCartuchosInf: document.getElementById("tiroCantCartuchosInf").value,
                 numRetenedores: document.getElementById("tiroNumRetenedores").value,
                 tipoRetenedor: document.getElementById("tiroTipoRetenedor").value
             };
@@ -555,11 +711,20 @@
                 indiceTiroActual++;
                 cargarFormularioTiroWizard(indiceTiroActual);
             } else {
-                // Finalizó todos los tiros de esta parada
-                paradasGuardadas.push({
-                    idParada: idParadaActual,
-                    tiros: [...tirosTemporales]
-                });
+                if (indiceEdicionParada !== null) {
+                    paradasGuardadas[indiceEdicionParada] = {
+                        idParada: idParadaActual,
+                        tiros: [...tirosTemporales]
+                    };
+                    indiceEdicionParada = null;
+                } else {
+                    paradasGuardadas.push({
+                        idParada: idParadaActual,
+                        tiros: [...tirosTemporales]
+                    });
+                }
+
+                ejecutarAutosave();
                 mostrarResumenParadasFinal();
             }
         }
@@ -570,39 +735,83 @@
                 indiceTiroActual--;
                 cargarFormularioTiroWizard(indiceTiroActual);
             } else {
-                // Regresar a la configuración de parada
                 document.getElementById("subPasoCapturaTiro").style.display = "none";
                 document.getElementById("subPasoConfigParada").style.display = "block";
             }
         }
 
         function mostrarResumenParadasFinal() {
+            document.getElementById("subPasoConfigParada").style.display = "none";
             document.getElementById("subPasoCapturaTiro").style.display = "none";
             document.getElementById("subPasoResumenFinal").style.display = "block";
 
+            filtrarParadasResumen();
+        }
+
+        function filtrarParadasResumen() {
+            const filtro = (document.getElementById("searchParada").value || "").toLowerCase();
             const contenedor = document.getElementById("listaParadasRegistradas");
             contenedor.innerHTML = "";
 
+            if (paradasGuardadas.length === 0) {
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay paradas registradas aún.</p>";
+                return;
+            }
+
             paradasGuardadas.forEach((parada, idx) => {
-                contenedor.innerHTML += `
-                    <div style="border-bottom: 1px solid #cbd5e1; padding: 10px 0;">
-                        <strong>📍 ${parada.idParada}</strong> - ${parada.tiros.length} tiros cargados.
-                    </div>
-                `;
+                if (parada.idParada.toLowerCase().includes(filtro)) {
+                    contenedor.innerHTML += `
+                        <div class="item-parada-card">
+                            <div>
+                                <strong>📍 ${parada.idParada}</strong><br>
+                                <span style="font-size: 12px; color: #64748b;">${parada.tiros.length} tiros cargados</span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" onclick="editarParada(${idx})" style="background: #e0f2fe; color: #0369a1; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">✏️ Editar</button>
+                                <button type="button" onclick="eliminarParada(${idx})" style="background: #fee2e2; color: #991b1b; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                }
             });
         }
 
+        function editarParada(index) {
+            indiceEdicionParada = index;
+            const parada = paradasGuardadas[index];
+            
+            document.getElementById("idParadaInput").value = parada.idParada;
+            document.getElementById("cantTirosInput").value = parada.tiros.length;
+
+            document.getElementById("subPasoResumenFinal").style.display = "none";
+            document.getElementById("subPasoConfigParada").style.display = "block";
+        }
+
+        function eliminarParada(index) {
+            if (confirm("¿Desea eliminar esta parada y todos sus tiros?")) {
+                paradasGuardadas.splice(index, 1);
+                ejecutarAutosave();
+                mostrarResumenParadasFinal();
+            }
+        }
+
         function prepararNuevaParada() {
+            indiceEdicionParada = null;
             document.getElementById("subPasoResumenFinal").style.display = "none";
             document.getElementById("subPasoConfigParada").style.display = "block";
             
-            // Sugiere automáticamente la siguiente parada
             document.getElementById("idParadaInput").value = `PARADA ${paradasGuardadas.length + 1}`;
+            document.getElementById("cantTirosInput").value = 3;
         }
 
         function guardarFormularioAnfo() {
+            if (paradasGuardadas.length === 0) {
+                alert("Por favor registre al menos una parada antes de guardar.");
+                return;
+            }
+
+            localStorage.removeItem("jej_anfo_draft");
             alert("¡Registro completo de ANFO guardado con éxito!");
+            window.location.href = "../index.html";
         }
     </script>
-</body>
-</html>
