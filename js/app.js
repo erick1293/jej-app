@@ -103,8 +103,10 @@ function cerrarSesionUnica() {
 }
 
 // Redirección hacia las páginas de seguimiento específicas en pages/
+// Redirección hacia las páginas de seguimiento específicas en pages/
 function navegarA(pagina) {
     if (pagina) {
-        window.location.href = `pages/${pagina}`;
+        // Aseguramos la ruta relativa limpia hacia la carpeta pages
+        window.location.href = `./pages/${pagina}`;
     }
 }
