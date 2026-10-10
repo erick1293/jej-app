@@ -160,4 +160,33 @@
             e.preventDefault();
             alert("¡Registro de ANFO guardado localmente con éxito!");
         }
+        // Cargar listas guardadas de personal filtradas por turno seleccionado
+        function actualizarListasPorTurno() {
+            const turnoSeleccionado = document.getElementById("turnoAnfo").value;
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+
+            // Función auxiliar para poblar datalist según el turno
+            function poblarDatalist(elementId, rolKey) {
+                const datalist = document.getElementById(elementId);
+                if (!datalist) return;
+                datalist.innerHTML = "";
+                
+                if (personalMap[rolKey]) {
+                    personalMap[rolKey].forEach(item => {
+                        // Si coincide el turno o está guardado como "Ambos"
+                        if (!turnoSeleccionado || item.turno === turnoSeleccionado || item.turno === "Ambos") {
+                            datalist.innerHTML += `<option value="${item.nombre}">`;
+                        }
+                    });
+                }
+            }
+
+            poblarDatalist("listaSupJeJ", "supervisorJeJ");
+            poblarDatalist("listaSupDet", "supervisorDet");
+            poblarDatalist("listaRespDet", "responsableDet");
+        }
+
+        // Escuchar el cambio de turno para actualizar los campos automáticamente
+        document.getElementById("turnoAnfo").addEventListener("change", actualizarListasPorTurno);
+        
     </script>

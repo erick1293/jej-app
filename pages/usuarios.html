@@ -57,7 +57,7 @@
         <h2>Gestión de Personal DET / JeJ</h2>
         <p class="subtitle">Registra los supervisores frecuentes para autocompletar formularios</p>
 
-        <form id="formPersonal" onsubmit="guardarPersonal(event)">
+       <form id="formPersonal" onsubmit="guardarPersonal(event)">
             <div class="form-group-field">
                 <label for="tipoPersonal">Rol del Personal:</label>
                 <select id="tipoPersonal" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
@@ -67,6 +67,24 @@
                     <option value="supervisorJeJ">Supervisor JeJ</option>
                 </select>
             </div>
+
+            <div class="form-group-field">
+                <label for="turnoPersonal">Asociar a Turno:</label>
+                <select id="turnoPersonal" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                    <option value="" disabled selected>-- Seleccione Turno --</option>
+                    <option value="A">Turno A</option>
+                    <option value="B">Turno B</option>
+                    <option value="Ambos">Ambos Turnos</option>
+                </select>
+            </div>
+
+            <div class="form-group-field">
+                <label for="nombrePersonal">Nombre Completo:</label>
+                <input type="text" id="nombrePersonal" placeholder="Ej. Andrés Bugeño" required autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%;">Guardar Personal</button>
+        </form>
 
             <div class="form-group-field">
                 <label for="nombrePersonal">Nombre Completo:</label>
@@ -134,6 +152,51 @@
                 contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay personal registrado aún.</p>";
             }
         }
+
+        function guardarPersonal(e) {
+            e.preventDefault();
+            const rol = document.getElementById("tipoPersonal").value;
+            const turno = document.getElementById("turnoPersonal").value;
+            const nombre = document.getElementById("nombrePersonal").value.trim();
+
+            if (!rol || !turno || !nombre) return;
+
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            if (!personalMap[rol]) personalMap[rol] = [];
+
+            // Guardamos como objeto que incluye nombre y turno
+            const existe = personalMap[rol].some(p => p.nombre === nombre && p.turno === turno);
+
+            if (!existe) {
+                personalMap[rol].push({ nombre, turno });
+                localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
+                alert("Personal guardado con éxito.");
+                document.getElementById("nombrePersonal").value = "";
+                mostrarListadoPersonal();
+            } else {
+                alert("Este nombre ya está registrado para este turno y rol.");
+            }
+        }
+
+        function mostrarListadoPersonal() {
+            const contenedor = document.getElementById("contenedorLista");
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            
+            contenedor.innerHTML = "";
+            let hayRegistros = false;
+
+            for (let rol in personalMap) {
+                personalMap[rol].forEach(item => {
+                    hayRegistros = true;
+                    contenedor.innerHTML += `<div class="item-pers"><span><strong>[${rol} - Turno ${item.turno}]</strong> ${item.nombre}</span></div>`;
+                });
+            }
+
+            if (!hayRegistros) {
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay personal registrado aún.</p>";
+            }
+        }
+        
     </script>
 </body>
 </html>
