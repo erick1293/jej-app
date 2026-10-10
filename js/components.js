@@ -1,6 +1,7 @@
 function cargarBarMenu(esSubcarpeta = false) {
     const rutaPrefix = esSubcarpeta ? "../" : "";
 
+    
     const headerHTML = `
     <header class="bar-menu">
         <div class="logo-container">
