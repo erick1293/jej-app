@@ -108,7 +108,6 @@
     <script>
         cargarBarMenu(true);
 
-        // Automatizar fecha actual y usuario logueado al cargar la página
         document.addEventListener("DOMContentLoaded", () => {
             // 1. Asignar fecha actual (DD/MM/YYYY)
             const hoy = new Date();
@@ -124,13 +123,41 @@
             if (inputEncargado && usuarioActivo) {
                 inputEncargado.value = usuarioActivo;
             }
+
+            // 3. Cargar las listas guardadas de personal desde localStorage en los datalists
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            
+            if (personalMap.supervisorJeJ) {
+                const listSupJeJ = document.getElementById("listaSupJeJ");
+                if (listSupJeJ) {
+                    listSupJeJ.innerHTML = "";
+                    personalMap.supervisorJeJ.forEach(n => {
+                        listSupJeJ.innerHTML += `<option value="${n}">`;
+                    });
+                }
+            }
+            if (personalMap.supervisorDet) {
+                const listSupDet = document.getElementById("listaSupDet");
+                if (listSupDet) {
+                    listSupDet.innerHTML = "";
+                    personalMap.supervisorDet.forEach(n => {
+                        listSupDet.innerHTML += `<option value="${n}">`;
+                    });
+                }
+            }
+            if (personalMap.responsableDet) {
+                const listRespDet = document.getElementById("listaRespDet");
+                if (listRespDet) {
+                    listRespDet.innerHTML = "";
+                    personalMap.responsableDet.forEach(n => {
+                        listRespDet.innerHTML += `<option value="${n}">`;
+                    });
+                }
+            }
         });
 
         function guardarRegistroAnfo(e) {
             e.preventDefault();
             alert("¡Registro de ANFO guardado localmente con éxito!");
-            // Aquí puedes programar la lógica para exportarlo a Excel o guardarlo en almacenamiento offline
         }
     </script>
-</body>
-</html>
