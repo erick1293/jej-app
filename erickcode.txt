@@ -1054,9 +1054,11 @@
             }
         }
 
-        function mostrarResumenParadasFinal() {
+      function mostrarResumenParadasFinal() {
             ocultarTodosPasos();
             document.getElementById("paso6").style.display = "block";
+            // Actualizamos el título del resumen para indicar el trabajo actual
+            document.querySelector("#paso6 h2").innerText = `Resumen de Paradas - Trabajo: ${idTrabajoActual}`;
             filtrarParadasResumen();
         }
 
@@ -1065,30 +1067,35 @@
             const contenedor = document.getElementById("listaParadasRegistradas");
             contenedor.innerHTML = "";
 
+            // Buscamos únicamente el trabajo seleccionado actualmente
+            const trabajoActualObj = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
+            
+            if (!trabajoActualObj || !trabajoActualObj.paradas || trabajoActualObj.paradas.length === 0) {
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay paradas registradas para este trabajo aún.</p>";
+                return;
+            }
+
             let totalParadasCount = 0;
-            trabajosGuardados.forEach(trabajo => {
-                trabajo.paradas.forEach(parada => {
-                    const textoBusqueda = `${trabajo.idTrabajo} ${parada.idParada}`.toLowerCase();
-                    if (textoBusqueda.includes(filtro)) {
-                        totalParadasCount++;
-                        contenedor.innerHTML += `
-                            <div class="item-parada-card">
-                                <div>
-                                    <strong>👷 Trabajo: ${trabajo.idTrabajo} | 📍 Parada: ${parada.idParada}</strong><br>
-                                    <span style="font-size: 12px; color: #64748b;">${parada.tiros.length} tiros cargados</span>
-                                </div>
-                                <div style="display: flex; gap: 6px;">
-                                    <button type="button" onclick="editarParadaDesdeResumen('${trabajo.idTrabajo}', '${parada.idParada}')" style="background: #e0f2fe; color: #0369a1; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">✏️ Editar</button>
-                                    <button type="button" onclick="eliminarParadaDesdeResumen('${trabajo.idTrabajo}', '${parada.idParada}')" style="background: #fee2e2; color: #991b1b; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">🗑️</button>
-                                </div>
+            trabajoActualObj.paradas.forEach(parada => {
+                if (parada.idParada.toLowerCase().includes(filtro)) {
+                    totalParadasCount++;
+                    contenedor.innerHTML += `
+                        <div class="item-parada-card">
+                            <div>
+                                <strong>📍 Parada: ${parada.idParada}</strong><br>
+                                <span style="font-size: 12px; color: #64748b;">${parada.tiros.length} tiros cargados</span>
                             </div>
-                        `;
-                    }
-                });
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" onclick="editarParadaDesdeResumen('${trabajoActualObj.idTrabajo}', '${parada.idParada}')" style="background: #e0f2fe; color: #0369a1; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">✏️ Editar</button>
+                                <button type="button" onclick="eliminarParadaDesdeResumen('${trabajoActualObj.idTrabajo}', '${parada.idParada}')" style="background: #fee2e2; color: #991b1b; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                }
             });
 
             if (totalParadasCount === 0) {
-                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay registros de paradas aún.</p>";
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No se encontraron paradas con ese filtro.</p>";
             }
         }
 
