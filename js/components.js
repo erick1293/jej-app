@@ -1,6 +1,6 @@
 function cargarBarMenu(esSubcarpeta = false) {
     const rutaPrefix = esSubcarpeta ? "../" : "";
-    
+
     const headerHTML = `
     <header class="bar-menu">
         <div class="logo-container">
@@ -9,7 +9,7 @@ function cargarBarMenu(esSubcarpeta = false) {
                 <span id="logoFallback" class="logo-text" style="display:none;">JEJ</span>
             </a>
         </div>
-        
+
         <div class="hamburger-container">
             <button id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menú">☰</button>
             <nav id="dropdownMenu" class="dropdown-menu">
