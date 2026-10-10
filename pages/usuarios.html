@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Personal - App JEJ</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .card-wide {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .form-group-field {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .form-group-field label {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #1e293b;
+        }
+        .form-group-field input {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .listado-personal {
+            margin-top: 20px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .listado-personal h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+        .item-pers {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="card-wide">
+        <h2>Gestión de Personal DET / JeJ</h2>
+        <p class="subtitle">Registra los supervisores frecuentes para autocompletar formularios</p>
+
+        <form id="formPersonal" onsubmit="guardarPersonal(event)">
+            <div class="form-group-field">
+                <label for="tipoPersonal">Rol del Personal:</label>
+                <select id="tipoPersonal" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                    <option value="" disabled selected>-- Seleccione Rol --</option>
+                    <option value="supervisorDet">Supervisor DET</option>
+                    <option value="responsableDet">Responsable Carguío DET</option>
+                    <option value="supervisorJeJ">Supervisor JeJ</option>
+                </select>
+            </div>
+
+            <div class="form-group-field">
+                <label for="nombrePersonal">Nombre Completo:</label>
+                <input type="text" id="nombrePersonal" placeholder="Ej. Andrés Bugeño" required autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%;">Guardar Personal</button>
+        </form>
+
+        <div class="listado-personal">
+            <h3>Personal Registrado</h3>
+            <div id="contenedorLista">Cargando...</div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="../index.html" class="btn-primary" style="background-color: #64748b; text-decoration: none; display: inline-block; padding: 10px 20px;">Volver al Menú Principal</a>
+        </div>
+    </main>
+
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        cargarBarMenu(true);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            mostrarListadoPersonal();
+        });
+
+        function guardarPersonal(e) {
+            e.preventDefault();
+            const rol = document.getElementById("tipoPersonal").value;
+            const nombre = document.getElementById("nombrePersonal").value.trim();
+
+            if (!rol || !nombre) return;
+
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            if (!personalMap[rol]) personalMap[rol] = [];
+
+            if (!personalMap[rol].includes(nombre)) {
+                personalMap[rol].push(nombre);
+                localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
+                alert("Personal guardado con éxito.");
+                document.getElementById("nombrePersonal").value = "";
+                mostrarListadoPersonal();
+            } else {
+                alert("Este nombre ya está registrado en este rol.");
+            }
+        }
+
+        function mostrarListadoPersonal() {
+            const contenedor = document.getElementById("contenedorLista");
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            
+            contenedor.innerHTML = "";
+            let hayRegistros = false;
+
+            for (let rol in personalMap) {
+                personalMap[rol].forEach(nombre => {
+                    hayRegistros = true;
+                    contenedor.innerHTML += `<div class="item-pers"><span><strong>[${rol}]</strong> ${nombre}</span></div>`;
+                });
+            }
+
+            if (!hayRegistros) {
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay personal registrado aún.</p>";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -76,27 +76,22 @@
             <div class="form-grid">
                 <div class="form-group-field">
                     <label for="supervisorJeJ">Supervisor JeJ:</label>
-                    <input type="text" id="supervisorJeJ" placeholder="Nombre Supervisor JeJ">
+                    <input type="text" id="supervisorJeJ" list="listaSupJeJ" placeholder="Seleccione o escriba...">
+                    <datalist id="listaSupJeJ"></datalist>
                 </div>
                 <div class="form-group-field">
                     <label for="encargadoSeguimiento">Encargado Seguimiento JeJ:</label>
                     <input type="text" id="encargadoSeguimiento" readonly style="background-color: #f1f5f9; font-weight: bold; color: #2563eb;">
-                    <small style="color: #64748b; margin-top: 3px;">(Cargado automáticamente desde tu Login)</small>
                 </div>
                 <div class="form-group-field">
                     <label for="supervisorDet">Supervisor DET:</label>
-                    <input type="text" id="supervisorDet" list="listaSupDet" placeholder="Escriba o seleccione...">
-                    <datalist id="listaSupDet">
-                        <option value="Andrés Bugeño">
-                        <option value="Otro Supervisor">
-                    </datalist>
+                    <input type="text" id="supervisorDet" list="listaSupDet" placeholder="Seleccione o escriba...">
+                    <datalist id="listaSupDet"></datalist>
                 </div>
                 <div class="form-group-field">
                     <label for="responsableDet">Responsable Carguío DET:</label>
-                    <input type="text" id="responsableDet" list="listaRespDet" placeholder="Escriba o seleccione...">
-                    <datalist id="listaRespDet">
-                        <option value="Sergio guerrero">
-                    </datalist>
+                    <input type="text" id="responsableDet" list="listaRespDet" placeholder="Seleccione o escriba...">
+                    <datalist id="listaRespDet"></datalist>
                 </div>
             </div>
 

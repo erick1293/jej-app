@@ -110,3 +110,18 @@ function navegarA(pagina) {
         window.location.href = `./pages/${pagina}`;
     }
 }
+// Cargar listas guardadas de personal
+        let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+        
+        if (personalMap.supervisorJeJ) {
+            const listSupJeJ = document.getElementById("listaSupJeJ");
+            personalMap.supervisorJeJ.forEach(n => listSupJeJ.innerHTML += `<option value="${n}">`);
+        }
+        if (personalMap.supervisorDet) {
+            const listSupDet = document.getElementById("listaSupDet");
+            personalMap.supervisorDet.forEach(n => listSupDet.innerHTML += `<option value="${n}">`);
+        }
+        if (personalMap.responsableDet) {
+            const listRespDet = document.getElementById("listaRespDet");
+            personalMap.responsableDet.forEach(n => listRespDet.innerHTML += `<option value="${n}">`);
+        }
