@@ -869,7 +869,7 @@
             guardarHistoricoTrabajos(); // Guardar en histórico siempre
             
            const borrador = {
-                // ... (propiedades anteriores) ...
+               
                 hLlegadaJeJ: document.getElementById("hLlegadaJeJ") ? document.getElementById("hLlegadaJeJ").value : "",
                 hSalidaJeJ: document.getElementById("hSalidaJeJ") ? document.getElementById("hSalidaJeJ").value : "",
                 hLlegadaPyT: document.getElementById("hLlegadaPyT") ? document.getElementById("hLlegadaPyT").value : "",
@@ -1193,7 +1193,6 @@
       function mostrarResumenParadasFinal() {
             ocultarTodosPasos();
             document.getElementById("paso6").style.display = "block";
-            // Actualizamos el título del resumen para indicar el trabajo actual
             document.querySelector("#paso6 h2").innerText = `Resumen de Paradas - Trabajo: ${idTrabajoActual}`;
             filtrarParadasResumen();
         }
@@ -1296,10 +1295,7 @@
             alert("Datos de la plantilla guardados correctamente.");
         }
 
-        // NUEVA FUNCIÓN DE GUARDADO Y EXPORTACIÓN A EXCEL BASADA EN PLANTILLA
-        // Usa ExcelJS (no XLSX.js) porque XLSX.js Community Edition NO puede escribir
-        // de vuelta los estilos/colores/combinadas de la plantilla: solo los lee.
-        // ExcelJS sí preserva el formato original al editar un archivo existente.
+        
        async function guardarFormularioAnfoYExportarExcel() {
             let totalParadas = 0;
             trabajosGuardados.forEach(t => totalParadas += t.paradas.length);
@@ -1318,14 +1314,10 @@
                 await workbook.xlsx.load(arrayBuffer);
                 const worksheet = workbook.worksheets[0];
 
-                // Pequeño helper: solo escribe si hay valor, sin tocar el resto de la celda (estilo intacto)
                 function asignarValorCelda(cellRef, valor) {
                     worksheet.getCell(cellRef).value = valor;
                 }
 
-                // 2. Cabecera: estas son las celdas de VALOR reales de la plantilla
-                //    (las celdas de al lado de cada etiqueta, no la etiqueta misma, que antes
-                //    era lo que se estaba sobrescribiendo por error)
                 asignarValorCelda('D6', document.getElementById("fechaAnfo").value);
                 asignarValorCelda('D7', document.getElementById("turnoAnfo").value);
                 asignarValorCelda('D8', document.getElementById("modalMina").value);
@@ -1335,67 +1327,52 @@
                 asignarValorCelda('D12', document.getElementById("modalSupJeJ").value);
                 asignarValorCelda('D13', document.getElementById("modalEncargado").value);
 
-                // Supervisor(es) DET y Responsable(s) Carguío DET: pueden agregarse varios
-                // en el formulario, así que se listan separados por coma.
                 const supervisoresDet = Array.from(document.querySelectorAll('[name="supervisorDet"]'))
                     .map(i => i.value.trim()).filter(Boolean).join(", ");
                 const responsablesDet = Array.from(document.querySelectorAll('[name="responsableDet"]'))
                     .map(i => i.value.trim()).filter(Boolean).join(", ");
                 asignarValorCelda('D14', supervisoresDet);
                 asignarValorCelda('D15', responsablesDet);
-
-                // Tiempos y Horarios (Columna H, no G: la G es parte de la celda de la etiqueta)
                 asignarValorCelda('H6', document.getElementById("hLlegadaJeJ")?.value || "");
                 asignarValorCelda('H7', document.getElementById("hSalidaJeJ")?.value || "");
                 asignarValorCelda('H8', document.getElementById("hLlegadaPyT")?.value || "");
                 asignarValorCelda('H9', document.getElementById("hInicioCarguio")?.value || "");
                 asignarValorCelda('H10', document.getElementById("hFinCarguio")?.value || "");
                 asignarValorCelda('H11', document.getElementById("hSalidaPyT")?.value || "");
-
-                // Diámetro de tiros y Tiro con VoD (antes no se guardaban en el Excel)
                 asignarValorCelda('H14', parseFloat(document.getElementById("diametroTiros")?.value) || "");
                 asignarValorCelda('H15', document.getElementById("tiroVod")?.value || "");
-
-                // Presiones (Columna K, no J: la J es parte de la celda de la etiqueta)
                 asignarValorCelda('K6', parseFloat(document.getElementById("presionCompresor")?.value) || 0);
                 asignarValorCelda('K7', parseFloat(document.getElementById("presionPera")?.value) || 0);
-
-                // Ubicación / distancia de geófono (antes no se guardaban en el Excel)
                 asignarValorCelda('K13', document.getElementById("ubicacionGeofono")?.value || "");
                 asignarValorCelda('K14', document.getElementById("distanciaGeofono")?.value || "");
-
-                // Zanja, Fase, Calle UCL y Paradas Inicio/Fin
                 asignarValorCelda('N6', document.getElementById("numZanja")?.value || "");
-                // "Calles Zanja" no tenía un <input> en el formulario (el código llamaba
-                // a un id="calleZanja" que no existía), por eso siempre quedaba vacío.
-                // Se agregó el campo en la sección 3 del modal.
                 asignarValorCelda('N7', document.getElementById("calleZanja")?.value || "");
                 asignarValorCelda('N9', document.getElementById("faseZanja")?.value || "");
-                // "Calle UCL" y "Parada Inicial" ocupan 2 columnas de etiqueta (M:N), por lo
-                // que su valor real cae en la columna O, no en N.
                 asignarValorCelda('O10', document.getElementById("calleUcl")?.value || "");
-                // El formulario solo tiene un campo combinado "Parada Inicial / Final"
-                // (id="paradasInicioFin"); "paradaInicial"/"paradaFinal" no existen como
-                // id en el HTML, por eso antes quedaban siempre vacíos.
                 asignarValorCelda('O11', document.getElementById("paradasInicioFin")?.value || "");
-
-                // Hora Inicio/Fin Amarre: tampoco existían como campos en el formulario.
-                // Sin estas dos celdas (O13 y O14), la fórmula de "Total Tiempo Amarre"
-                // (O15, ya presente en la plantilla) no tiene de dónde calcular y queda vacía.
                 asignarValorCelda('O13', document.getElementById("hInicioAmarre")?.value || "");
                 asignarValorCelda('O14', document.getElementById("hFinAmarre")?.value || "");
-
-                // 3. Inserción de la tabla de Paradas y Tiros a partir de la Fila 17
-                //    (la Fila 16 son los encabezados "PARADA, TIRO, LONG. DISEÑO..."; antes
-                //    se empezaba en la 16 y se borraban esos encabezados con el primer tiro)
                 let rowIndex = 17;
+                const VERDE_PARADA = 'FF99FFCC'; 
+                let colorAlternado = false;
 
                 trabajosGuardados.forEach(trabajo => {
                     trabajo.paradas.forEach(parada => {
+                        colorAlternado = !colorAlternado; // cada parada nueva cambia de color
                         parada.tiros.forEach(tiro => {
                             const row = worksheet.getRow(rowIndex);
-                            // Columnas exactas según la plantilla: B=PARADA, C=TIRO, etc.
-                            row.getCell(2).value = parada.idParada;
+                            const celdaParada = row.getCell(2);
+                            celdaParada.value = parada.idParada;
+                            celdaParada.style = Object.assign({}, celdaParada.style);
+                            if (colorAlternado) {
+                                celdaParada.fill = {
+                                    type: 'pattern',
+                                    pattern: 'solid',
+                                    fgColor: { argb: VERDE_PARADA }
+                                };
+                            } else {
+                                celdaParada.fill = { type: 'pattern', pattern: 'none' };
+                            }
                             row.getCell(3).value = parseInt(tiro.tiroNum);
                             row.getCell(4).value = parseFloat(tiro.longDiseno);
                             row.getCell(5).value = parseFloat(tiro.taco);
@@ -1423,7 +1400,6 @@
                     });
                 });
 
-                // 4. Generamos el archivo resultante conservando el formato de la plantilla
                 const outBuffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([outBuffer], {
                     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

@@ -87,10 +87,7 @@ function ingresarApp() {
     let usuariosMap = JSON.parse(localStorage.getItem("jej_usuarios_map") || "{}");
     usuariosMap[nombreUsuario] = Date.now();
     localStorage.setItem("jej_usuarios_map", JSON.stringify(usuariosMap));
-
     localStorage.setItem("jej_usuario_activo", nombreUsuario);
-    
-    // Refrescar estado para mostrar el menú instantáneamente
     verificarEstadoSesion();
 }
 
@@ -102,7 +99,6 @@ function cerrarSesionUnica() {
     verificarEstadoSesion();
 }
 
-// Redirección hacia las páginas de seguimiento específicas en pages/
 // Redirección hacia las páginas de seguimiento específicas en pages/
 function navegarA(pagina) {
     if (pagina) {
