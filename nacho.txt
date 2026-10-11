@@ -3,25 +3,1426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento ANFO - App JEJ</title>
+    <title>Seguimiento a la Perforación - App JEJ</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+/* Estilos de la página de seguimiento (se cargan DESPUÉS de styles.css) */
+.jp-page { max-width: 100%; padding: 16px 20px 48px; box-sizing: border-box; color: #0f172a; font-family: inherit; }
+.jp-page h1 { font-size: 1.25rem; margin: 4px 0 2px; }
+.jp-page h2 { font-size: 1rem; margin: 22px 0 8px; }
+.jp-sub { color: #475569; font-size: .85rem; margin: 0 0 12px; }
+.jp-titulo-pagina { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.jp-menu-link { font-size: .85rem; color: #1e293b; background: #e2e8f0; padding: 6px 12px; border-radius: 6px; text-decoration: none; }
+.jp-menu-link:hover { background: #cbd5e1; }
+[hidden] { display: none !important; }
+
+/* Barra superior */
+.jp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+.jp-tb-label { font-size: .85rem; display: flex; gap: 6px; align-items: center; }
+.jp-toolbar select { max-width: 320px; }
+.jp-sep { flex: 1; }
+.jp-btn { border: 1px solid #cbd5e1; background: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: .85rem; }
+.jp-btn:hover { background: #f1f5f9; }
+.jp-btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+.jp-btn-primary:hover { background: #1d4ed8; }
+.jp-btn-danger { color: #b91c1c; border-color: #fecaca; }
+.jp-btn-grande { padding: 12px 20px; font-size: .95rem; font-weight: 600; }
+.jp-btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+/* Flujo por pasos */
+.jp-pasos { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; list-style: none; margin: 14px 0 16px; padding: 0; }
+.jp-pasos button { display: flex; align-items: center; gap: 7px; padding: 5px 13px 5px 5px; border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; font-size: .82rem; cursor: pointer; color: #334155; }
+.jp-pasos .n { width: 22px; height: 22px; border-radius: 50%; background: #e2e8f0; display: grid; place-items: center; font-size: .75rem; font-weight: 700; }
+.jp-pasos .activo { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; font-weight: 700; }
+.jp-pasos .activo .n { background: #2563eb; color: #fff; }
+.jp-pasos .hecho .n { background: #16a34a; color: #fff; }
+.jp-paso { max-width: 820px; margin: 0 auto; }
+.jp-paso-titulo { margin: 0 0 4px; font-size: 1.15rem; text-align: center; }
+.jp-paso-ayuda { color: #475569; font-size: .85rem; margin: 0 0 14px; text-align: center; }
+.jp-navpaso { display: flex; justify-content: space-between; gap: 8px; max-width: 820px; margin: 18px auto 0; }
+
+/* Bloques de datos (Identificación, Horarios, Labor): tarjetas centradas */
+.jp-bloque { border: 1px solid #dbe3ee; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(15,23,42,.06); }
+.jp-bloque > h3 { margin: 0; padding: 12px 16px; font-size: .95rem; text-align: center; background: #f1f5f9; border-bottom: 1px solid #dbe3ee; }
+.jp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; padding: 16px; }
+.jp-campo { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 10px 12px 12px; background: #f0f6fd; border: 1px solid #dbe7f6; border-top: 4px solid #93c5fd; border-radius: 10px; min-width: 0; }
+.jp-campo.verde { background: #effcef; border-color: #cdeccd; border-top-color: #4ade80; }
+.jp-campo.amar { background: #fff9e0; border-color: #f3e6a8; border-top-color: #fbbf24; }
+.jp-campo label { font-size: .78rem; font-weight: 700; color: #334155; text-align: center; letter-spacing: .02em; }
+.jp-campo input, .jp-campo select, .jp-campo output { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 10px; min-height: 44px; font-size: 1rem; text-align: center; text-align-last: center; background: #fff; min-width: 0; width: 100%; box-sizing: border-box; color: #0f172a; }
+.jp-campo output { display: flex; align-items: center; justify-content: center; font-weight: 700; background: #fff7d6; border-color: #f3e6a8; }
+.jp-campo input:focus, .jp-campo select:focus { outline: 3px solid rgba(37,99,235,.25); border-color: #2563eb; }
+.jp-doble { grid-column: 1 / -1; }
+.jp-par { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Registro por tiro: una pregunta a la vez */
+.jp-q { border: 1px solid #cbd5e1; border-left-width: 8px; border-radius: 10px; background: #fff; padding: 14px 16px 14px; }
+.jp-q-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: .8rem; color: #475569; flex-wrap: wrap; }
+.jp-q-top b { color: #0f172a; font-size: .9rem; }
+.jp-q-top select { font-size: .8rem; max-width: 230px; }
+.jp-q-barra { height: 5px; background: #e2e8f0; border-radius: 3px; margin: 8px 0 14px; overflow: hidden; }
+.jp-q-barra i { display: block; height: 100%; background: #2563eb; }
+.jp-q h3 { margin: 0 0 2px; font-size: 1.2rem; text-align: center; }
+.jp-q-ayuda { margin: 0; font-size: .8rem; color: #64748b; text-align: center; }
+.jp-q-input { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px auto 8px; max-width: 420px; }
+.jp-q-input input { flex: 1; text-align: center; font-size: 1.4rem; padding: 12px 12px; border: 1px solid #94a3b8; border-radius: 8px; min-width: 0; box-sizing: border-box; }
+.jp-q-input input:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
+.jp-q-input .u { color: #64748b; font-size: .95rem; min-width: 34px; }
+.jp-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 14px auto 8px; max-width: 520px; }
+.jp-opt { padding: 14px 10px; border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; cursor: pointer; font-size: .95rem; }
+.jp-opt:hover { background: #f1f5f9; }
+.jp-opt.sel { background: #2563eb; border-color: #2563eb; color: #fff; }
+.jp-q-calc { display: block; text-align: center; width: fit-content; margin-left: auto; margin-right: auto; background: #fff7d6; border-radius: 6px; padding: 6px 10px; font-size: .85rem; font-weight: 700; margin: 4px 0; }
+.jp-q-error { color: #b91c1c; font-size: .82rem; margin: 4px 0; text-align: center; }
+.jp-q-acciones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; align-items: center; justify-content: center; }
+.jp-chip { border: 1px dashed #94a3b8; background: #f8fafc; border-radius: 999px; padding: 4px 10px; font-size: .78rem; cursor: pointer; color: #334155; }
+.jp-chip:hover { background: #e2e8f0; }
+.jp-q-resumen { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+.jp-q-resumen span { font-size: .72rem; background: #f1f5f9; border-radius: 4px; padding: 2px 6px; color: #334155; }
+.jp-aviso { background: #dcfce7; color: #166534; border-radius: 8px; padding: 8px 12px; font-size: .88rem; margin-bottom: 10px; }
+.jp-vacio { border: 1px dashed #94a3b8; border-radius: 8px; padding: 18px; color: #475569; font-size: .9rem; background: #f8fafc; margin-bottom: 12px; }
+
+/* Tablas simples */
+.jp-scroll { overflow: auto; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; margin-bottom: 12px; }
+.jp-tabla-simple { border-collapse: collapse; font-size: .85rem; width: 100%; }
+.jp-tabla-simple th, .jp-tabla-simple td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: center; white-space: nowrap; }
+.jp-tabla-simple th { background: #f1f5f9; }
+.jp-tabla-simple tfoot td { background: #fff7d6; font-weight: 700; }
+.jp-x { border: 0; background: transparent; color: #94a3b8; cursor: pointer; font-size: 1.1rem; padding: 0 6px; }
+.jp-x:hover { color: #b91c1c; }
+.jp-link { border: 0; background: none; color: #2563eb; cursor: pointer; font-size: .85rem; padding: 0 4px; }
+.jp-link:hover { text-decoration: underline; }
+
+/* Pérdida operacional */
+.jp-perd { border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff; }
+.jp-perd-head { background: #fce4d6; font-weight: 700; font-size: .85rem; padding: 7px 10px; display: grid; grid-template-columns: 1fr 110px 30px; gap: 8px; }
+.jp-perd-fila { display: grid; grid-template-columns: 1fr 110px 30px; border-top: 1px solid #e2e8f0; align-items: stretch; }
+.jp-perd-fila input { border: 0; padding: 9px 10px; font-size: .9rem; min-width: 0; width: 100%; box-sizing: border-box; background: transparent; }
+.jp-perd-fila input:focus { outline: 2px solid #2563eb; outline-offset: -2px; background: #fff; }
+.jp-perd-fila input.t { border-left: 1px solid #e2e8f0; text-align: center; }
+.jp-perd-total { padding: 10px 12px; font-weight: 700; font-size: .95rem; text-align: right; background: #fff7d6; border-top: 1px solid #e2e8f0; }
+.jp-perd-total small { font-weight: 400; color: #475569; margin-left: 6px; }
+.jp-perd-pie { padding: 8px 10px; border-top: 1px solid #e2e8f0; }
+
+/* Finalizar */
+.jp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+.jp-kpi { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; background: #fff; }
+.jp-kpi b { display: block; font-size: 1.3rem; }
+.jp-kpi span { font-size: .75rem; color: #475569; }
+.jp-obs { margin-top: 6px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+.jp-obs > div { background: #fff2cc; text-align: center; font-weight: 700; font-size: .8rem; padding: 6px; }
+.jp-obs input { display: block; width: 100%; border: 0; border-top: 1px solid #e2e8f0; padding: 8px 10px; box-sizing: border-box; font-size: .88rem; }
+.jp-opciones { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: .85rem; margin: 10px 0; }
+.jp-descargas { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    </style>
 </head>
 <body>
 
     <!-- CONTENIDO ESPECÍFICO DE LA PÁGINA -->
-    <main class="container-center">
-        <section class="card login-card">
-            <h2>Seguimiento al Carguío con Anfo</h2>
-            <p class="subtitle">Apartado de automatización y registros</p>
-            <!-- Aquí irá tu formulario, lectura de Excel o automatización -->
-            <a href="../index.html" class="btn-primary" style="display: block; text-align: center; text-decoration: none; line-height: normal;">Volver al Menú Principal</a>
-        </section>
+    <main class="jp-page">
+        <div class="jp-titulo-pagina">
+            <div>
+                <h1>Seguimiento a la Perforación</h1>
+                <p class="jp-sub">J.E.J. Ingeniería · Contrato N° 4600026097 · Servicio QA/QC Operaciones de Perforación y Tronadura</p>
+            </div>
+            <a class="jp-menu-link" href="../index.html">Menú principal</a>
+        </div>
+
+        <div id="toolbar"></div>
+
+        <ol class="jp-pasos" id="pasos"></ol>
+        <section class="jp-paso" id="paso"></section>
+        <div class="jp-navpaso" id="navPaso"></div>
     </main>
 
+    <!-- Librería para generar el Excel (.xlsx) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
+
     <script>
-        cargarBarMenu(true); // ¡Importante: El 'true' indica que está en una subcarpeta (pages/)!
+/* ===================== NÚCLEO DE DATOS (listas, columnas, cálculos, almacenamiento) ===================== */
+/* =========================================================
+   JEJ · Núcleo de datos (listas, columnas, cálculos, almacenamiento)
+   Si necesitas cambiar una lista desplegable, edítala en LISTAS.
+   ========================================================= */
+(function (root) {
+  'use strict';
+
+  var KEY = 'jej_app_v1';
+
+  /* ---------- Listas desplegables ---------- */
+  var LISTAS = {
+    turno:      ['A', 'B', 'Especial'],
+    siNo:       ['Si', 'No'],
+    nivel:      ['NP', 'UCL', 'Panel 2'],
+    bloque:     ['B-2', 'B-6', 'Ext Fw', 'DHz'],
+    fase:       ['1', '1 2/3', '2', '3', '4'],
+    problemas:  ['Barra Pegada', 'Repasos', 'Cambio Bit', 'Cambio Barras', 'Equipo fuera servicio'],
+    // Estas dos no venían en tu Excel: ajústalas a tu criterio de terreno
+    estadoTiro: ['Bueno', 'Tapado', 'Colapsado', 'Desviado', 'Obstruido'],
+    signo:      ['Negativo', 'Positivo']
+  };
+
+  /* ---------- Definición de columnas del registro por tiro ---------- */
+  // type: text | num | select | time | calc ; unit = unidad que se muestra al preguntar el dato
+  var COLS = {
+    perf: [
+      { k: 'parada',     label: 'PARADA',                       type: 'text',   w: 6,  bg: '00B0F0' },
+      { k: 'tiro',       label: 'TIRO',                         type: 'text',   w: 6,  bg: '00B0F0' },
+      { k: 'mDiseno',    label: 'Mts Diseño',                   type: 'num',    w: 9,  bg: 'DCE6F1', unit: 'm' },
+      { k: 'taco',       label: 'Taco teórico',                 type: 'num',    w: 8,  bg: 'DCE6F1', unit: 'm' },
+      { k: 'mPerf',      label: 'Mts Perforados',               type: 'num',    w: 10, bg: 'DCE6F1', unit: 'm' },
+      { k: 'cumpl',      label: 'Cumplimiento para carga de diseño', type: 'calc', calc: 'cumpl', fmt: 'pct', w: 11, bg: 'FDE9D9' },
+      { k: 'problema',   label: 'Problemas durante la perforación', type: 'select', list: 'problemas', w: 14, bg: 'F8CBAD' },
+      { k: 'alturaBarra',label: 'Altura barra pegada',          type: 'num',    w: 9,  bg: 'F8CBAD', unit: 'm' },
+      { k: 'estado',     label: 'ESTADO TIRO',                  type: 'select', list: 'estadoTiro', w: 10, bg: 'FFF2CC' },
+      { k: 'conAgua',    label: 'TIRO CON AGUA',                type: 'select', list: 'siNo', w: 8, bg: 'FFF2CC' },
+      { k: 'signo',      label: 'TIRO NEGATIVO / POSITIVO',     type: 'select', list: 'signo', w: 10, bg: 'FFF2CC' },
+      { k: 'abat',       label: 'ÁNGULO ABATIMIENTO',           type: 'num',    w: 10, bg: '7030A0', fg: 'FFFFFF', unit: '°' },
+      { k: 'rot',        label: 'ÁNGULO ROTACIÓN',              type: 'num',    w: 10, bg: '7030A0', fg: 'FFFFFF', unit: '°' },
+      { k: 'entubados',  label: 'MTS ENTUBADOS',                type: 'num',    w: 9,  bg: 'FF99FF', unit: 'm' },
+      { k: 'pPerc',      label: 'Presión de Percusión [bar]',   type: 'num',    w: 10, bg: '1F4E78', fg: 'FFFFFF', unit: 'bar' },
+      { k: 'pRot',       label: 'Presión de Rotación [bar]',    type: 'num',    w: 10, bg: '1F4E78', fg: 'FFFFFF', unit: 'bar' },
+      { k: 'pAv',        label: 'Presión de Avance [bar]',      type: 'num',    w: 10, bg: '1F4E78', fg: 'FFFFFF', unit: 'bar' },
+      { k: 'pAgua',      label: 'Presión de Agua [bar]',        type: 'num',    w: 10, bg: '1F4E78', fg: 'FFFFFF', unit: 'bar' },
+      { k: 'pComp',      label: 'Presión de Compresor de Aceite [bar]', type: 'num', w: 11, bg: '1F4E78', fg: 'FFFFFF', unit: 'bar' },
+      { k: 'golpes',     label: 'Percusión martillo (golpes/min)', type: 'num', w: 11, bg: 'A9E4B8', unit: 'golpes/min', sinCaptura: true },
+      { k: 'rpm',        label: 'Rotación (RPM)',               type: 'num',    w: 9,  bg: 'A9E4B8', unit: 'RPM', sinCaptura: true },
+      { k: 'vAv',        label: 'Velocidad de Avance [m/tiempo]', type: 'num',  w: 11, bg: 'A9E4B8', unit: 'm/tiempo', sinCaptura: true },
+      { k: 'caudal',     label: 'Caudal agua barrido (m3/min)', type: 'num',    w: 11, bg: 'A9E4B8', unit: 'm³/min', sinCaptura: true },
+      { k: 'hIni',       label: 'Hora Inicio',                  type: 'time',   w: 8,  bg: 'D9D9D9' },
+      { k: 'hFin',       label: 'Hora Término',                 type: 'time',   w: 8,  bg: 'D9D9D9' },
+      { k: 'tTiro',       label: 'Tiempo Perforación del Tiro [min]', type: 'calc', calc: 'tTiro', fmt: 'num1', w: 11, bg: 'D9D9D9' }
+    ]
+  };
+
+  /* ---------- Utilidades numéricas / horarias ---------- */
+  function num(v) {
+    if (v === null || v === undefined || v === '') return NaN;
+    var n = parseFloat(String(v).replace(',', '.'));
+    return isFinite(n) ? n : NaN;
+  }
+  function fmt(n, d) {
+    if (!isFinite(n)) return '';
+    return n.toFixed(d === undefined ? 1 : d).replace('.', ',');
+  }
+  function toMin(hhmm) {
+    if (!hhmm || !/^\d{1,2}:\d{2}/.test(hhmm)) return NaN;
+    var p = hhmm.split(':'); return (+p[0]) * 60 + (+p[1]);
+  }
+  function diffMin(a, b) { // de a hasta b, admite cruce de medianoche
+    var x = toMin(a), y = toMin(b);
+    if (isNaN(x) || isNaN(y)) return NaN;
+    return ((y - x) % 1440 + 1440) % 1440;
+  }
+  function fmtHM(min) {
+    if (!isFinite(min)) return '00:00';
+    var h = Math.floor(min / 60), m = Math.round(min % 60);
+    if (m === 60) { h++; m = 0; }
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+
+  /* ---------- Cálculos de la planilla ---------- */
+  var calc = {
+    // (Perforado − taco) / (Diseño − taco): cuánto del largo de carga de diseño se alcanzó
+    cumpl: function (r) {
+      var d = num(r.mDiseno), p = num(r.mPerf), t = num(r.taco);
+      if (isNaN(t)) t = 0;
+      if (isNaN(d) || isNaN(p) || d - t <= 0) return 0;
+      return Math.max(0, (p - t) / (d - t));
+    },
+    tTiro: function (r) { return diffMin(r.hIni, r.hFin); }
+  };
+  function tPostura(h) { return diffMin(h.hLlegPyt, h.hSalPyt); }
+  function tPerforacion(h) { return diffMin(h.hIniPerf, h.hFinPerf); }
+  function totalPerdidas(p) {
+    var s = 0; p.perdidas.forEach(function (x) { var m = toMin(x.tiempo); if (!isNaN(m)) s += m; });
+    return s;
+  }
+  function filaUsada(r) {
+    return !!(r.parada || r.tiro || r.mDiseno || r.mPerf);
+  }
+  function filaTieneDatos(r) {
+    return Object.keys(r).some(function (k) { return r[k] !== '' && r[k] !== null && r[k] !== undefined; });
+  }
+
+  function resumen(p) {
+    var usadas = p.filas.filter(filaUsada);
+    var mDis = 0, mPerf = 0, mDisPar = 0, sumCumpl = 0, nCumpl = 0, minTiros = 0, prob = {}, paradas = {};
+    usadas.forEach(function (r) {
+      var d = num(r.mDiseno), m = num(r.mPerf);
+      if (!isNaN(d)) mDis += d;
+      if (!isNaN(m)) mPerf += m;
+      if (!isNaN(d) && !isNaN(m)) { sumCumpl += calc.cumpl(r); nCumpl++; mDisPar += d; }
+      var t = calc.tTiro(r); if (!isNaN(t)) minTiros += t;
+      if (r.problema) prob[r.problema] = (prob[r.problema] || 0) + 1;
+      var key = r.parada === '' ? '—' : r.parada;
+      var g = paradas[key] || (paradas[key] = { parada: key, tiros: 0, mDis: 0, mDisPar: 0, mPerf: 0, minutos: 0 });
+      g.tiros++; if (!isNaN(d)) g.mDis += d; if (!isNaN(m)) g.mPerf += m; if (!isNaN(d) && !isNaN(m)) g.mDisPar += d;
+      if (!isNaN(t)) g.minutos += t;
+    });
+    var tPerf = tPerforacion(p.header);
+    var horasRef = !isNaN(tPerf) && tPerf > 0 ? tPerf / 60 : (minTiros > 0 ? minTiros / 60 : NaN);
+    return {
+      nTiros: usadas.length, mDis: mDis, mPerf: mPerf,
+      desvio: mDisPar > 0 ? (mPerf - mDisPar) / mDisPar : NaN,
+      cumplProm: nCumpl ? sumCumpl / nCumpl : NaN,
+      minTiros: minTiros, tPostura: tPostura(p.header), tPerf: tPerf,
+      tPerdidas: totalPerdidas(p),
+      rendimiento: isNaN(horasRef) ? NaN : mPerf / horasRef,
+      problemas: prob,
+      paradas: Object.keys(paradas).map(function (k) { return paradas[k]; })
+    };
+  }
+
+  /* ---------- Almacenamiento (localStorage con respaldo en memoria) ---------- */
+  var mem = null;
+  function uid() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  function filaVaciaPerf() { var o = {}; COLS.perf.forEach(function (c) { if (c.type !== 'calc') o[c.k] = ''; }); return o; }
+
+  var HEADER_KEYS = ['fecha', 'turno', 'mina', 'nivel', 'bloque', 'idTronadura', 'supJej', 'encSeg', 'supDet', 'perforistaDet',
+    'hLlegJej', 'hSalJej', 'hLlegPyt', 'hIniPerf', 'hFinPerf', 'hSalPyt', 'diametro', 'idEquipo',
+    'numZanja', 'calleZanja1', 'calleZanja2', 'fase', 'calleUcl', 'paradaIni', 'paradaFin'];
+
+  function nuevaPlanilla() {
+    var p = { id: uid(), header: {}, perdidas: [], filas: [], obs: [], refAbat: 'horizontal' };
+    HEADER_KEYS.forEach(function (k) { p.header[k] = ''; });
+    for (var k = 0; k < 10; k++) p.obs.push('');
+    return p;
+  }
+  function normalizar(p) {
+    var base = nuevaPlanilla();
+    p.header = Object.assign(base.header, p.header || {});
+    // pérdidas: se descartan las filas vacías (la pantalla agrega una en blanco al editar)
+    p.perdidas = (p.perdidas || []).filter(function (x) { return x && (x.desc || x.tiempo); });
+    // tiros: se descartan las filas totalmente vacías de versiones anteriores
+    p.filas = (p.filas || []).map(function (f) { var o = Object.assign(filaVaciaPerf(), f); delete o.obs; return o; }).filter(filaTieneDatos);
+    p.obs = p.obs && p.obs.length ? p.obs : base.obs;
+    p.refAbat = p.refAbat === 'vertical' ? 'vertical' : 'horizontal';
+    delete p.carguio; // el carguío ya no se usa en esta planilla
+    return p;
+  }
+
+  var state = { planillas: {}, actual: null };
+  function load() {
+    var raw = null;
+    try { raw = root.localStorage.getItem(KEY); } catch (e) { raw = mem; }
+    if (raw) {
+      try {
+        var s = JSON.parse(raw);
+        Object.keys(s.planillas || {}).forEach(function (id) { s.planillas[id] = normalizar(s.planillas[id]); });
+        state = s;
+      } catch (e) { /* datos corruptos: se parte vacío */ }
+    }
+    if (!state.actual || !state.planillas[state.actual]) {
+      var ids = Object.keys(state.planillas);
+      if (ids.length) state.actual = ids[0];
+      else { var p = nuevaPlanilla(); state.planillas[p.id] = p; state.actual = p.id; }
+    }
+  }
+  var timer = null;
+  function save() {
+    var s = JSON.stringify(state);
+    try { root.localStorage.setItem(KEY, s); } catch (e) { mem = s; }
+  }
+  function touch() { clearTimeout(timer); timer = setTimeout(save, 250); }
+
+  var store = {
+    current: function () { return state.planillas[state.actual]; },
+    list: function () { return Object.keys(state.planillas).map(function (id) { return state.planillas[id]; }); },
+    setCurrent: function (id) { if (state.planillas[id]) { state.actual = id; save(); } },
+    create: function () { var p = nuevaPlanilla(); state.planillas[p.id] = p; state.actual = p.id; save(); return p; },
+    remove: function (id) {
+      delete state.planillas[id];
+      if (!Object.keys(state.planillas).length) { var p = nuevaPlanilla(); state.planillas[p.id] = p; }
+      if (!state.planillas[state.actual]) state.actual = Object.keys(state.planillas)[0];
+      save();
+    },
+    touch: touch, saveNow: save,
+    exportJSON: function () { return JSON.stringify(state, null, 1); },
+    importJSON: function (text) {
+      var s = JSON.parse(text);
+      if (!s || !s.planillas) throw new Error('Archivo de respaldo no válido');
+      Object.keys(s.planillas).forEach(function (id) { state.planillas[id] = normalizar(s.planillas[id]); });
+      state.actual = s.actual && state.planillas[s.actual] ? s.actual : Object.keys(state.planillas)[0];
+      save();
+    },
+    etiqueta: function (p) {
+      var h = p.header;
+      return (h.idTronadura || 'Sin ID') + ' · ' + (h.fecha || 'sin fecha') + ' · Turno ' + (h.turno || '–');
+    },
+    filaVaciaPerf: filaVaciaPerf
+  };
+  load();
+
+  root.JEJ = {
+    LISTAS: LISTAS, COLS: COLS, store: store, calc: calc,
+    num: num, fmt: fmt, toMin: toMin, fmtHM: fmtHM, diffMin: diffMin,
+    tPostura: tPostura, tPerforacion: tPerforacion, totalPerdidas: totalPerdidas,
+    resumen: resumen, filaUsada: filaUsada
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = root.JEJ;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ===================== EXPORTACIÓN A EXCEL ===================== */
+/* =========================================================
+   JEJ · Exportación a Excel (.xlsx) con ExcelJS
+   Replica la "Hoja de terreno control de perforación":
+   colores de encabezado, listas desplegables y fórmulas vivas.
+   ========================================================= */
+(function (root) {
+  'use strict';
+  var J = root.JEJ;
+
+  function colLetter(n) { var s = ''; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
+  function colNum(s) { var n = 0; for (var i = 0; i < s.length; i++) n = n * 26 + s.charCodeAt(i) - 64; return n; }
+  function argb(hex) { return 'FF' + hex; }
+  var THIN = { style: 'thin', color: { argb: 'FF000000' } };
+  var BORDER = { top: THIN, left: THIN, bottom: THIN, right: THIN };
+  function fill(hex) { return { type: 'pattern', pattern: 'solid', fgColor: { argb: argb(hex) } }; }
+
+  function timeVal(s) { var m = J.toMin(s); return isNaN(m) ? null : m / 1440; }
+  function autoNum(v) { return /^\d+([.,]\d+)?$/.test(String(v)) ? J.num(v) : v; }
+  function cellVal(col, v) {
+    if (v === '' || v === undefined || v === null) return null;
+    if (col.type === 'select') return autoNum(v);
+    if (col.type === 'num') { var n = J.num(v); return isNaN(n) ? String(v) : n; }
+    if (col.type === 'time') return timeVal(v);
+    return String(v);
+  }
+
+  function build(ExcelJS, p) {
+    var wb = new ExcelJS.Workbook();
+    wb.creator = 'App JEJ'; wb.created = new Date();
+    var ws = wb.addWorksheet('Perforación', { views: [{ showGridLines: false }] });
+    var wl = wb.addWorksheet('Listas');
+
+    /* ---------- Hoja Listas ---------- */
+    var listaRef = {}; var ci = 1;
+    var NOMBRES = { turno: 'TURNO', siNo: 'Si / No', nivel: 'Nivel', bloque: 'Bloque', fase: 'Fase',
+      problemas: 'Problemas durante la perforación', estadoTiro: 'Estado Tiro', signo: 'Tiro Negativo / Positivo' };
+    Object.keys(J.LISTAS).forEach(function (k) {
+      var L = colLetter(ci), arr = J.LISTAS[k];
+      var h = wl.getCell(L + '1'); h.value = NOMBRES[k] || k; h.font = { bold: true }; h.alignment = { wrapText: true, horizontal: 'center' };
+      arr.forEach(function (v, i) { wl.getCell(L + (i + 2)).value = autoNum(v); wl.getCell(L + (i + 2)).alignment = { horizontal: 'center' }; });
+      wl.getColumn(ci).width = 16;
+      listaRef[k] = 'Listas!$' + L + '$2:$' + L + '$' + (arr.length + 1);
+      ci++;
+    });
+    function validar(cell, key) {
+      cell.dataValidation = { type: 'list', allowBlank: true, formulae: [listaRef[key]] };
+    }
+
+    /* ---------- Hoja Perforación ---------- */
+    var C = J.COLS.perf;
+    C.forEach(function (c, i) { ws.getColumn(i + 1).width = c.w; });
+    function merge(rng, value, st) {
+      ws.mergeCells(rng);
+      var cell = ws.getCell(rng.split(':')[0]);
+      if (value !== undefined) cell.value = value;
+      if (st) Object.keys(st).forEach(function (k) { cell[k] = st[k]; });
+      var m = rng.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
+      if (m && st && st.border) {
+        var c1 = colNum(m[1]), c2 = colNum(m[3]);
+        for (var r = +m[2]; r <= +m[4]; r++) for (var c = c1; c <= c2; c++) ws.getCell(r, c).border = st.border;
+      }
+      return cell;
+    }
+
+    var titulo = { font: { bold: true, size: 11 }, alignment: { horizontal: 'center', vertical: 'middle' } };
+    merge('A1:AA1', 'HOJA DE TERRENO CONTROL DE PERFORACIÓN', titulo);
+    merge('A2:AA2', 'J. E. J. INGENIERÍA S. A. CONTRATO N° 4600026097', titulo);
+    merge('A3:AA3', 'SERVICIO QA/QC OPERACIONES DE PERFORACIÓN Y TRONADURA', titulo);
+    ws.getRow(1).height = 20; ws.getRow(2).height = 20; ws.getRow(3).height = 20;
+
+    var H = p.header;
+    var lbl = function (hex) { return { font: { bold: true, size: 9 }, fill: fill(hex), border: BORDER, alignment: { vertical: 'middle', wrapText: true } }; };
+    var val = function (hex) { return { font: { size: 9 }, fill: hex ? fill(hex) : undefined, border: BORDER, alignment: { vertical: 'middle', horizontal: 'center' } }; };
+    var AZUL = 'DDEBF7', VERDE = '00FF00', AMAR = 'FFE699';
+
+    // Grupo 1: A:C etiqueta, D:E valor
+    var g1 = [
+      ['Fecha', H.fecha, AZUL, 'date'], ['Turno', H.turno, AZUL, 'turno'], ['Mina', H.mina, AZUL], ['Nivel', H.nivel, AZUL, 'nivel'],
+      ['Bloque', H.bloque, AZUL, 'bloque'], ['ID Tronadura', H.idTronadura, AMAR], ['Supervisor JeJ', H.supJej, AZUL],
+      ['Encargado Seguimiento JeJ', H.encSeg, AZUL], ['Supervisor DET', H.supDet, VERDE], ['Perforista DET', H.perforistaDet, VERDE]
+    ];
+    g1.forEach(function (f, i) {
+      var r = 5 + i;
+      merge('A' + r + ':C' + r, f[0], lbl(f[2]));
+      var v = f[1];
+      if (f[3] === 'date' && v) { var dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); v = dm ? new Date(Date.UTC(+dm[1], +dm[2] - 1, +dm[3])) : v; }
+      var cell = merge('D' + r + ':E' + r, v === '' ? null : v, val(f[2]));
+      if (f[3] === 'date') cell.numFmt = 'dd-mm-yyyy';
+      if (f[3] === 'turno' || f[3] === 'nivel' || f[3] === 'bloque') validar(cell, f[3]);
+    });
+    ws.getRow(12).height = 24;
+
+    // Grupo 2: G:I etiqueta, J:K valor
+    var T = function (k) { return timeVal(H[k]); };
+    var g2 = [
+      ['H Llegada JeJ a Postura', T('hLlegJej'), VERDE, 'time'], ['H Salida JeJ de Postura', T('hSalJej'), VERDE, 'time'],
+      ['H Llegada PyT a Postura', T('hLlegPyt'), VERDE, 'time'], ['H Inicio Perforación', T('hIniPerf'), VERDE, 'time'],
+      ['H Fin Perforación', T('hFinPerf'), VERDE, 'time'], ['H Salida PyT de Postura', T('hSalPyt'), VERDE, 'time'],
+      ['Tiempo en Postura', { formula: 'IF(AND(J10<>"",J7<>""),MOD(J10-J7,1),0)', result: (J.tPostura(H) || 0) / 1440 }, AMAR, 'time'],
+      ['Tiempo en Perforación', { formula: 'IF(AND(J9<>"",J8<>""),MOD(J9-J8,1),0)', result: (J.tPerforacion(H) || 0) / 1440 }, AMAR, 'time'],
+      ['Diámetro Perforación [pulg]', H.diametro === '' ? null : (isNaN(J.num(H.diametro)) ? H.diametro : J.num(H.diametro)), AZUL],
+      ['ID Del Equipo de Perforación', H.idEquipo === '' ? null : H.idEquipo, VERDE]
+    ];
+    g2.forEach(function (f, i) {
+      var r = 5 + i;
+      merge('G' + r + ':I' + r, f[0], lbl(f[2]));
+      var cell = merge('J' + r + ':K' + r, f[1], val(f[2]));
+      if (f[3] === 'time') cell.numFmt = 'hh:mm';
+    });
+
+    // Grupo 3: M:O etiqueta, P:Q valor
+    merge('M5:O5', 'Núm. Zanja', lbl(VERDE)); merge('P5:Q5', H.numZanja || null, val(VERDE));
+    merge('M6:O7', 'Calles Zanja', lbl(VERDE));
+    merge('P6:P7', H.calleZanja1 || null, val(VERDE)); merge('Q6:Q7', H.calleZanja2 || null, val(VERDE));
+    merge('M8:O8', 'Fase', lbl(AZUL)); var cf = merge('P8:Q8', H.fase || null, val(AZUL)); validar(cf, 'fase');
+    merge('M9:O9', 'Calle UCL', lbl(VERDE)); merge('P9:Q9', H.calleUcl || null, val(VERDE));
+    merge('M10:O10', 'Parada Inicial', lbl(VERDE)); merge('P10:Q10', H.paradaIni || null, val(VERDE));
+    merge('M11:O11', 'Parada Final (neg)', lbl(VERDE)); merge('P11:Q11', H.paradaFin || null, val(VERDE));
+
+    // Pérdida operacional: S:Z observación, AA tiempo (crece si hay más de 9 pérdidas)
+    var perd = p.perdidas.filter(function (x) { return x.desc || x.tiempo; });
+    var nP = Math.max(9, perd.length);
+    merge('S5:Z5', 'Pérdida Operacional Durante la Perforación · Observación', { font: { bold: true, size: 9 }, fill: fill('FCE4D6'), border: BORDER, alignment: { horizontal: 'center', vertical: 'middle' } });
+    ws.getCell('AA5').value = 'TIEMPO'; ws.getCell('AA5').font = { bold: true, size: 8 }; ws.getCell('AA5').border = BORDER;
+    ws.getCell('AA5').alignment = { horizontal: 'center' }; ws.getCell('AA5').fill = fill('FCE4D6');
+    for (var pi = 0; pi < nP; pi++) {
+      var x = perd[pi] || { desc: '', tiempo: '' }, rp = 6 + pi;
+      merge('S' + rp + ':Z' + rp, x.desc || null, { font: { size: 9 }, border: BORDER });
+      var cp = ws.getCell('AA' + rp); cp.value = timeVal(x.tiempo); cp.numFmt = 'hh:mm'; cp.border = BORDER; cp.alignment = { horizontal: 'center' };
+    }
+    var rTot = 6 + nP;
+    var tot = ws.getCell('AA' + rTot);
+    tot.value = { formula: 'SUM(AA6:AA' + (5 + nP) + ')', result: J.totalPerdidas(p) / 1440 }; tot.numFmt = '[h]:mm'; tot.font = { bold: true, size: 9 };
+    tot.border = BORDER; tot.alignment = { horizontal: 'center' };
+    merge('S' + rTot + ':Z' + rTot, 'Total pérdida operacional', { font: { bold: true, size: 9 }, alignment: { horizontal: 'right' } });
+
+    /* tabla de tiros */
+    var HR = 7 + nP; // fila de encabezado (16 cuando hay 9 pérdidas)
+    C.forEach(function (c, i) {
+      var cell = ws.getCell(HR, i + 1);
+      cell.value = c.label;
+      cell.font = { bold: true, size: 8, color: { argb: argb(c.fg || '000000') } };
+      cell.fill = fill(c.bg); cell.border = BORDER;
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    });
+    ws.getRow(HR).height = 48;
+    var filas = p.filas.filter(J.filaUsada);
+    var n = Math.max(20, filas.length);
+    var idx = {}; C.forEach(function (c, i) { idx[c.k] = i + 1; });
+    for (var i = 0; i < n; i++) {
+      var r = HR + 1 + i, row = filas[i] || {};
+      C.forEach(function (c, j) {
+        var cell = ws.getCell(r, j + 1);
+        cell.border = BORDER; cell.font = { size: 9 };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        if (c.type === 'calc') return;
+        cell.value = cellVal(c, row[c.k]);
+        if (c.type === 'time') cell.numFmt = 'hh:mm';
+        if (c.type === 'select') validar(cell, c.list);
+      });
+      var D = colLetter(idx.taco) + r, E = colLetter(idx.mPerf) + r, Cc = colLetter(idx.mDiseno) + r;
+      var cu = ws.getCell(r, idx.cumpl);
+      cu.value = { formula: 'IFERROR(MAX(0,(' + E + '-' + D + ')/(' + Cc + '-' + D + ')),0)', result: J.calc.cumpl(row) };
+      cu.numFmt = '0%';
+      var hi = colLetter(idx.hIni) + r, hf = colLetter(idx.hFin) + r;
+      var tt = ws.getCell(r, idx.tTiro), tm = J.calc.tTiro(row);
+      tt.value = { formula: 'IF(AND(' + hi + '<>"",' + hf + '<>""),MOD(' + hf + '-' + hi + ',1)*1440,0)', result: isNaN(tm) ? 0 : tm };
+      tt.numFmt = '0.0';
+    }
+    var last = HR + n;
+    // Totales de metros
+    var rt = last + 1;
+    ws.getCell(rt, 1).value = 'TOTAL'; ws.getCell(rt, 1).font = { bold: true, size: 9 };
+    ['mDiseno', 'mPerf', 'tTiro'].forEach(function (k) {
+      var L = colLetter(idx[k]);
+      var cell = ws.getCell(rt, idx[k]);
+      var res = 0; filas.forEach(function (f) { var v = k === 'tTiro' ? J.calc.tTiro(f) : J.num(f[k]); if (!isNaN(v)) res += v; });
+      cell.value = { formula: 'SUM(' + L + (HR + 1) + ':' + L + last + ')', result: res };
+      cell.font = { bold: true, size: 9 }; cell.alignment = { horizontal: 'center' }; cell.border = BORDER;
+      if (k === 'tTiro') cell.numFmt = '0.0';
+    });
+
+    // Otras observaciones
+    var ob = rt + 2;
+    merge('A' + ob + ':' + colLetter(C.length) + ob, 'OTRAS OBSERVACIONES EN TERRENO', { font: { bold: true, size: 9 }, fill: fill('FFF2CC'), border: BORDER, alignment: { horizontal: 'center' } });
+    for (var o = 0; o < Math.max(10, p.obs.length); o++) {
+      merge('A' + (ob + 1 + o) + ':' + colLetter(C.length) + (ob + 1 + o), p.obs[o] || null, { font: { size: 9 }, border: BORDER });
+    }
+    ws.views = [{ showGridLines: false, state: 'frozen', xSplit: 2, ySplit: HR }];
+    ws.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+
+    return wb;
+  }
+
+  function nombreArchivo(p) {
+    var h = p.header;
+    return ('Perforacion_' + (h.idTronadura || 'sin-ID') + '_' + (h.fecha || 'sin-fecha')).replace(/[^\w\-]+/g, '_') + '.xlsx';
+  }
+
+  function download(p) {
+    var EJS = root.ExcelJS;
+    if (!EJS) { alert('No se cargó la librería ExcelJS (requiere conexión a internet la primera vez).'); return Promise.resolve(); }
+    var wb = build(EJS, p);
+    return wb.xlsx.writeBuffer().then(function (buf) {
+      var blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = nombreArchivo(p);
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    });
+  }
+
+  root.JEJ.excel = { build: build, download: download, nombreArchivo: nombreArchivo };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ===================== COMPONENTES DE INTERFAZ ===================== */
+/* =========================================================
+   JEJ · Componentes de interfaz: barra superior y campos de formulario.
+   ========================================================= */
+(function (root) {
+  'use strict';
+  var J = root.JEJ;
+
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'class') e.className = attrs[k];
+      else if (k === 'text') e.textContent = attrs[k];
+      else if (k === 'style') e.style.cssText = attrs[k];
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== undefined && attrs[k] !== null) e.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function $(sel) { return typeof sel === 'string' ? document.querySelector(sel) : sel; }
+
+  function opciones(sel, lista, actual) {
+    sel.innerHTML = '';
+    sel.appendChild(el('option', { value: '', text: '' }));
+    var found = false;
+    lista.forEach(function (v) {
+      var o = el('option', { value: v, text: v }); if (v === actual) { o.selected = true; found = true; }
+      sel.appendChild(o);
+    });
+    if (actual && !found) { var o2 = el('option', { value: actual, text: actual }); o2.selected = true; sel.appendChild(o2); }
+  }
+
+  /* ---------- Barra superior: planilla activa, nueva, eliminar, descargas ---------- */
+  function toolbar(host, opt) {
+    host = $(host); opt = opt || {};
+    host.innerHTML = '';
+    host.classList.add('jp-toolbar');
+    var sel = el('select', { 'aria-label': 'Planilla activa' });
+    J.store.list().forEach(function (p) {
+      var o = el('option', { value: p.id, text: J.store.etiqueta(p) });
+      if (p.id === J.store.current().id) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', function () { J.store.setCurrent(sel.value); opt.onChange && opt.onChange(); toolbar(host, opt); });
+
+    var botones = [
+      el('button', { type: 'button', class: 'jp-btn', text: '＋ Nueva planilla', onclick: function () { J.store.create(); opt.onChange && opt.onChange(); toolbar(host, opt); } }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-danger', text: 'Eliminar', onclick: function () {
+        if (confirm('¿Eliminar la planilla "' + J.store.etiqueta(J.store.current()) + '"? No se puede deshacer.')) {
+          J.store.remove(J.store.current().id); opt.onChange && opt.onChange(); toolbar(host, opt);
+        } } }),
+      el('span', { class: 'jp-sep' }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(J.store.current()); } }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(J.store.current()); } })
+    ];
+    host.appendChild(el('label', { class: 'jp-tb-label' }, ['Planilla: ', sel]));
+    botones.forEach(function (b) { host.appendChild(b); });
+  }
+
+  /* ---------- Campo de formulario ---------- */
+  // def: {k,label,type:text|date|time|select|calc, list, cls}
+  function campo(def, obj, onInput, calcFn) {
+    var wrap = el('div', { class: 'jp-campo ' + (def.cls || '') });
+    wrap.appendChild(el('label', { text: def.label }));
+    var inp;
+    if (def.type === 'calc') {
+      inp = el('output', { class: 'jp-calc', 'data-calc': def.k, text: calcFn ? calcFn() : '' });
+    } else if (def.type === 'select') {
+      inp = el('select'); opciones(inp, J.LISTAS[def.list], obj[def.k]);
+      inp.addEventListener('change', function () { obj[def.k] = inp.value; onInput && onInput(def.k); });
+    } else {
+      inp = el('input', { type: def.type || 'text', value: obj[def.k] || '' });
+      inp.addEventListener('input', function () { obj[def.k] = inp.value; onInput && onInput(def.k); });
+    }
+    wrap.appendChild(inp);
+    return wrap;
+  }
+
+  J.ui = { el: el, $: $, toolbar: toolbar, campo: campo, opciones: opciones };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ===================== DIAGRAMAS DE DISPARO ===================== */
+/* =========================================================
+   JEJ · Diagramas de disparo (SVG) a partir de la planilla
+   Convención (editable en el paso "Finalizar"):
+   - Abatimiento: ángulo del tiro respecto de la horizontal (o de la vertical,
+     según la opción elegida). Signo: columna "Tiro negativo / positivo".
+   - Rotación: ángulo en planta medido desde el eje de la labor
+     (0° = a lo largo de la labor, 90° = hacia la derecha, 270° = hacia la izquierda).
+   ========================================================= */
+(function (root) {
+  'use strict';
+  var J = root.JEJ;
+  var RAD = Math.PI / 180;
+  var COL = { fondo: '#f8fafc', piso: '#eef2f7', borde: '#dbe3ec', anillo: '#c3cfdc', eje: '#475569', taco: '#64748b',
+              carga: '#ea580c', dis: '#94a3b8', alerta: '#dc2626', texto: '#0f172a', collar: '#12263f' };
+  var FONT = 'Segoe UI,system-ui,Arial,sans-serif';
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function f1(n) { return (Math.round(n * 10) / 10).toString(); }
+
+  // Devuelve null si el tiro no tiene ángulo de abatimiento
+  function geometria(row, ref) {
+    var a = J.num(row.abat); if (isNaN(a)) return null;
+    var r = J.num(row.rot), supuesto = false;
+    if (isNaN(r)) { r = 90; supuesto = true; }
+    var mag = Math.abs(a);
+    if (ref === 'vertical') mag = 90 - mag;
+    var sg = row.signo === 'Negativo' ? -1 : (row.signo === 'Positivo' ? 1 : (a < 0 ? -1 : 1));
+    var elev = sg * mag * RAD, az = r * RAD;
+    var L = J.num(row.mPerf); if (isNaN(L)) L = J.num(row.mDiseno);
+    var Ld = J.num(row.mDiseno);
+    if (isNaN(L)) return null;
+    var u = { across: Math.cos(elev) * Math.sin(az), along: Math.cos(elev) * Math.cos(az), up: Math.sin(elev) };
+    return { u: u, L: L, Ld: isNaN(Ld) ? null : Ld, taco: Math.max(0, J.num(row.taco) || 0), supuesto: supuesto, row: row,
+             mag: mag, sg: sg, rot: r, conProblema: !!(row.estado && row.estado !== 'Bueno') };
+  }
+
+  function flecha(x, y, dir) { // punta de flecha pequeña en (x,y) apuntando según dir
+    var d = 5, w = 3.2;
+    var p = { u: [x, y - d, x - w, y, x + w, y], d: [x, y + d, x - w, y, x + w, y], l: [x - d, y, x, y - w, x, y + w], r: [x + d, y, x, y - w, x, y + w] }[dir];
+    return '<polygon points="' + p.join(',') + '" fill="' + COL.eje + '"/>';
+  }
+  function etiquetaEje(x, y, txt, anchor) {
+    return '<text x="' + x + '" y="' + y + '" text-anchor="' + anchor + '" fill="' + COL.eje + '" font-weight="600" font-size="11" paint-order="stroke" stroke="' + COL.fondo + '" stroke-width="3">' + txt + '</text>';
+  }
+
+  function vista(rows, modo, ref) {
+    var W = 520, H = 520, cx = W / 2, cy = H / 2, m = 54;
+    var geos = rows.map(function (r) { return geometria(r, ref); }).filter(Boolean);
+    var omitidos = rows.length - geos.length;
+    var maxL = 5; geos.forEach(function (g) { maxL = Math.max(maxL, g.L, g.Ld || 0); });
+    var paso = maxL > 40 ? 10 : (maxL > 15 ? 5 : 2);
+    var tope = Math.ceil(maxL / paso) * paso;
+    var s = (W / 2 - m) / tope;
+    var o = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" font-family="' + FONT + '" font-size="11">'];
+
+    // fondo: tarjeta con mitad inferior sombreada (piso) en la sección transversal
+    o.push('<rect x="1" y="1" width="' + (W - 2) + '" height="' + (H - 2) + '" rx="14" fill="' + COL.fondo + '"/>');
+    if (modo === 'seccion') {
+      o.push('<path d="M1 ' + cy + ' H' + (W - 1) + ' V' + (H - 15) + ' Q' + (W - 1) + ' ' + (H - 1) + ' ' + (W - 15) + ' ' + (H - 1) + ' H15 Q1 ' + (H - 1) + ' 1 ' + (H - 15) + ' Z" fill="' + COL.piso + '"/>');
+    }
+    o.push('<rect x="1" y="1" width="' + (W - 2) + '" height="' + (H - 2) + '" rx="14" fill="none" stroke="' + COL.borde + '"/>');
+
+    // anillos de distancia
+    for (var d = paso; d <= tope; d += paso) {
+      var rr = d * s;
+      o.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + rr.toFixed(1) + '" fill="none" stroke="' + COL.anillo + '" stroke-dasharray="2 5" stroke-linecap="round"/>');
+      o.push('<text x="' + (cx + rr * 0.7071 + 3).toFixed(1) + '" y="' + (cy - rr * 0.7071 - 3).toFixed(1) + '" fill="#64748b" font-size="10" paint-order="stroke" stroke="' + COL.fondo + '" stroke-width="3">' + d + ' m</text>');
+    }
+    // ejes
+    o.push('<line x1="' + m / 2 + '" y1="' + cy + '" x2="' + (W - m / 2) + '" y2="' + cy + '" stroke="' + COL.eje + '" stroke-width="1"/>');
+    o.push('<line x1="' + cx + '" y1="' + m / 2 + '" x2="' + cx + '" y2="' + (H - m / 2) + '" stroke="' + COL.eje + '" stroke-width="1"/>');
+    o.push(flecha(m / 2, cy, 'l'), flecha(W - m / 2, cy, 'r'), flecha(cx, m / 2, 'u'), flecha(cx, H - m / 2, 'd'));
+    var lb = modo === 'seccion' ? ['Izquierda', 'Derecha', 'Techo (+)', 'Piso (−)'] : ['Izquierda', 'Derecha', 'Avance de la labor', 'Retroceso'];
+    o.push(etiquetaEje(m / 2 - 8, cy - 9, lb[0], 'start'));
+    o.push(etiquetaEje(W - m / 2 + 8, cy - 9, lb[1], 'end'));
+    o.push(etiquetaEje(cx + 10, 22, lb[2], 'start'));
+    o.push(etiquetaEje(cx + 10, H - 12, lb[3], 'start'));
+
+    function pt(g, L) {
+      var x = g.u.across * L, y = modo === 'seccion' ? g.u.up * L : g.u.along * L;
+      return [cx + x * s, cy - y * s];
+    }
+    var chips = [];
+    // 1) largo de diseño (debajo de todo)
+    geos.forEach(function (g) {
+      if (g.Ld !== null && Math.abs(g.Ld - g.L) > 0.05) {
+        var o0 = pt(g, 0), td = pt(g, g.Ld);
+        o.push('<line x1="' + o0[0].toFixed(1) + '" y1="' + o0[1].toFixed(1) + '" x2="' + td[0].toFixed(1) + '" y2="' + td[1].toFixed(1) + '" stroke="' + COL.dis + '" stroke-width="1.4" stroke-dasharray="5 4"/>');
+      }
+    });
+    // 2) tiros: taco + largo de carga
+    geos.forEach(function (g) {
+      var o0 = pt(g, 0), toe = pt(g, g.L), pc = pt(g, Math.min(g.taco, g.L));
+      o.push('<line x1="' + o0[0].toFixed(1) + '" y1="' + o0[1].toFixed(1) + '" x2="' + pc[0].toFixed(1) + '" y2="' + pc[1].toFixed(1) + '" stroke="' + COL.taco + '" stroke-width="4" stroke-linecap="round"/>');
+      o.push('<line x1="' + pc[0].toFixed(1) + '" y1="' + pc[1].toFixed(1) + '" x2="' + toe[0].toFixed(1) + '" y2="' + toe[1].toFixed(1) + '" stroke="' + COL.carga + '" stroke-width="4" stroke-linecap="round"/>');
+      if (g.conProblema) o.push('<circle cx="' + toe[0].toFixed(1) + '" cy="' + toe[1].toFixed(1) + '" r="8" fill="none" stroke="' + COL.alerta + '" stroke-width="1.8"/>');
+      o.push('<circle cx="' + toe[0].toFixed(1) + '" cy="' + toe[1].toFixed(1) + '" r="3.4" fill="#fff" stroke="' + COL.carga + '" stroke-width="2"/>');
+      chips.push({ g: g, toe: toe });
+    });
+    // 3) etiquetas del número de tiro (encima de todo)
+    chips.forEach(function (c) {
+      var txt = String(c.g.row.tiro || ''); if (!txt) return;
+      var dx = c.toe[0] - cx, dy = c.toe[1] - cy, n = Math.hypot(dx, dy) || 1;
+      var wch = 7.4 * txt.length + 12, hch = 17;
+      var lx = c.toe[0] + dx / n * (13 + wch / 4), ly = c.toe[1] + dy / n * 15;
+      lx = Math.max(wch / 2 + 4, Math.min(W - wch / 2 - 4, lx)); ly = Math.max(hch / 2 + 4, Math.min(H - hch / 2 - 4, ly));
+      o.push('<rect x="' + (lx - wch / 2).toFixed(1) + '" y="' + (ly - hch / 2).toFixed(1) + '" width="' + wch.toFixed(1) + '" height="' + hch + '" rx="8.5" fill="#fff" stroke="' + (c.g.conProblema ? COL.alerta : COL.collar) + '" stroke-width="1.2"/>');
+      o.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 4).toFixed(1) + '" text-anchor="middle" fill="' + COL.texto + '" font-weight="700" font-size="11">' + esc(txt) + '</text>');
+    });
+    // collar
+    o.push('<circle cx="' + cx + '" cy="' + cy + '" r="6" fill="#fff" stroke="' + COL.collar + '" stroke-width="2"/><circle cx="' + cx + '" cy="' + cy + '" r="2" fill="' + COL.collar + '"/>');
+    o.push('</svg>');
+    var fuera = geos.some(function (g) { return Math.abs(g.u.along) * g.L > 0.5; });
+    return { svg: o.join(''), fueraDePlano: fuera, n: geos.length, omitidos: omitidos, supuestos: geos.filter(function (g) { return g.supuesto; }).length };
+  }
+
+  function leyenda() {
+    return '<div class="lg">' +
+      '<span><i style="background:' + COL.taco + '"></i>Taco teórico</span>' +
+      '<span><i style="background:' + COL.carga + '"></i>Largo de carga (perforado − taco)</span>' +
+      '<span><i class="dash"></i>Largo de diseño (si difiere)</span>' +
+      '<span><i class="ring"></i>Tiro con estado distinto de "Bueno"</span></div>';
+  }
+
+  /* Barras: metros de diseño vs perforados por tiro */
+  function barras(rows) {
+    var d = rows.filter(function (r) { return r.tiro || r.mPerf || r.mDiseno; });
+    if (!d.length) return '';
+    var W = Math.max(520, 40 * d.length + 80), H = 250, mL = 40, mB = 40, mT = 26;
+    var max = 1; d.forEach(function (r) { max = Math.max(max, J.num(r.mDiseno) || 0, J.num(r.mPerf) || 0); });
+    max = Math.ceil(max / 5) * 5;
+    var ph = H - mB - mT, bw = (W - mL - 12) / d.length;
+    var o = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto" font-family="' + FONT + '" font-size="10.5"><rect width="' + W + '" height="' + H + '" rx="12" fill="' + COL.fondo + '"/>'];
+    for (var t = 0; t <= 4; t++) {
+      var v = max * t / 4, y = mT + ph - ph * t / 4;
+      o.push('<line x1="' + mL + '" x2="' + (W - 8) + '" y1="' + y + '" y2="' + y + '" stroke="#e2e8f0"/><text x="' + (mL - 6) + '" y="' + (y + 3.5) + '" text-anchor="end" fill="#64748b">' + J.fmt(v, 0) + '</text>');
+    }
+    var etiquetas = d.length <= 18;
+    d.forEach(function (r, i) {
+      var x = mL + i * bw + bw * 0.14, w = bw * 0.36;
+      var a = J.num(r.mDiseno) || 0, b = J.num(r.mPerf) || 0;
+      o.push('<rect x="' + x.toFixed(1) + '" y="' + (mT + ph - ph * a / max).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + (ph * a / max).toFixed(1) + '" rx="2" fill="#b6c2d1"/>');
+      o.push('<rect x="' + (x + w + 2).toFixed(1) + '" y="' + (mT + ph - ph * b / max).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + (ph * b / max).toFixed(1) + '" rx="2" fill="#2563eb"/>');
+      if (etiquetas && b) o.push('<text x="' + (x + w * 1.5 + 2).toFixed(1) + '" y="' + (mT + ph - ph * b / max - 4).toFixed(1) + '" text-anchor="middle" fill="#1e3a8a" font-size="9.5" font-weight="600">' + J.fmt(b, 1) + '</text>');
+      o.push('<text x="' + (x + w + 1).toFixed(1) + '" y="' + (H - mB + 15) + '" text-anchor="middle" fill="#0f172a" font-weight="600">' + esc(r.tiro || '') + '</text>');
+      if (r.parada) o.push('<text x="' + (x + w + 1).toFixed(1) + '" y="' + (H - mB + 27) + '" text-anchor="middle" fill="#64748b" font-size="9">P' + esc(r.parada) + '</text>');
+    });
+    o.push('<rect x="' + mL + '" y="6" width="10" height="10" rx="2" fill="#b6c2d1"/><text x="' + (mL + 15) + '" y="15" fill="#334155">Diseño [m]</text>');
+    o.push('<rect x="' + (mL + 90) + '" y="6" width="10" height="10" rx="2" fill="#2563eb"/><text x="' + (mL + 105) + '" y="15" fill="#334155">Perforado [m]</text>');
+    o.push('</svg>');
+    return o.join('');
+  }
+
+  J.diagram = { vista: vista, leyenda: leyenda, barras: barras, geometria: geometria };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ===================== INFORME TÉCNICO ===================== */
+/* =========================================================
+   JEJ · Informe técnico (documento HTML autónomo, listo para
+   imprimir o guardar como PDF) con resumen, tablas y diagramas.
+   ========================================================= */
+(function (root) {
+  'use strict';
+  var J = root.JEJ;
+
+  function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pct(v) { return isFinite(v) ? J.fmt(v * 100, 1) + '%' : '—'; }
+  function tm(min) { return isFinite(min) ? J.fmtHM(min) : '—'; }
+  function dash(v) { var t = esc(v); return t === '' ? '—' : t; }
+  function fechaLarga(f) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || ''); return m ? m[3] + '-' + m[2] + '-' + m[1] : (f || '—');
+  }
+
+  var CSS = [
+    ':root{--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--navy:#12263f;--acc:#ea580c;--blue:#2563eb}',
+    '*{box-sizing:border-box}',
+    'body{margin:0;font-family:"Segoe UI",system-ui,Arial,sans-serif;color:var(--ink);background:#e9edf3;font-size:13px;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
+    '.barra{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:12px;color:var(--mut)}',
+    '.barra button{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}',
+    '.hoja{max-width:900px;margin:16px auto;background:#fff;box-shadow:0 1px 8px rgba(15,23,42,.12)}',
+    '.port{background:var(--navy);color:#fff;padding:26px 34px 22px;display:flex;justify-content:space-between;gap:20px;align-items:flex-end;border-bottom:5px solid var(--acc)}',
+    '.port .emp{font-size:12px;letter-spacing:.02em;opacity:.8;margin:0 0 6px}',
+    '.port h1{margin:0;font-size:24px;line-height:1.15;font-weight:700}',
+    '.port .id{font-size:13px;opacity:.9;margin-top:6px}',
+    '.port .der{text-align:right;font-size:12px;opacity:.9;white-space:nowrap}',
+    '.port .der b{display:block;font-size:20px;opacity:1}',
+    '.cuerpo{padding:6px 34px 26px}',
+    'h2{font-size:15px;margin:24px 0 8px;padding-left:10px;border-left:4px solid var(--acc);break-after:avoid}',
+    'h3{font-size:13.5px;margin:0 0 6px}',
+    '.ficha{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}',
+    '.ficha div{padding:6px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-size:12px}',
+    '.ficha div:nth-child(3n){border-right:0}',
+    '.ficha span{display:block;color:var(--mut);font-size:10.5px}',
+    '.ficha b{font-weight:600}',
+    '.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}',
+    '.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#f8fafc;break-inside:avoid}',
+    '.kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums;color:var(--navy)}',
+    '.kpi span{font-size:11px;color:var(--mut)}',
+    '.kpi.ok b{color:#15803d}.kpi.mal b{color:#b91c1c}',
+    'table{border-collapse:collapse;width:100%;font-size:11.5px;margin:6px 0}',
+    'th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}',
+    'th{background:#eef2f7;font-weight:600;color:#1e293b}',
+    'td.l,th.l{text-align:left}',
+    'tbody tr:nth-child(even) td{background:#fafbfd}',
+    'tfoot td{background:#fff7d6;font-weight:700}',
+    'tr{break-inside:avoid}',
+    '.tabla-ancha{overflow-x:auto}',
+    '.tabla-ancha table{font-size:10.5px}',
+    '.par{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;break-inside:avoid}',
+    '.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}',
+    '.dg figure{margin:0}',
+    '.dg svg{width:100%;height:auto;display:block}',
+    '.dg figcaption{font-size:11px;color:var(--mut);margin-top:4px;text-align:center}',
+    '.lg{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:#334155;margin:4px 0 8px}',
+    '.lg i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}',
+    '.lg i.dash{background:none;border-top:2px dashed #94a3b8;height:0;border-radius:0}',
+    '.lg i.ring{width:11px;height:11px;border:2px solid #dc2626;border-radius:50%;background:none}',
+    '.nota{font-size:11px;color:var(--mut);margin:6px 0 0}',
+    '.pie{padding:10px 34px 16px;font-size:10.5px;color:var(--mut);border-top:1px solid var(--line);display:flex;justify-content:space-between}',
+    '@page{size:A4;margin:11mm}',
+    '@media print{body{background:#fff}.barra{display:none}.hoja{margin:0;max-width:none;box-shadow:none}.cuerpo{padding:4px 6px 10px}.port{padding:20px 24px 16px}.pie{padding:8px 6px}.ficha div,.kpi{break-inside:avoid}}',
+    '@media(max-width:640px){.ficha{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.port{flex-direction:column;align-items:flex-start}.port .der{text-align:left}}'
+  ].join('\n');
+
+  function agrupar(p) {
+    var g = {}, orden = [];
+    p.filas.filter(J.filaUsada).forEach(function (r) {
+      var k = r.parada === '' ? '—' : String(r.parada);
+      if (!g[k]) { g[k] = []; orden.push(k); }
+      g[k].push(r);
+    });
+    return { g: g, orden: orden };
+  }
+
+  function documento(p) {
+    var h = p.header, R = J.resumen(p), A = agrupar(p), ref = p.refAbat === 'vertical' ? 'vertical' : 'horizontal';
+    var filas = p.filas.filter(J.filaUsada);
+    var B = [];
+
+    /* ---- Portada ---- */
+    B.push('<div class="port"><div><p class="emp">J.E.J. Ingeniería · Servicio QA/QC Operaciones de Perforación y Tronadura · Contrato N° 4600026097</p>' +
+      '<h1>Informe técnico de perforación</h1>' +
+      '<div class="id">' + (h.idTronadura ? 'ID Tronadura ' + esc(h.idTronadura) : 'ID de tronadura no informado') + (h.mina ? ' · ' + esc(h.mina) : '') + '</div></div>' +
+      '<div class="der"><b>' + esc(fechaLarga(h.fecha)) + '</b>Turno ' + dash(h.turno) + '</div></div>');
+    B.push('<div class="cuerpo">');
+
+    /* ---- Identificación ---- */
+    B.push('<h2>Identificación y labor</h2><div class="ficha">' + [
+      ['Fecha', fechaLarga(h.fecha)], ['Turno', h.turno], ['Mina', h.mina], ['Nivel', h.nivel], ['Bloque', h.bloque], ['ID Tronadura', h.idTronadura],
+      ['Supervisor JeJ', h.supJej], ['Encargado seguimiento JeJ', h.encSeg], ['Supervisor DET', h.supDet], ['Perforista DET', h.perforistaDet],
+      ['Equipo de perforación', h.idEquipo], ['Diámetro de perforación [pulg]', h.diametro],
+      ['Núm. zanja', h.numZanja], ['Calles zanja', [h.calleZanja1, h.calleZanja2].filter(Boolean).join(' / ')], ['Fase', h.fase],
+      ['Calle UCL', h.calleUcl], ['Parada inicial', h.paradaIni], ['Parada final (neg)', h.paradaFin]
+    ].map(function (f) { return '<div><span>' + f[0] + '</span><b>' + dash(f[1]) + '</b></div>'; }).join('') + '</div>');
+
+    /* ---- Indicadores ---- */
+    var dif = isFinite(R.desvio) ? (R.desvio >= 0 ? '+' : '') + J.fmt(R.desvio * 100, 1) + '%' : '—';
+    B.push('<h2>Indicadores del turno</h2><div class="kpis">' + [
+      [R.nTiros, 'tiros registrados', ''],
+      [J.fmt(R.mDis, 1) + ' m', 'metros de diseño', ''],
+      [J.fmt(R.mPerf, 1) + ' m', 'metros perforados', ''],
+      [dif, 'diferencia vs diseño', isFinite(R.desvio) ? (R.desvio >= 0 ? 'ok' : 'mal') : ''],
+      [pct(R.cumplProm), 'cumplimiento promedio de carga de diseño', ''],
+      [isFinite(R.rendimiento) ? J.fmt(R.rendimiento, 1) + ' m/h' : '—', 'rendimiento de perforación', ''],
+      [tm(R.tPerdidas), 'pérdida operacional total', R.tPerdidas > 0 ? 'mal' : ''],
+      [tm(R.tPerf), 'tiempo en perforación', '']
+    ].map(function (k) { return '<div class="kpi ' + k[2] + '"><b>' + k[0] + '</b><span>' + k[1] + '</span></div>'; }).join('') + '</div>');
+
+    /* ---- Horarios ---- */
+    B.push('<h2>Horarios</h2><table><thead><tr><th>Llegada JeJ</th><th>Salida JeJ</th><th>Llegada PyT</th><th>Inicio perforación</th><th>Fin perforación</th><th>Salida PyT</th><th>Tiempo en postura</th><th>Tiempo en perforación</th></tr></thead><tbody><tr>' +
+      [h.hLlegJej, h.hSalJej, h.hLlegPyt, h.hIniPerf, h.hFinPerf, h.hSalPyt].map(function (x) { return '<td>' + dash(x) + '</td>'; }).join('') +
+      '<td><b>' + tm(R.tPostura) + '</b></td><td><b>' + tm(R.tPerf) + '</b></td></tr></tbody></table>');
+
+    /* ---- Resumen por parada ---- */
+    if (R.paradas.length) {
+      B.push('<h2>Resumen por parada</h2><table><thead><tr><th>Parada</th><th>Tiros</th><th>Diseño [m]</th><th>Perforado [m]</th><th>Diferencia</th><th>Tiempo en tiros [min]</th></tr></thead><tbody>' +
+        R.paradas.map(function (g) {
+          var d = g.mDisPar > 0 ? (g.mPerf - g.mDisPar) / g.mDisPar : NaN;
+          return '<tr><td>' + esc(g.parada) + '</td><td>' + g.tiros + '</td><td>' + J.fmt(g.mDis, 1) + '</td><td>' + J.fmt(g.mPerf, 1) + '</td><td>' +
+            (isFinite(d) ? (d >= 0 ? '+' : '') + J.fmt(d * 100, 1) + '%' : '—') + '</td><td>' + J.fmt(g.minutos, 1) + '</td></tr>';
+        }).join('') + '</tbody></table>');
+    }
+
+    /* ---- Registro por tiro ---- */
+    if (filas.length) {
+      B.push('<h2>Registro por tiro</h2><div class="tabla-ancha"><table><thead><tr><th>Parada</th><th>Tiro</th><th>Diseño [m]</th><th>Taco [m]</th><th>Perforado [m]</th><th>Cumpl. carga</th><th>Abat. [°]</th><th>Rot. [°]</th><th>Sentido</th><th>Estado</th><th>Agua</th><th>Entub. [m]</th><th>Problema</th><th>T. perf. [min]</th></tr></thead><tbody>' +
+        filas.map(function (r) {
+          var t = J.calc.tTiro(r), prob = r.problema ? esc(r.problema) + (r.alturaBarra ? ' (' + esc(r.alturaBarra) + ' m)' : '') : '—';
+          return '<tr><td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td><td>' + dash(r.mDiseno) + '</td><td>' + dash(r.taco) + '</td><td>' + dash(r.mPerf) + '</td><td>' +
+            (r.mDiseno && r.mPerf ? Math.round(J.calc.cumpl(r) * 100) + '%' : '—') + '</td><td>' + dash(r.abat) + '</td><td>' + dash(r.rot) + '</td><td>' + dash(r.signo) + '</td><td>' + dash(r.estado) + '</td><td>' + dash(r.conAgua) + '</td><td>' + dash(r.entubados) +
+            '</td><td class="l">' + prob + '</td><td>' + (isNaN(t) ? '—' : J.fmt(t, 1)) + '</td></tr>';
+        }).join('') + '</tbody><tfoot><tr><td colspan="2">Total</td><td>' + J.fmt(R.mDis, 1) + '</td><td></td><td>' + J.fmt(R.mPerf, 1) + '</td><td>' + pct(R.cumplProm) + '</td><td colspan="7"></td><td>' + J.fmt(R.minTiros, 1) + '</td></tr></tfoot></table></div>');
+
+      /* ---- Parámetros operacionales ---- */
+      var keys = ['pPerc', 'pRot', 'pAv', 'pAgua', 'pComp', 'golpes', 'rpm', 'vAv', 'caudal', 'hIni', 'hFin'];
+      if (filas.some(function (r) { return keys.some(function (k) { return r[k] !== ''; }); })) {
+        B.push('<h2>Parámetros de perforación</h2><div class="tabla-ancha"><table><thead><tr><th>Parada</th><th>Tiro</th><th>P. percusión [bar]</th><th>P. rotación [bar]</th><th>P. avance [bar]</th><th>P. agua [bar]</th><th>P. compresor aceite [bar]</th><th>Golpes/min</th><th>RPM</th><th>Vel. avance</th><th>Caudal agua [m³/min]</th><th>Inicio</th><th>Término</th></tr></thead><tbody>' +
+          filas.map(function (r) {
+            return '<tr><td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td>' + ['pPerc', 'pRot', 'pAv', 'pAgua', 'pComp', 'golpes', 'rpm', 'vAv', 'caudal', 'hIni', 'hFin'].map(function (k) { return '<td>' + dash(r[k]) + '</td>'; }).join('') + '</tr>';
+          }).join('') + '</tbody></table></div>');
+      }
+
+      /* ---- Gráfico de metros ---- */
+      B.push('<h2>Metros por tiro: diseño vs perforado</h2>' + J.diagram.barras(filas));
+    }
+
+    /* ---- Diagramas de disparo ---- */
+    B.push('<h2>Diagramas de disparo</h2>' + J.diagram.leyenda() +
+      '<p class="nota">Abatimiento medido desde la ' + ref + '. Rotación: 0° = a lo largo de la labor, 90° = hacia la derecha, 270° = hacia la izquierda.</p>');
+    if (!A.orden.length) B.push('<p class="nota">Aún no hay tiros registrados.</p>');
+    A.orden.forEach(function (k) {
+      var rows = A.g[k], s = J.diagram.vista(rows, 'seccion', ref);
+      if (!s.n) { B.push('<div class="par"><h3>Parada ' + esc(k) + '</h3><p class="nota">Sin tiros con ángulo de abatimiento: no hay diagrama que dibujar.</p></div>'); return; }
+      var pl = J.diagram.vista(rows, 'planta', ref), nota = '';
+      if (s.omitidos) nota += s.omitidos + ' tiro(s) sin ángulo de abatimiento no se dibujan. ';
+      if (s.supuestos) nota += s.supuestos + ' tiro(s) sin rotación: se asumió 90° (hacia la derecha). ';
+      B.push('<div class="par"><h3>Parada ' + esc(k) + ' · ' + s.n + ' tiro(s) dibujados</h3><div class="dg"><figure>' + s.svg + '<figcaption>Sección transversal</figcaption></figure>' +
+        (pl.fueraDePlano ? '<figure>' + pl.svg + '<figcaption>Vista en planta</figcaption></figure>' : '') + '</div>' +
+        '<table><thead><tr><th>Tiro</th><th>Largo perforado [m]</th><th>Largo diseño [m]</th><th>Taco [m]</th><th>Abatimiento</th><th>Rotación</th><th>Sentido</th><th>Estado</th></tr></thead><tbody>' +
+        rows.map(function (r) {
+          return '<tr><td><b>' + dash(r.tiro) + '</b></td><td>' + dash(r.mPerf) + '</td><td>' + dash(r.mDiseno) + '</td><td>' + dash(r.taco) + '</td><td>' + (r.abat ? esc(r.abat) + '°' : '—') + '</td><td>' + (r.rot ? esc(r.rot) + '°' : '—') + '</td><td>' + dash(r.signo) + '</td><td>' + dash(r.estado) + '</td></tr>';
+        }).join('') + '</tbody></table>' + (nota ? '<p class="nota">' + nota + '</p>' : '') + '</div>');
+    });
+
+    /* ---- Problemas y pérdidas ---- */
+    var probs = Object.keys(R.problemas), perd = p.perdidas.filter(function (x) { return x.desc || x.tiempo; });
+    if (probs.length || perd.length) {
+      B.push('<h2>Problemas y pérdida operacional</h2>');
+      if (probs.length) B.push('<table><thead><tr><th class="l">Problema durante la perforación</th><th>Tiros afectados</th></tr></thead><tbody>' +
+        probs.map(function (k) { return '<tr><td class="l">' + esc(k) + '</td><td>' + R.problemas[k] + '</td></tr>'; }).join('') + '</tbody></table>');
+      if (perd.length) B.push('<table><thead><tr><th class="l">Pérdida operacional durante la perforación · Observación</th><th>Tiempo</th></tr></thead><tbody>' +
+        perd.map(function (x) { return '<tr><td class="l">' + dash(x.desc) + '</td><td>' + dash(x.tiempo) + '</td></tr>'; }).join('') +
+        '</tbody><tfoot><tr><td class="l">Total pérdida operacional</td><td>' + tm(R.tPerdidas) + '</td></tr></tfoot></table>');
+    }
+
+    /* ---- Observaciones ---- */
+    var ob = p.obs.filter(function (x) { return x; });
+    if (ob.length) {
+      B.push('<h2>Observaciones en terreno</h2>');
+      if (ob.length) B.push('<ul>' + ob.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>');
+    }
+
+    B.push('</div><div class="pie"><span>J.E.J. Ingeniería · Contrato N° 4600026097</span><span>Generado el ' + new Date().toLocaleString('es-CL') + '</span></div>');
+
+    var titulo = 'Informe técnico ' + (h.idTronadura || 'perforación') + (h.fecha ? ' · ' + h.fecha : '');
+    var LT = '<';
+    return LT + '!DOCTYPE html>' + LT + 'html lang="es">' + LT + 'head>' + LT + 'meta charset="UTF-8">' + LT + 'meta name="viewport" content="width=device-width, initial-scale=1">' +
+      LT + 'title>' + esc(titulo) + LT + '/title>' + LT + 'style>' + CSS + LT + '/style>' + LT + '/head>' + LT + 'body>' +
+      LT + 'div class="barra">' + LT + 'span>Para guardar el informe: Imprimir → Destino «Guardar como PDF».' + LT + '/span>' + LT + 'button type="button" onclick="window.print()">Imprimir / Guardar PDF' + LT + '/button>' + LT + '/div>' +
+      LT + 'div class="hoja">' + B.join('') + LT + '/div>' + LT + '/body>' + LT + '/html>';
+  }
+
+  function nombreArchivo(p) {
+    var h = p.header;
+    return ('Informe_Tecnico_' + (h.idTronadura || 'sin-ID') + '_' + (h.fecha || 'sin-fecha')).replace(/[^\w\-]+/g, '_') + '.html';
+  }
+
+  function descargarHtml(p, html) {
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = nombreArchivo(p);
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  // Abre el informe en una pestaña nueva y lanza la impresión (Guardar como PDF)
+  function abrir(p) {
+    var html = documento(p);
+    var w = window.open('', '_blank');
+    if (!w) {
+      descargarHtml(p, html);
+      alert('El navegador bloqueó la ventana emergente, así que el informe se descargó como archivo .html. Ábrelo y usa Imprimir → Guardar como PDF.');
+      return;
+    }
+    w.document.open(); w.document.write(html); w.document.close();
+    w.focus();
+    setTimeout(function () { try { w.print(); } catch (e) { /* el usuario puede imprimir desde el botón */ } }, 600);
+  }
+
+  J.informe = { documento: documento, abrir: abrir, descargarHtml: descargarHtml, nombreArchivo: nombreArchivo };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ===================== FLUJO POR PASOS ===================== */
+/* Identificación → Horarios y equipo → Labor → Registro por tiro → Pérdida operacional → Finalizar */
+(function () {
+  'use strict';
+  var J = window.JEJ, U = J.ui, el = U.el;
+
+  var PASOS = ['Identificación', 'Horarios y equipo', 'Labor', 'Registro por tiro', 'Pérdida operacional', 'Finalizar'];
+  var ui = { paso: 0, tiro: null, aviso: '' };
+
+  /* ---------- Definición de los formularios (pasos 1 a 3) ---------- */
+  var CAB1 = [
+    { k: 'fecha', label: 'Fecha', type: 'date' },
+    { k: 'turno', label: 'Turno', type: 'select', list: 'turno' },
+    { k: 'mina', label: 'Mina' },
+    { k: 'nivel', label: 'Nivel', type: 'select', list: 'nivel' },
+    { k: 'bloque', label: 'Bloque', type: 'select', list: 'bloque' },
+    { k: 'idTronadura', label: 'ID Tronadura', cls: 'amar' },
+    { k: 'supJej', label: 'Supervisor JeJ' },
+    { k: 'encSeg', label: 'Encargado Seguimiento JeJ' },
+    { k: 'supDet', label: 'Supervisor DET', cls: 'verde' },
+    { k: 'perforistaDet', label: 'Perforista DET', cls: 'verde' }
+  ];
+  var CAB2 = [
+    { k: 'hLlegJej', label: 'H Llegada JeJ a Postura', type: 'time', cls: 'verde' },
+    { k: 'hSalJej', label: 'H Salida JeJ de Postura', type: 'time', cls: 'verde' },
+    { k: 'hLlegPyt', label: 'H Llegada PyT a Postura', type: 'time', cls: 'verde' },
+    { k: 'hIniPerf', label: 'H Inicio Perforación', type: 'time', cls: 'verde' },
+    { k: 'hFinPerf', label: 'H Fin Perforación', type: 'time', cls: 'verde' },
+    { k: 'hSalPyt', label: 'H Salida PyT de Postura', type: 'time', cls: 'verde' },
+    { k: 'tPostura', label: 'Tiempo en Postura', type: 'calc', cls: 'amar' },
+    { k: 'tPerf', label: 'Tiempo en Perforación', type: 'calc', cls: 'amar' },
+    { k: 'diametro', label: 'Diámetro Perforación [pulg]' },
+    { k: 'idEquipo', label: 'ID del Equipo de Perforación', cls: 'verde' }
+  ];
+  var CAB3 = [
+    { k: 'numZanja', label: 'Núm. Zanja', cls: 'verde' },
+    'calles',
+    { k: 'fase', label: 'Fase', type: 'select', list: 'fase' },
+    { k: 'calleUcl', label: 'Calle UCL', cls: 'verde' },
+    { k: 'paradaIni', label: 'Parada Inicial', cls: 'verde' },
+    { k: 'paradaFin', label: 'Parada Final (neg)', cls: 'verde' }
+  ];
+
+  function calcCab(k, h) {
+    if (k === 'tPostura') return J.fmtHM(J.tPostura(h));
+    if (k === 'tPerf') return J.fmtHM(J.tPerforacion(h));
+    return '';
+  }
+  function refrescarCalcs(h) {
+    document.querySelectorAll('[data-calc]').forEach(function (o) { o.textContent = calcCab(o.getAttribute('data-calc'), h); });
+  }
+  function etiquetaPlanilla(p) {
+    var o = document.querySelector('#toolbar option:checked'); if (o) o.textContent = J.store.etiqueta(p);
+  }
+
+  function bloque(titulo, defs, p) {
+    var h = p.header, body = el('div', { class: 'jp-grid' });
+    defs.forEach(function (d) {
+      if (d === 'calles') {
+        var w = el('div', { class: 'jp-campo jp-doble verde' }, [el('label', { text: 'Calles Zanja' })]);
+        var par = el('div', { class: 'jp-par' });
+        ['calleZanja1', 'calleZanja2'].forEach(function (k) {
+          var i = el('input', { type: 'text', value: h[k] || '', 'aria-label': 'Calle zanja' });
+          i.addEventListener('input', function () { h[k] = i.value; J.store.touch(); });
+          par.appendChild(i);
+        });
+        w.appendChild(par);
+        body.appendChild(w); return;
+      }
+      body.appendChild(U.campo(d, h, function () { refrescarCalcs(h); etiquetaPlanilla(p); J.store.touch(); }, function () { return calcCab(d.k, h); }));
+    });
+    return el('div', { class: 'jp-bloque' }, [el('h3', { text: titulo }), body]);
+  }
+
+  function cabeza(host, titulo, ayuda) {
+    host.appendChild(el('h2', { class: 'jp-paso-titulo', text: titulo }));
+    if (ayuda) host.appendChild(el('p', { class: 'jp-paso-ayuda', text: ayuda }));
+  }
+
+  /* ---------- Paso 1: Identificación ---------- */
+  function pasoIdentificacion(host, p) {
+    cabeza(host, 'Identificación', 'Completa los datos del turno. Después seguimos con los horarios y el equipo.');
+    host.appendChild(bloque('Identificación', CAB1, p));
+  }
+  /* ---------- Paso 2: Horarios y equipo ---------- */
+  function pasoHorarios(host, p) {
+    cabeza(host, 'Horarios y equipo');
+    host.appendChild(bloque('Horarios y equipo', CAB2, p));
+  }
+  /* ---------- Paso 3: Labor ---------- */
+  function pasoLabor(host, p) {
+    cabeza(host, 'Labor');
+    host.appendChild(bloque('Labor', CAB3, p));
+  }
+
+  /* ---------- Paso 4: Registro por tiro (dato por dato) ---------- */
+  function camposTiro(row) {
+    return J.COLS.perf.filter(function (c) {
+      if (c.type === 'calc' || c.sinCaptura) return false;
+      if (c.k === 'alturaBarra' && row.problema !== 'Barra Pegada') return false; // solo si hubo barra pegada
+      return true;
+    });
+  }
+  function filaAnterior(p, row) {
+    var i = p.filas.indexOf(row);
+    return i > 0 ? p.filas[i - 1] : null;
+  }
+  function calcTexto(c, row) {
+    if (c.k === 'mPerf') {
+      if (isNaN(J.num(row.mDiseno)) || isNaN(J.num(row.mPerf))) return 'Cumplimiento para carga de diseño: —';
+      return 'Cumplimiento para carga de diseño: ' + Math.round(J.calc.cumpl(row) * 100) + '%';
+    }
+    if (c.k === 'hFin') {
+      var t = J.calc.tTiro(row);
+      return 'Tiempo de perforación del tiro: ' + (isNaN(t) ? '—' : J.fmt(t, 1) + ' min');
+    }
+    return null;
+  }
+  function nombreTiro(row) {
+    return (row.parada ? 'Parada ' + row.parada : 'Parada s/n') + ' · Tiro ' + (row.tiro || 's/n');
+  }
+
+  function nuevoTiro(p) {
+    var last = p.filas[p.filas.length - 1], r = J.store.filaVaciaPerf();
+    if (last) {
+      r.parada = last.parada;
+      if (/^\d+$/.test(String(last.tiro).trim())) r.tiro = String(parseInt(last.tiro, 10) + 1);
+    } else if (p.header.paradaIni) {
+      r.parada = p.header.paradaIni;
+    }
+    p.filas.push(r); J.store.touch();
+    ui.tiro = { row: r, nuevo: true, i: 0, err: '' }; ui.aviso = '';
+    render();
+  }
+  function editarTiro(p, row) { ui.tiro = { row: row, nuevo: false, i: 0, err: '' }; ui.aviso = ''; render(); }
+  function cancelarTiro(p) {
+    var t = ui.tiro;
+    if (t.nuevo) { var i = p.filas.indexOf(t.row); if (i >= 0) p.filas.splice(i, 1); }
+    ui.tiro = null; ui.aviso = ''; J.store.touch(); render();
+  }
+  function terminarTiro(p) {
+    ui.aviso = nombreTiro(ui.tiro.row) + ' guardado. Puedes registrar otro tiro o continuar con la pérdida operacional.';
+    ui.tiro = null; J.store.touch(); render();
+  }
+  function avanzar(p) {
+    var t = ui.tiro, cs = camposTiro(t.row), c = cs[t.i];
+    if (c.type === 'num') {
+      var v = t.row[c.k];
+      if (v !== '' && isNaN(J.num(v))) { t.err = 'Ingresa un número (puedes usar coma o punto).'; render(); return; }
+    }
+    t.err = '';
+    if (t.i >= cs.length - 1) { terminarTiro(p); return; }
+    t.i++; render();
+  }
+  function retroceder() {
+    var t = ui.tiro; t.err = '';
+    if (t.i > 0) { t.i--; render(); }
+  }
+
+  function preguntaTiro(host, p) {
+    var t = ui.tiro, row = t.row, cs = camposTiro(row);
+    if (t.i > cs.length - 1) t.i = cs.length - 1;
+    var c = cs[t.i], prev = filaAnterior(p, row);
+    var q = el('div', { class: 'jp-q', style: 'border-left-color:#' + c.bg });
+
+    var salto = el('select', { 'aria-label': 'Ir a otro dato' });
+    cs.forEach(function (x, i) { var o = el('option', { value: String(i), text: (i + 1) + '. ' + x.label }); if (i === t.i) o.selected = true; salto.appendChild(o); });
+    salto.addEventListener('change', function () { t.i = +salto.value; t.err = ''; render(); });
+    q.appendChild(el('div', { class: 'jp-q-top' }, [el('b', { text: nombreTiro(row) }), el('span', { text: 'Dato ' + (t.i + 1) + ' de ' + cs.length }), salto]));
+    q.appendChild(el('div', { class: 'jp-q-barra' }, [el('i', { style: 'width:' + Math.round((t.i + 1) / cs.length * 100) + '%' })]));
+    q.appendChild(el('h3', { text: c.label }));
+    if (c.k === 'problema') q.appendChild(el('p', { class: 'jp-q-ayuda', text: 'Si no hubo problemas, toca «Sin problemas».' }));
+    if (c.k === 'alturaBarra') q.appendChild(el('p', { class: 'jp-q-ayuda', text: 'Se pregunta porque el problema fue barra pegada.' }));
+
+    var calcBox = null, ct = calcTexto(c, row);
+    function actualizarCalc() { if (calcBox) calcBox.textContent = calcTexto(c, row); }
+    var inp = null;
+
+    if (c.type === 'select') {
+      var opts = el('div', { class: 'jp-opts' });
+      J.LISTAS[c.list].forEach(function (v) {
+        opts.appendChild(el('button', { type: 'button', class: 'jp-opt' + (row[c.k] === v ? ' sel' : ''), text: v, onclick: function () {
+          row[c.k] = v;
+          if (c.k === 'problema' && v !== 'Barra Pegada') row.alturaBarra = '';
+          J.store.touch(); avanzar(p);
+        } }));
+      });
+      q.appendChild(opts);
+    } else {
+      inp = el('input', { type: c.type === 'time' ? 'time' : 'text', value: row[c.k] || '', 'aria-label': c.label });
+      if (c.type === 'num') inp.setAttribute('inputmode', 'decimal');
+      inp.addEventListener('input', function () { row[c.k] = inp.value; t.err = ''; J.store.touch(); actualizarCalc(); });
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); avanzar(p); } });
+      q.appendChild(el('div', { class: 'jp-q-input' }, [inp, c.unit ? el('span', { class: 'u', text: c.unit }) : null]));
+    }
+    if (ct !== null) { calcBox = el('div', { class: 'jp-q-calc', text: ct }); q.appendChild(calcBox); }
+    if (t.err) q.appendChild(el('div', { class: 'jp-q-error', text: t.err }));
+
+    // Atajo: repetir el valor del tiro anterior (parada y tiro ya vienen sugeridos)
+    var pv = prev ? (c.k === 'hIni' ? prev.hFin : prev[c.k]) : '';
+    if (pv && !row[c.k] && c.k !== 'parada' && c.k !== 'tiro') {
+      q.appendChild(el('div', { style: 'margin-top:6px' }, [el('button', { type: 'button', class: 'jp-chip',
+        text: (c.k === 'hIni' ? 'Usar hora de término del tiro anterior: ' : 'Usar el del tiro anterior: ') + pv,
+        onclick: function () { row[c.k] = pv; J.store.touch(); render(); } })]));
+    }
+
+    var acc = el('div', { class: 'jp-q-acciones' }, [
+      el('button', { type: 'button', class: 'jp-btn', text: '← Anterior', disabled: t.i === 0 ? 'disabled' : null, onclick: retroceder }),
+      el('button', { type: 'button', class: 'jp-btn', text: c.type === 'select' ? (c.k === 'problema' ? 'Sin problemas' : 'Omitir') : 'Omitir', onclick: function () {
+        row[c.k] = ''; if (c.k === 'problema') row.alturaBarra = ''; J.store.touch(); avanzar(p);
+      } }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: t.i >= cs.length - 1 ? '✔ Guardar tiro' : 'Siguiente →', onclick: function () { avanzar(p); } }),
+      el('span', { class: 'jp-sep' }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-danger', text: t.nuevo ? 'Cancelar tiro' : 'Cerrar', onclick: function () { if (t.nuevo) { if (confirm('¿Cancelar este tiro? Se descartan los datos ingresados.')) cancelarTiro(p); } else { terminarTiro(p); } } })
+    ]);
+    q.appendChild(acc);
+
+    // Lo ya ingresado en este tiro
+    var llenos = cs.filter(function (x) { return row[x.k] !== '' && x.k !== c.k; });
+    if (llenos.length) {
+      q.appendChild(el('div', { class: 'jp-q-resumen' }, llenos.map(function (x) {
+        return el('span', { text: x.label.replace(/ \[.*\]$/, '') + ': ' + row[x.k] });
+      })));
+    }
+    host.appendChild(q);
+    if (inp) setTimeout(function () { try { inp.focus(); if (inp.select) inp.select(); } catch (e) { /* sin foco */ } }, 0);
+  }
+
+  function listaTiros(host, p) {
+    var filas = p.filas;
+    if (ui.aviso) host.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
+    if (!filas.length) {
+      host.appendChild(el('div', { class: 'jp-vacio', text: 'Aún no hay tiros. Toca «Agregar tiro»: te voy preguntando cada dato, uno por uno.' }));
+    } else {
+      var R = J.resumen(p);
+      var tb = el('tbody');
+      filas.forEach(function (r) {
+        tb.appendChild(el('tr', null, [
+          el('td', { text: r.parada || '—' }), el('td', { text: r.tiro || '—' }), el('td', { text: r.mDiseno || '—' }), el('td', { text: r.mPerf || '—' }),
+          el('td', { text: r.mDiseno && r.mPerf ? Math.round(J.calc.cumpl(r) * 100) + '%' : '—' }),
+          el('td', { text: r.abat ? r.abat + '°' : '—' }), el('td', { text: r.estado || '—' }), el('td', { text: r.problema || '—' }),
+          el('td', null, [
+            el('button', { type: 'button', class: 'jp-link', text: 'Editar', onclick: function () { editarTiro(p, r); } }),
+            el('button', { type: 'button', class: 'jp-x', title: 'Eliminar tiro', text: '×', onclick: function () {
+              if (confirm('¿Eliminar ' + nombreTiro(r) + '?')) { p.filas.splice(p.filas.indexOf(r), 1); J.store.touch(); ui.aviso = ''; render(); }
+            } })
+          ])
+        ]));
+      });
+      var tf = el('tfoot', null, [el('tr', null, [el('td', { text: 'Total' }), el('td', { text: String(R.nTiros) }), el('td', { text: J.fmt(R.mDis, 1) }), el('td', { text: J.fmt(R.mPerf, 1) }), el('td', { text: pctTxt(R.cumplProm) }), el('td', { colspan: '4' })])]);
+      var tabla = el('table', { class: 'jp-tabla-simple' }, [
+        el('thead', null, [el('tr', null, ['Parada', 'Tiro', 'Diseño [m]', 'Perforado [m]', 'Cumpl.', 'Abat.', 'Estado', 'Problema', ''].map(function (x) { return el('th', { text: x }); }))]),
+        tb, tf]);
+      host.appendChild(el('div', { class: 'jp-scroll' }, [tabla]));
+    }
+    host.appendChild(el('button', { type: 'button', class: 'jp-btn jp-btn-primary jp-btn-grande', text: '＋ Agregar tiro', onclick: function () { nuevoTiro(p); } }));
+  }
+  function pctTxt(v) { return isFinite(v) ? Math.round(v * 100) + '%' : '—'; }
+
+  function pasoTiros(host, p) {
+    if (ui.tiro) { preguntaTiro(host, p); return; }
+    cabeza(host, 'Registro por tiro', 'Cada tiro se registra dato por dato. Enter o «Siguiente» avanza; en las listas basta con tocar la opción.');
+    listaTiros(host, p);
+  }
+
+  /* ---------- Paso 5: Pérdida operacional durante la perforación ---------- */
+  function normalizarTiempo(v) {
+    v = String(v).trim(); if (!v) return '';
+    var mm = v.match(/^(\d{1,2}):(\d{1,2})$/);
+    if (mm) return ('0' + mm[1]).slice(-2) + ':' + ('0' + mm[2]).slice(-2);
+    if (/^\d+$/.test(v)) return J.fmtHM(+v);   // 90 -> 01:30 (minutos)
+    return null;
+  }
+  function pasoPerdidas(host, p) {
+    cabeza(host, 'Pérdida operacional durante la perforación', 'Anota cada pérdida con su observación y el tiempo (hh:mm). Si escribes solo minutos, por ejemplo 90, se convierte a 01:30.');
+    if (!p.perdidas.length) p.perdidas.push({ desc: '', tiempo: '' });
+    var caja = el('div', { class: 'jp-perd' });
+    caja.appendChild(el('div', { class: 'jp-perd-head' }, [el('span', { text: 'Observación' }), el('span', { text: 'Tiempo', style: 'text-align:center' }), el('span')]));
+    var dl = el('datalist', { id: 'dl-problemas' });
+    J.LISTAS.problemas.forEach(function (v) { dl.appendChild(el('option', { value: v })); });
+    caja.appendChild(dl);
+    var total = el('div', { class: 'jp-perd-total' });
+    function actualizar() {
+      var m = J.totalPerdidas(p);
+      total.innerHTML = '';
+      total.appendChild(document.createTextNode('Total pérdida operacional: ' + J.fmtHM(m)));
+      total.appendChild(el('small', { text: '(' + Math.round(m) + ' min en ' + p.perdidas.filter(function (x) { return !isNaN(J.toMin(x.tiempo)); }).length + ' registro(s))' }));
+    }
+    p.perdidas.forEach(function (x, i) {
+      var d = el('input', { type: 'text', list: 'dl-problemas', value: x.desc || '', placeholder: 'Describe la pérdida', 'aria-label': 'Observación de la pérdida' });
+      var m = el('input', { type: 'text', class: 't', value: x.tiempo || '', placeholder: 'hh:mm', maxlength: 5, inputmode: 'numeric', 'aria-label': 'Tiempo perdido (hh:mm)' });
+      d.addEventListener('input', function () { x.desc = d.value; J.store.touch(); });
+      m.addEventListener('input', function () { x.tiempo = m.value; actualizar(); J.store.touch(); });
+      m.addEventListener('blur', function () {
+        var v = normalizarTiempo(m.value);
+        if (v === null) { m.value = ''; x.tiempo = ''; } else { m.value = v; x.tiempo = v; }
+        actualizar(); J.store.touch();
+      });
+      var del = el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { p.perdidas.splice(i, 1); J.store.touch(); render(); } });
+      caja.appendChild(el('div', { class: 'jp-perd-fila' }, [d, m, del]));
+    });
+    caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'jp-btn', text: '＋ Agregar pérdida', onclick: function () { p.perdidas.push({ desc: '', tiempo: '' }); J.store.touch(); render(); } })]));
+    caja.appendChild(total);
+    actualizar();
+    host.appendChild(caja);
+  }
+
+  /* ---------- Paso 6: Finalizar ---------- */
+  function pasoFinal(host, p) {
+    cabeza(host, 'Finalizar', 'Revisa el resumen y descarga la planilla y el informe técnico.');
+    var R = J.resumen(p);
+    host.appendChild(el('div', { class: 'jp-kpis' }, [
+      [R.nTiros, 'tiros registrados'], [J.fmt(R.mDis, 1) + ' m', 'metros de diseño'], [J.fmt(R.mPerf, 1) + ' m', 'metros perforados'],
+      [isFinite(R.cumplProm) ? Math.round(R.cumplProm * 100) + '%' : '—', 'cumplimiento prom. carga de diseño'],
+      [J.fmtHM(R.tPerf), 'tiempo en perforación'], [J.fmtHM(R.tPerdidas), 'pérdida operacional total']
+    ].map(function (k) { return el('div', { class: 'jp-kpi' }, [el('b', { text: String(k[0]) }), el('span', { text: k[1] })]); })));
+
+    var sel = el('select', { 'aria-label': 'Referencia del abatimiento' }, [
+      el('option', { value: 'horizontal', text: 'horizontal' }), el('option', { value: 'vertical', text: 'vertical' })]);
+    sel.value = p.refAbat || 'horizontal';
+    sel.addEventListener('change', function () { p.refAbat = sel.value; J.store.touch(); });
+    host.appendChild(el('div', { class: 'jp-opciones' }, [el('label', null, ['Para los diagramas, el abatimiento se mide desde la ', sel])]));
+
+    host.appendChild(el('h2', { text: 'Otras observaciones en terreno' }));
+    var ob = el('div', { class: 'jp-obs' });
+    p.obs.forEach(function (v, i) {
+      var inp = el('input', { type: 'text', value: v || '', 'aria-label': 'Observación ' + (i + 1) });
+      inp.addEventListener('input', function () { p.obs[i] = inp.value; J.store.touch(); });
+      ob.appendChild(inp);
+    });
+    host.appendChild(ob);
+
+    host.appendChild(el('div', { class: 'jp-descargas' }, [
+      el('button', { type: 'button', class: 'jp-btn jp-btn-primary jp-btn-grande', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(p); } }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-primary jp-btn-grande', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(p); } })
+    ]));
+  }
+
+  /* ---------- Render general ---------- */
+  var RENDERS = [pasoIdentificacion, pasoHorarios, pasoLabor, pasoTiros, pasoPerdidas, pasoFinal];
+
+  function irA(n) {
+    if (ui.tiro && ui.tiro.nuevo) { // al salir se descarta un tiro nuevo que quedó vacío
+      var p = J.store.current(), t = ui.tiro;
+      var vacio = J.COLS.perf.every(function (c) { return c.type === 'calc' || c.k === 'parada' || c.k === 'tiro' || !t.row[c.k]; });
+      if (vacio) { var i = p.filas.indexOf(t.row); if (i >= 0) p.filas.splice(i, 1); }
+    }
+    ui.tiro = null; ui.aviso = ''; ui.paso = n; render();
+    window.scrollTo(0, 0);
+  }
+
+  function render() {
+    var p = J.store.current();
+    var pasos = U.$('#pasos'); pasos.innerHTML = '';
+    PASOS.forEach(function (nom, i) {
+      var b = el('button', { type: 'button', class: (i === ui.paso ? 'activo' : '') + (i < ui.paso ? ' hecho' : ''), onclick: function () { irA(i); } },
+        [el('span', { class: 'n', text: i < ui.paso ? '✓' : String(i + 1) }), nom]);
+      pasos.appendChild(el('li', null, [b]));
+    });
+    var host = U.$('#paso'); host.innerHTML = '';
+    RENDERS[ui.paso](host, p);
+
+    var nav = U.$('#navPaso'); nav.innerHTML = '';
+    if (ui.tiro) return; // mientras se pregunta un tiro, la navegación es la de la pregunta
+    nav.appendChild(ui.paso > 0 ? el('button', { type: 'button', class: 'jp-btn', text: '← Atrás', onclick: function () { irA(ui.paso - 1); } }) : el('span'));
+    nav.appendChild(ui.paso < PASOS.length - 1 ? el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: 'Siguiente →', onclick: function () { irA(ui.paso + 1); } }) : el('span'));
+  }
+
+  /* ---------- Arranque ---------- */
+  U.toolbar('#toolbar', { onChange: function () { ui.tiro = null; ui.aviso = ''; render(); } });
+  render();
+  window.addEventListener('beforeunload', function () { J.store.saveNow(); });
+})();
+    </script>
+    <script>
+        if (typeof cargarBarMenu === 'function') cargarBarMenu(true); // true = está en una subcarpeta (pages/)
     </script>
 </body>
 </html>

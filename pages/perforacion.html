@@ -114,6 +114,112 @@
 .jp-obs input { display: block; width: 100%; border: 0; border-top: 1px solid #e2e8f0; padding: 8px 10px; box-sizing: border-box; font-size: .88rem; }
 .jp-opciones { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: .85rem; margin: 10px 0; }
 .jp-descargas { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+/* ===== Flujo tipo tarjeta: datos → ID de trabajo → paradas ===== */
+.jp-paso { max-width: 560px; }
+.jp-card { background: #fff; border-radius: 16px; padding: 22px 20px; box-shadow: 0 2px 12px rgba(15,23,42,.10); }
+.jp-card-t { margin: 0; font-size: 1.4rem; text-align: left; line-height: 1.25; }
+.jp-card-sub { margin: 3px 0 14px; color: #64748b; font-size: .88rem; }
+.jp-lbl { display: block; font-weight: 700; font-size: .85rem; margin: 14px 0 6px; color: #1e293b; }
+.jp-in { width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1rem; background: #fff; color: #0f172a; font-family: inherit; }
+.jp-in.gris { background: #f0f4fa; }
+.jp-in.salida { display: flex; align-items: center; background: #fff7d6; border-color: #f3e6a8; font-weight: 700; }
+.jp-in:focus { outline: 3px solid rgba(37,99,235,.25); border-color: #2563eb; }
+.jp-sec { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+.jp-sec span { font-size: 1.02rem; }
+.jp-resumen-box { margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: .88rem; line-height: 1.7; }
+.jp-resumen-box hr { border: 0; border-top: 1px solid #cbd5e1; margin: 8px 0; }
+.jp-b { display: block; width: 100%; border: 0; border-radius: 8px; padding: 13px 14px; font-size: .95rem; font-weight: 700; color: #fff; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; font-family: inherit; }
+.jp-b:hover { filter: brightness(.93); }
+.jp-b.gris { background: #64748b; } .jp-b.azul { background: #2563eb; } .jp-b.cel { background: #0284c7; }
+.jp-b.verde { background: #16a34a; } .jp-b.nar { background: #d97706; } .jp-b.teal { background: #0d9488; }
+.jp-b.rojo { background: #fee2e2; color: #b91c1c; } .jp-b.editar { background: #e0f2fe; color: #075985; }
+.jp-b.chico { display: inline-block; width: auto; padding: 9px 14px; font-size: .85rem; }
+.jp-fila2 { display: flex; gap: 10px; margin-top: 18px; }
+.jp-fila2 > * { flex: 1; }
+.jp-pila { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.jp-panel { background: #f0f4fa; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px; margin-top: 14px; }
+.jp-panel-t { font-weight: 800; font-size: .85rem; letter-spacing: .02em; margin-bottom: 10px; color: #1e293b; }
+.jp-parada { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+.jp-parada:last-child { margin-bottom: 0; }
+.jp-parada-t { font-weight: 800; font-size: 1.02rem; }
+.jp-parada-s { font-size: .78rem; color: #64748b; }
+.jp-parada-b { display: flex; gap: 6px; }
+.jp-multi { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+.jp-lista-paradas .jp-vacio { margin: 0; }
+.jp-card .jp-kpis { margin: 10px 0; }
+
+/* Ventana modal */
+.jp-ov { position: fixed; inset: 0; background: rgba(71,85,105,.82); display: flex; padding: 16px; overflow: auto; z-index: 1000; }
+.jp-modal { background: #fff; border-radius: 14px; width: 100%; max-width: 560px; padding: 20px; margin: auto; box-shadow: 0 10px 30px rgba(15,23,42,.35); box-sizing: border-box; }
+.jp-modal h3 { margin: 0; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; font-size: 1.15rem; }
+.jp-modal h4 { margin: 18px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; font-size: 1.02rem; font-weight: 400; }
+.jp-mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.jp-mf { min-width: 0; }
+.jp-mf.full { grid-column: 1 / -1; }
+.jp-mf label { display: block; font-weight: 700; font-size: .8rem; margin-bottom: 5px; color: #1e293b; }
+.jp-modal .jp-par { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.jp-modal-acc { display: flex; gap: 10px; margin-top: 22px; }
+.jp-modal-acc > * { flex: 1; }
+@media (max-width: 420px) { .jp-mgrid { grid-template-columns: 1fr; } .jp-ov { padding: 8px; } }
+
+/* ===== Ajustes: tabla de tiros sin scroll + modal de plantilla ===== */
+.jp-paso { max-width: 900px; }
+.jp-card { max-width: 560px; margin-left: auto; margin-right: auto; }
+.jp-card.ancha { max-width: 900px; }
+.jp-scroll.sin-scroll { overflow: visible; }
+.jp-tabla-tiros { width: 100%; table-layout: auto; }
+.jp-tabla-tiros th, .jp-tabla-tiros td { white-space: normal; word-break: break-word; padding: 8px 5px; font-size: .84rem; }
+.jp-tabla-tiros th { font-size: .78rem; }
+.jp-tabla-tiros .acc { display: flex; align-items: center; justify-content: center; gap: 2px; flex-wrap: nowrap; white-space: nowrap; }
+@media (max-width: 480px) {
+  .jp-page { padding-left: 8px; padding-right: 8px; }
+  .jp-card { padding: 16px 10px; }
+  .jp-tabla-tiros th, .jp-tabla-tiros td { padding: 6px 2px; font-size: .72rem; }
+  .jp-tabla-tiros th { font-size: .68rem; }
+  .jp-tabla-tiros .jp-link { padding: 0 2px; font-size: .72rem; }
+}
+.jp-descarga { margin-top: 12px; }
+.jp-descarga small { display: block; text-align: center; color: #64748b; font-size: .78rem; margin-top: 8px; }
+
+/* Modal de plantilla */
+.jp-modal { max-width: 640px; }
+.jp-modal-acc { position: sticky; bottom: 0; background: #fff; padding: 12px 0 2px; margin-top: 18px; border-top: 1px solid #e2e8f0; }
+.pl-sec { border: 1px solid #dbe3ee; border-radius: 14px; margin-top: 14px; overflow: hidden; background: #fff; }
+.pl-sec-h { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-weight: 800; font-size: .95rem; background: #f1f5f9; border-bottom: 1px solid #dbe3ee; }
+.pl-sec.az .pl-sec-h { background: #e8f1fd; } .pl-sec.vd .pl-sec-h { background: #e7f8ea; }
+.pl-sec.am .pl-sec-h { background: #fff4d6; } .pl-sec.rj .pl-sec-h { background: #fde9e0; }
+.pl-sec-b { padding: 14px; }
+.pl-sec-n { margin: 0 0 10px; font-size: .82rem; color: #64748b; }
+.pl-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.pl-fila:last-child { margin-bottom: 0; }
+.pl-fila.t3 { grid-template-columns: 1fr 1fr; }
+.pl-f { min-width: 0; }
+.pl-f > .pl-l { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 22px; margin-bottom: 4px; font-weight: 700; font-size: .8rem; color: #1e293b; }
+.pl-ahora { border: 0; background: #dbeafe; color: #1d4ed8; border-radius: 999px; padding: 2px 10px; font-size: .72rem; font-weight: 700; cursor: pointer; }
+.pl-ahora:hover { background: #bfdbfe; }
+.pl-grupo { font-weight: 800; font-size: .85rem; color: #334155; margin: 0 0 6px; }
+.pl-grupo + .pl-fila { margin-bottom: 14px; }
+.pl-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; padding-top: 12px; border-top: 1px dashed #cbd5e1; }
+.pl-kpi { background: #fff7d6; border: 1px solid #f3e6a8; border-radius: 10px; padding: 8px 10px; text-align: center; }
+.pl-kpi span { display: block; font-size: .72rem; color: #475569; font-weight: 700; }
+.pl-kpi output { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
+.pl-y { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; }
+.pl-y i { font-style: normal; color: #64748b; font-size: .85rem; }
+.jp-modal .jp-in { min-height: 44px; }
+.jp-modal .jp-perd { border: 0; background: transparent; overflow: visible; }
+.jp-modal .jp-perd-head { background: transparent; padding: 0 2px 4px; font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
+.jp-modal .jp-perd-fila { border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 8px; background: #fff; overflow: hidden; grid-template-columns: 1fr 96px 34px; }
+.jp-modal .jp-perd-fila input { padding: 12px 10px; }
+.jp-modal .jp-perd-pie { padding: 2px 0 8px; border: 0; }
+.jp-modal .jp-perd-total { border: 1px solid #f3e6a8; border-radius: 10px; }
+@media (max-width: 420px) {
+  .pl-fila, .pl-kpis { gap: 8px; }
+  .pl-sec-b { padding: 10px; }
+  .jp-modal { padding: 14px; }
+  .jp-modal .jp-perd-fila { grid-template-columns: 1fr 80px 30px; }
+}
+
     </style>
 </head>
 <body>
@@ -130,9 +236,7 @@
 
         <div id="toolbar"></div>
 
-        <ol class="jp-pasos" id="pasos"></ol>
         <section class="jp-paso" id="paso"></section>
-        <div class="jp-navpaso" id="navPaso"></div>
     </main>
 
     <!-- Librería para generar el Excel (.xlsx) -->
@@ -193,7 +297,8 @@
       { k: 'caudal',     label: 'Caudal agua barrido (m3/min)', type: 'num',    w: 11, bg: 'A9E4B8', unit: 'm³/min', sinCaptura: true },
       { k: 'hIni',       label: 'Hora Inicio',                  type: 'time',   w: 8,  bg: 'D9D9D9' },
       { k: 'hFin',       label: 'Hora Término',                 type: 'time',   w: 8,  bg: 'D9D9D9' },
-      { k: 'tTiro',       label: 'Tiempo Perforación del Tiro [min]', type: 'calc', calc: 'tTiro', fmt: 'num1', w: 11, bg: 'D9D9D9' }
+      { k: 'tTiro',       label: 'Tiempo Perforación del Tiro [min]', type: 'calc', calc: 'tTiro', fmt: 'num1', w: 11, bg: 'D9D9D9' },
+      { k: 'trabajo',    label: 'ID TRABAJO',                   type: 'text',   w: 12, bg: 'D9D9D9', sinCaptura: true }
     ]
   };
 
@@ -257,8 +362,8 @@
       if (!isNaN(d) && !isNaN(m)) { sumCumpl += calc.cumpl(r); nCumpl++; mDisPar += d; }
       var t = calc.tTiro(r); if (!isNaN(t)) minTiros += t;
       if (r.problema) prob[r.problema] = (prob[r.problema] || 0) + 1;
-      var key = r.parada === '' ? '—' : r.parada;
-      var g = paradas[key] || (paradas[key] = { parada: key, tiros: 0, mDis: 0, mDisPar: 0, mPerf: 0, minutos: 0 });
+      var key = (r.trabajo || '') + '||' + (r.parada === '' ? '—' : r.parada);
+      var g = paradas[key] || (paradas[key] = { trabajo: r.trabajo || '', parada: r.parada === '' ? '—' : r.parada, tiros: 0, mDis: 0, mDisPar: 0, mPerf: 0, minutos: 0 });
       g.tiros++; if (!isNaN(d)) g.mDis += d; if (!isNaN(m)) g.mPerf += m; if (!isNaN(d) && !isNaN(m)) g.mDisPar += d;
       if (!isNaN(t)) g.minutos += t;
     });
@@ -287,8 +392,11 @@
     'numZanja', 'calleZanja1', 'calleZanja2', 'fase', 'calleUcl', 'paradaIni', 'paradaFin'];
 
   function nuevaPlanilla() {
-    var p = { id: uid(), header: {}, perdidas: [], filas: [], obs: [], refAbat: 'horizontal' };
+    var p = { id: uid(), header: {}, perdidas: [], filas: [], obs: [], refAbat: 'horizontal', trabajos: [], trabajoActual: '' };
     HEADER_KEYS.forEach(function (k) { p.header[k] = ''; });
+    var hoy = new Date();
+    p.header.fecha = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth() + 1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
+    p.header.mina = 'Esmeralda'; p.header.nivel = 'NP'; p.header.bloque = 'Ext Fw'; p.header.encSeg = 'Luis Salinas';
     for (var k = 0; k < 10; k++) p.obs.push('');
     return p;
   }
@@ -302,6 +410,13 @@
     p.obs = p.obs && p.obs.length ? p.obs : base.obs;
     p.refAbat = p.refAbat === 'vertical' ? 'vertical' : 'horizontal';
     delete p.carguio; // el carguío ya no se usa en esta planilla
+    // ID de trabajo: los tiros antiguos sin trabajo pasan a "Trabajo 01"
+    p.trabajos = Array.isArray(p.trabajos) ? p.trabajos.filter(Boolean) : [];
+    p.filas.forEach(function (f) {
+      if (!f.trabajo) f.trabajo = 'Trabajo 01';
+      if (p.trabajos.indexOf(f.trabajo) < 0) p.trabajos.push(f.trabajo);
+    });
+    if (!p.trabajoActual || p.trabajos.indexOf(p.trabajoActual) < 0) p.trabajoActual = p.trabajos[0] || '';
     return p;
   }
 
@@ -333,7 +448,10 @@
     current: function () { return state.planillas[state.actual]; },
     list: function () { return Object.keys(state.planillas).map(function (id) { return state.planillas[id]; }); },
     setCurrent: function (id) { if (state.planillas[id]) { state.actual = id; save(); } },
-    create: function () { var p = nuevaPlanilla(); state.planillas[p.id] = p; state.actual = p.id; save(); return p; },
+    create: function () {
+      var p = nuevaPlanilla(), c = state.planillas[state.actual];
+      if (c) ['mina', 'nivel', 'bloque', 'encSeg', 'supJej', 'diametro', 'idEquipo'].forEach(function (k) { if (c.header[k]) p.header[k] = c.header[k]; });
+      state.planillas[p.id] = p; state.actual = p.id; save(); return p; },
     remove: function (id) {
       delete state.planillas[id];
       if (!Object.keys(state.planillas).length) { var p = nuevaPlanilla(); state.planillas[p.id] = p; }
@@ -617,29 +735,11 @@
 
   /* ---------- Barra superior: planilla activa, nueva, eliminar, descargas ---------- */
   function toolbar(host, opt) {
-    host = $(host); opt = opt || {};
+    // Barra superior eliminada: la selección de planilla y las descargas ya no se muestran aquí.
+    host = $(host);
     host.innerHTML = '';
-    host.classList.add('jp-toolbar');
-    var sel = el('select', { 'aria-label': 'Planilla activa' });
-    J.store.list().forEach(function (p) {
-      var o = el('option', { value: p.id, text: J.store.etiqueta(p) });
-      if (p.id === J.store.current().id) o.selected = true;
-      sel.appendChild(o);
-    });
-    sel.addEventListener('change', function () { J.store.setCurrent(sel.value); opt.onChange && opt.onChange(); toolbar(host, opt); });
-
-    var botones = [
-      el('button', { type: 'button', class: 'jp-btn', text: '＋ Nueva planilla', onclick: function () { J.store.create(); opt.onChange && opt.onChange(); toolbar(host, opt); } }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-danger', text: 'Eliminar', onclick: function () {
-        if (confirm('¿Eliminar la planilla "' + J.store.etiqueta(J.store.current()) + '"? No se puede deshacer.')) {
-          J.store.remove(J.store.current().id); opt.onChange && opt.onChange(); toolbar(host, opt);
-        } } }),
-      el('span', { class: 'jp-sep' }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(J.store.current()); } }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(J.store.current()); } })
-    ];
-    host.appendChild(el('label', { class: 'jp-tb-label' }, ['Planilla: ', sel]));
-    botones.forEach(function (b) { host.appendChild(b); });
+    host.classList.remove('jp-toolbar');
+    host.hidden = true;
   }
 
   /* ---------- Campo de formulario ---------- */
@@ -892,7 +992,7 @@
   function agrupar(p) {
     var g = {}, orden = [];
     p.filas.filter(J.filaUsada).forEach(function (r) {
-      var k = r.parada === '' ? '—' : String(r.parada);
+      var k = (r.trabajo ? r.trabajo + ' · ' : '') + 'Parada ' + (r.parada === '' ? '—' : String(r.parada));
       if (!g[k]) { g[k] = []; orden.push(k); }
       g[k].push(r);
     });
@@ -902,6 +1002,8 @@
   function documento(p) {
     var h = p.header, R = J.resumen(p), A = agrupar(p), ref = p.refAbat === 'vertical' ? 'vertical' : 'horizontal';
     var filas = p.filas.filter(J.filaUsada);
+    var trabajosUsados = []; filas.forEach(function (r) { if (r.trabajo && trabajosUsados.indexOf(r.trabajo) < 0) trabajosUsados.push(r.trabajo); });
+    var multi = trabajosUsados.length > 1;
     var B = [];
 
     /* ---- Portada ---- */
@@ -917,7 +1019,8 @@
       ['Supervisor JeJ', h.supJej], ['Encargado seguimiento JeJ', h.encSeg], ['Supervisor DET', h.supDet], ['Perforista DET', h.perforistaDet],
       ['Equipo de perforación', h.idEquipo], ['Diámetro de perforación [pulg]', h.diametro],
       ['Núm. zanja', h.numZanja], ['Calles zanja', [h.calleZanja1, h.calleZanja2].filter(Boolean).join(' / ')], ['Fase', h.fase],
-      ['Calle UCL', h.calleUcl], ['Parada inicial', h.paradaIni], ['Parada final (neg)', h.paradaFin]
+      ['Calle UCL', h.calleUcl], ['Parada inicial', h.paradaIni], ['Parada final (neg)', h.paradaFin],
+      ['ID(s) de trabajo', trabajosUsados.join(', ')]
     ].map(function (f) { return '<div><span>' + f[0] + '</span><b>' + dash(f[1]) + '</b></div>'; }).join('') + '</div>');
 
     /* ---- Indicadores ---- */
@@ -940,23 +1043,23 @@
 
     /* ---- Resumen por parada ---- */
     if (R.paradas.length) {
-      B.push('<h2>Resumen por parada</h2><table><thead><tr><th>Parada</th><th>Tiros</th><th>Diseño [m]</th><th>Perforado [m]</th><th>Diferencia</th><th>Tiempo en tiros [min]</th></tr></thead><tbody>' +
+      B.push('<h2>Resumen por parada</h2><table><thead><tr>' + (multi ? '<th>Trabajo</th>' : '') + '<th>Parada</th><th>Tiros</th><th>Diseño [m]</th><th>Perforado [m]</th><th>Diferencia</th><th>Tiempo en tiros [min]</th></tr></thead><tbody>' +
         R.paradas.map(function (g) {
           var d = g.mDisPar > 0 ? (g.mPerf - g.mDisPar) / g.mDisPar : NaN;
-          return '<tr><td>' + esc(g.parada) + '</td><td>' + g.tiros + '</td><td>' + J.fmt(g.mDis, 1) + '</td><td>' + J.fmt(g.mPerf, 1) + '</td><td>' +
+          return '<tr>' + (multi ? '<td>' + dash(g.trabajo) + '</td>' : '') + '<td>' + esc(g.parada) + '</td><td>' + g.tiros + '</td><td>' + J.fmt(g.mDis, 1) + '</td><td>' + J.fmt(g.mPerf, 1) + '</td><td>' +
             (isFinite(d) ? (d >= 0 ? '+' : '') + J.fmt(d * 100, 1) + '%' : '—') + '</td><td>' + J.fmt(g.minutos, 1) + '</td></tr>';
         }).join('') + '</tbody></table>');
     }
 
     /* ---- Registro por tiro ---- */
     if (filas.length) {
-      B.push('<h2>Registro por tiro</h2><div class="tabla-ancha"><table><thead><tr><th>Parada</th><th>Tiro</th><th>Diseño [m]</th><th>Taco [m]</th><th>Perforado [m]</th><th>Cumpl. carga</th><th>Abat. [°]</th><th>Rot. [°]</th><th>Sentido</th><th>Estado</th><th>Agua</th><th>Entub. [m]</th><th>Problema</th><th>T. perf. [min]</th></tr></thead><tbody>' +
+      B.push('<h2>Registro por tiro</h2><div class="tabla-ancha"><table><thead><tr>' + (multi ? '<th>Trabajo</th>' : '') + '<th>Parada</th><th>Tiro</th><th>Diseño [m]</th><th>Taco [m]</th><th>Perforado [m]</th><th>Cumpl. carga</th><th>Abat. [°]</th><th>Rot. [°]</th><th>Sentido</th><th>Estado</th><th>Agua</th><th>Entub. [m]</th><th>Problema</th><th>T. perf. [min]</th></tr></thead><tbody>' +
         filas.map(function (r) {
           var t = J.calc.tTiro(r), prob = r.problema ? esc(r.problema) + (r.alturaBarra ? ' (' + esc(r.alturaBarra) + ' m)' : '') : '—';
-          return '<tr><td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td><td>' + dash(r.mDiseno) + '</td><td>' + dash(r.taco) + '</td><td>' + dash(r.mPerf) + '</td><td>' +
+          return '<tr>' + (multi ? '<td>' + dash(r.trabajo) + '</td>' : '') + '<td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td><td>' + dash(r.mDiseno) + '</td><td>' + dash(r.taco) + '</td><td>' + dash(r.mPerf) + '</td><td>' +
             (r.mDiseno && r.mPerf ? Math.round(J.calc.cumpl(r) * 100) + '%' : '—') + '</td><td>' + dash(r.abat) + '</td><td>' + dash(r.rot) + '</td><td>' + dash(r.signo) + '</td><td>' + dash(r.estado) + '</td><td>' + dash(r.conAgua) + '</td><td>' + dash(r.entubados) +
             '</td><td class="l">' + prob + '</td><td>' + (isNaN(t) ? '—' : J.fmt(t, 1)) + '</td></tr>';
-        }).join('') + '</tbody><tfoot><tr><td colspan="2">Total</td><td>' + J.fmt(R.mDis, 1) + '</td><td></td><td>' + J.fmt(R.mPerf, 1) + '</td><td>' + pct(R.cumplProm) + '</td><td colspan="7"></td><td>' + J.fmt(R.minTiros, 1) + '</td></tr></tfoot></table></div>');
+        }).join('') + '</tbody><tfoot><tr><td colspan="' + (multi ? 3 : 2) + '">Total</td><td>' + J.fmt(R.mDis, 1) + '</td><td></td><td>' + J.fmt(R.mPerf, 1) + '</td><td>' + pct(R.cumplProm) + '</td><td colspan="7"></td><td>' + J.fmt(R.minTiros, 1) + '</td></tr></tfoot></table></div>');
 
       /* ---- Parámetros operacionales ---- */
       var keys = ['pPerc', 'pRot', 'pAv', 'pAgua', 'pComp', 'golpes', 'rpm', 'vAv', 'caudal', 'hIni', 'hFin'];
@@ -977,11 +1080,11 @@
     if (!A.orden.length) B.push('<p class="nota">Aún no hay tiros registrados.</p>');
     A.orden.forEach(function (k) {
       var rows = A.g[k], s = J.diagram.vista(rows, 'seccion', ref);
-      if (!s.n) { B.push('<div class="par"><h3>Parada ' + esc(k) + '</h3><p class="nota">Sin tiros con ángulo de abatimiento: no hay diagrama que dibujar.</p></div>'); return; }
+      if (!s.n) { B.push('<div class="par"><h3>' + esc(k) + '</h3><p class="nota">Sin tiros con ángulo de abatimiento: no hay diagrama que dibujar.</p></div>'); return; }
       var pl = J.diagram.vista(rows, 'planta', ref), nota = '';
       if (s.omitidos) nota += s.omitidos + ' tiro(s) sin ángulo de abatimiento no se dibujan. ';
       if (s.supuestos) nota += s.supuestos + ' tiro(s) sin rotación: se asumió 90° (hacia la derecha). ';
-      B.push('<div class="par"><h3>Parada ' + esc(k) + ' · ' + s.n + ' tiro(s) dibujados</h3><div class="dg"><figure>' + s.svg + '<figcaption>Sección transversal</figcaption></figure>' +
+      B.push('<div class="par"><h3>' + esc(k) + ' · ' + s.n + ' tiro(s) dibujados</h3><div class="dg"><figure>' + s.svg + '<figcaption>Sección transversal</figcaption></figure>' +
         (pl.fueraDePlano ? '<figure>' + pl.svg + '<figcaption>Vista en planta</figcaption></figure>' : '') + '</div>' +
         '<table><thead><tr><th>Tiro</th><th>Largo perforado [m]</th><th>Largo diseño [m]</th><th>Taco [m]</th><th>Abatimiento</th><th>Rotación</th><th>Sentido</th><th>Estado</th></tr></thead><tbody>' +
         rows.map(function (r) {
@@ -1048,111 +1151,462 @@
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* ===================== FLUJO POR PASOS ===================== */
-/* Identificación → Horarios y equipo → Labor → Registro por tiro → Pérdida operacional → Finalizar */
+/* Paso 1 Datos generales y turno → Paso 2 ID de trabajo → Resumen de paradas → Tiros de una parada → Finalizar */
 (function () {
   'use strict';
   var J = window.JEJ, U = J.ui, el = U.el;
 
-  var PASOS = ['Identificación', 'Horarios y equipo', 'Labor', 'Registro por tiro', 'Pérdida operacional', 'Finalizar'];
-  var ui = { paso: 0, tiro: null, aviso: '' };
+  var ui = { vista: 'datos', tiro: null, aviso: '', parada: '', busca: '', nuevaParada: false };
+  function P() { return J.store.current(); }
 
-  /* ---------- Definición de los formularios (pasos 1 a 3) ---------- */
-  var CAB1 = [
-    { k: 'fecha', label: 'Fecha', type: 'date' },
-    { k: 'turno', label: 'Turno', type: 'select', list: 'turno' },
-    { k: 'mina', label: 'Mina' },
-    { k: 'nivel', label: 'Nivel', type: 'select', list: 'nivel' },
-    { k: 'bloque', label: 'Bloque', type: 'select', list: 'bloque' },
-    { k: 'idTronadura', label: 'ID Tronadura', cls: 'amar' },
-    { k: 'supJej', label: 'Supervisor JeJ' },
-    { k: 'encSeg', label: 'Encargado Seguimiento JeJ' },
-    { k: 'supDet', label: 'Supervisor DET', cls: 'verde' },
-    { k: 'perforistaDet', label: 'Perforista DET', cls: 'verde' }
-  ];
-  var CAB2 = [
-    { k: 'hLlegJej', label: 'H Llegada JeJ a Postura', type: 'time', cls: 'verde' },
-    { k: 'hSalJej', label: 'H Salida JeJ de Postura', type: 'time', cls: 'verde' },
-    { k: 'hLlegPyt', label: 'H Llegada PyT a Postura', type: 'time', cls: 'verde' },
-    { k: 'hIniPerf', label: 'H Inicio Perforación', type: 'time', cls: 'verde' },
-    { k: 'hFinPerf', label: 'H Fin Perforación', type: 'time', cls: 'verde' },
-    { k: 'hSalPyt', label: 'H Salida PyT de Postura', type: 'time', cls: 'verde' },
-    { k: 'tPostura', label: 'Tiempo en Postura', type: 'calc', cls: 'amar' },
-    { k: 'tPerf', label: 'Tiempo en Perforación', type: 'calc', cls: 'amar' },
-    { k: 'diametro', label: 'Diámetro Perforación [pulg]' },
-    { k: 'idEquipo', label: 'ID del Equipo de Perforación', cls: 'verde' }
-  ];
-  var CAB3 = [
-    { k: 'numZanja', label: 'Núm. Zanja', cls: 'verde' },
-    'calles',
-    { k: 'fase', label: 'Fase', type: 'select', list: 'fase' },
-    { k: 'calleUcl', label: 'Calle UCL', cls: 'verde' },
-    { k: 'paradaIni', label: 'Parada Inicial', cls: 'verde' },
-    { k: 'paradaFin', label: 'Parada Final (neg)', cls: 'verde' }
-  ];
-
-  function calcCab(k, h) {
-    if (k === 'tPostura') return J.fmtHM(J.tPostura(h));
-    if (k === 'tPerf') return J.fmtHM(J.tPerforacion(h));
-    return '';
+  /* ---------- Consultas sobre trabajos / paradas / tiros ---------- */
+  function tirosDe(p, trabajo, parada) {
+    return p.filas.filter(function (r) { return r.trabajo === trabajo && (parada === undefined || String(r.parada) === String(parada)); });
   }
-  function refrescarCalcs(h) {
-    document.querySelectorAll('[data-calc]').forEach(function (o) { o.textContent = calcCab(o.getAttribute('data-calc'), h); });
+  function paradasDe(p, trabajo) {
+    var o = [];
+    tirosDe(p, trabajo).forEach(function (r) { var k = String(r.parada); if (o.indexOf(k) < 0) o.push(k); });
+    return o;
+  }
+  function metros(rows) { var s = 0; rows.forEach(function (r) { var m = J.num(r.mPerf); if (!isNaN(m)) s += m; }); return s; }
+  function sinAsignar(v) { return v ? v : 'Sin asignar'; }
+  function pctTxt(v) { return isFinite(v) ? Math.round(v * 100) + '%' : '—'; }
+  function sugerirParada(p) {
+    var ps = paradasDe(p, p.trabajoActual), last = ps[ps.length - 1];
+    if (!last) return p.header.paradaIni || '';
+    var m = /^(.*?)(\d+)$/.exec(last);
+    return m ? m[1] + (parseInt(m[2], 10) + 1) : '';
   }
   function etiquetaPlanilla(p) {
     var o = document.querySelector('#toolbar option:checked'); if (o) o.textContent = J.store.etiqueta(p);
   }
+  function refrescarToolbar() { U.toolbar('#toolbar', { onChange: alCambiarPlanilla }); }
+  function alCambiarPlanilla() { ui.vista = 'datos'; ui.tiro = null; ui.aviso = ''; ui.parada = ''; ui.busca = ''; ui.nuevaParada = false; render(); }
 
-  function bloque(titulo, defs, p) {
-    var h = p.header, body = el('div', { class: 'jp-grid' });
-    defs.forEach(function (d) {
-      if (d === 'calles') {
-        var w = el('div', { class: 'jp-campo jp-doble verde' }, [el('label', { text: 'Calles Zanja' })]);
-        var par = el('div', { class: 'jp-par' });
-        ['calleZanja1', 'calleZanja2'].forEach(function (k) {
-          var i = el('input', { type: 'text', value: h[k] || '', 'aria-label': 'Calle zanja' });
-          i.addEventListener('input', function () { h[k] = i.value; J.store.touch(); });
-          par.appendChild(i);
-        });
-        w.appendChild(par);
-        body.appendChild(w); return;
-      }
-      body.appendChild(U.campo(d, h, function () { refrescarCalcs(h); etiquetaPlanilla(p); J.store.touch(); }, function () { return calcCab(d.k, h); }));
+  /* ---------- Piezas de formulario ---------- */
+  function mf(label, ctrl, cls) { return el('div', { class: 'jp-mf ' + (cls || '') }, [el('label', { text: label }), ctrl]); }
+  function txt(o, k, ph, cls, list, on) {
+    var i = el('input', { type: 'text', class: 'jp-in ' + (cls || ''), placeholder: ph || '', value: o[k] || '' });
+    if (list) i.setAttribute('list', list);
+    i.addEventListener('input', function () { o[k] = i.value; if (on) on(); });
+    return i;
+  }
+  function hora(o, k, on) {
+    var i = el('input', { type: 'time', class: 'jp-in', value: o[k] || '' });
+    i.addEventListener('input', function () { o[k] = i.value; if (on) on(); });
+    return i;
+  }
+  function sel(o, k, lista, ph, on) {
+    var s = el('select', { class: 'jp-in' });
+    U.opciones(s, J.LISTAS[lista], o[k]); s.options[0].textContent = ph || '';
+    s.addEventListener('change', function () { o[k] = s.value; if (on) on(); });
+    return s;
+  }
+  function partes(v) { return String(v || '').split(/\s*\/\s*/).filter(function (x) { return x.trim(); }); }
+  var dlN = 0;
+  function datalist(k, multi) {
+    var set = {};
+    J.store.list().forEach(function (p) { (multi ? partes(p.header[k]) : [p.header[k]]).forEach(function (x) { if (x) set[x] = 1; }); });
+    var d = el('datalist', { id: 'dl-' + k + (++dlN) });
+    Object.keys(set).forEach(function (v) { d.appendChild(el('option', { value: v })); });
+    return d;
+  }
+  // Varios nombres en un mismo campo (se guardan separados por " / ")
+  function multiInput(host, label, k, draft, textoAdd) {
+    var vals = partes(draft[k]); if (!vals.length) vals = [''];
+    var dl = datalist(k, true), box = el('div');
+    function sync() { draft[k] = vals.map(function (x) { return x.trim(); }).filter(Boolean).join(' / '); }
+    function pintar(enfocarUltimo) {
+      box.innerHTML = '';
+      vals.forEach(function (v, i) {
+        var inp = el('input', { type: 'text', class: 'jp-in', placeholder: 'Seleccione o escriba...', value: v, list: dl.id });
+        inp.addEventListener('input', function () { vals[i] = inp.value; sync(); });
+        var fila = el('div', { class: 'jp-multi' }, [inp]);
+        if (vals.length > 1) fila.appendChild(el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { vals.splice(i, 1); sync(); pintar(); } }));
+        box.appendChild(fila);
+        if (enfocarUltimo && i === vals.length - 1) setTimeout(function () { try { inp.focus(); } catch (e) { /* sin foco */ } }, 0);
+      });
+      box.appendChild(el('button', { type: 'button', class: 'jp-chip', text: '+ ' + textoAdd, onclick: function () { vals.push(''); pintar(true); } }));
+    }
+    pintar();
+    host.appendChild(el('div', { class: 'jp-mf full' }, [el('label', { text: label }), dl, box]));
+  }
+
+  /* ---------- Ventana modal ---------- */
+  function abrirModal(titulo, armar, onGuardar, textoGuardar) {
+    var ov = el('div', { class: 'jp-ov' }), m = el('div', { class: 'jp-modal', role: 'dialog', 'aria-modal': 'true' });
+    function cerrar() { ov.remove(); }
+    m.appendChild(el('h3', { text: titulo }));
+    armar(m);
+    m.appendChild(el('div', { class: 'jp-modal-acc' }, [
+      el('button', { type: 'button', class: 'jp-b gris', text: 'Cancelar', onclick: cerrar }),
+      el('button', { type: 'button', class: 'jp-b verde', text: textoGuardar || 'Guardar y Aplicar', onclick: function () { if (onGuardar() !== false) cerrar(); } })
+    ]));
+    ov.appendChild(m);
+    document.body.appendChild(ov);
+  }
+
+  /* ---------- Modal: Postura y Personal ---------- */
+  function modalPostura() {
+    var p = P(), d = {};
+    ['mina', 'nivel', 'bloque', 'idTronadura', 'encSeg', 'supJej', 'supDet', 'perforistaDet'].forEach(function (k) { d[k] = p.header[k] || ''; });
+    abrirModal('Configuración de Postura y Personal', function (m) {
+      m.appendChild(el('h4', { text: '1. Ubicación y Postura' }));
+      var g = el('div', { class: 'jp-mgrid' });
+      g.appendChild(mf('Mina:', txt(d, 'mina')));
+      g.appendChild(mf('Nivel:', sel(d, 'nivel', 'nivel')));
+      g.appendChild(mf('Bloque:', sel(d, 'bloque', 'bloque')));
+      g.appendChild(mf('ID Tronadura:', txt(d, 'idTronadura', 'Ej. TR-04')));
+      m.appendChild(g);
+      m.appendChild(el('h4', { text: '2. Personal Responsable' }));
+      var g2 = el('div', { class: 'jp-mgrid' });
+      g2.appendChild(mf('Encargado Seguimiento JeJ (Tú):', txt(d, 'encSeg', '', 'gris'), 'full'));
+      var dlS = datalist('supJej', false);
+      g2.appendChild(dlS);
+      g2.appendChild(mf('Supervisor JeJ:', txt(d, 'supJej', 'Seleccione o escriba...', '', dlS.id), 'full'));
+      multiInput(g2, 'Supervisor(es) DET:', 'supDet', d, 'Agregar otro Supervisor DET');
+      multiInput(g2, 'Perforista(s) DET:', 'perforistaDet', d, 'Agregar otro Perforista DET');
+      m.appendChild(g2);
+    }, function () {
+      Object.keys(d).forEach(function (k) { p.header[k] = d[k]; });
+      J.store.touch(); refrescarToolbar(); render();
     });
-    return el('div', { class: 'jp-bloque' }, [el('h3', { text: titulo }), body]);
   }
 
-  function cabeza(host, titulo, ayuda) {
-    host.appendChild(el('h2', { class: 'jp-paso-titulo', text: titulo }));
-    if (ayuda) host.appendChild(el('p', { class: 'jp-paso-ayuda', text: ayuda }));
+  /* ---------- Modal: datos de plantilla (horarios, equipo, labor, pérdidas) ---------- */
+  function normalizarTiempo(v) {
+    v = String(v).trim(); if (!v) return '';
+    var mm = v.match(/^(\d{1,2}):(\d{1,2})$/);
+    if (mm) return ('0' + mm[1]).slice(-2) + ':' + ('0' + mm[2]).slice(-2);
+    if (/^\d+$/.test(v)) return J.fmtHM(+v);   // 90 -> 01:30 (minutos)
+    return null;
+  }
+  function modalPlantilla() {
+    var p = P(), d = {}, perd = p.perdidas.map(function (x) { return { desc: x.desc, tiempo: x.tiempo }; });
+    ['hLlegJej', 'hSalJej', 'hLlegPyt', 'hSalPyt', 'hIniPerf', 'hFinPerf', 'diametro', 'idEquipo', 'numZanja', 'calleZanja1', 'calleZanja2', 'fase', 'calleUcl', 'paradaIni', 'paradaFin']
+      .forEach(function (k) { d[k] = p.header[k] || ''; });
+    if (!perd.length) perd.push({ desc: '', tiempo: '' });
+
+    abrirModal('Completar Datos de Plantilla (Horarios y Operación)', function (m) {
+      /* helpers de diseño */
+      function sec(icono, titulo, cls) {
+        var body = el('div', { class: 'pl-sec-b' });
+        var box = el('div', { class: 'pl-sec ' + (cls || '') }, [el('div', { class: 'pl-sec-h' }, [el('span', { text: icono }), el('span', { text: titulo })]), body]);
+        m.appendChild(box);
+        return body;
+      }
+      function campoPl(label, ctrl, extra) {
+        var l = el('div', { class: 'pl-l' }, [el('span', { text: label })]);
+        if (extra) l.appendChild(extra);
+        return el('div', { class: 'pl-f' }, [l, ctrl]);
+      }
+      function horaPl(label, k) {
+        var inp = hora(d, k, calcs);
+        var ahora = el('button', { type: 'button', class: 'pl-ahora', text: 'Ahora', title: 'Poner la hora actual', onclick: function () {
+          var n = new Date(); inp.value = ('0' + n.getHours()).slice(-2) + ':' + ('0' + n.getMinutes()).slice(-2);
+          d[k] = inp.value; calcs();
+        } });
+        return campoPl(label, inp, ahora);
+      }
+      function fila(hijos) { return el('div', { class: 'pl-fila' }, hijos); }
+
+      /* 1. Horarios */
+      var oPost = el('output', { text: J.fmtHM(J.tPostura(d)) });
+      var oPerf = el('output', { text: J.fmtHM(J.tPerforacion(d)) });
+      function calcs() { oPost.textContent = J.fmtHM(J.tPostura(d)); oPerf.textContent = J.fmtHM(J.tPerforacion(d)); }
+      var s1 = sec('⏱️', '1. Horarios', 'az');
+      s1.appendChild(el('p', { class: 'pl-sec-n', text: 'Toca «Ahora» para poner la hora actual. Los tiempos se calculan solos.' }));
+      s1.appendChild(el('div', { class: 'pl-grupo', text: '🚜 Postura JeJ' }));
+      s1.appendChild(fila([horaPl('Llegada', 'hLlegJej'), horaPl('Salida', 'hSalJej')]));
+      s1.appendChild(el('div', { class: 'pl-grupo', text: '🧨 Postura PyT' }));
+      s1.appendChild(fila([horaPl('Llegada', 'hLlegPyt'), horaPl('Salida', 'hSalPyt')]));
+      s1.appendChild(el('div', { class: 'pl-grupo', text: '⛏️ Perforación' }));
+      s1.appendChild(fila([horaPl('Inicio', 'hIniPerf'), horaPl('Fin', 'hFinPerf')]));
+      s1.appendChild(el('div', { class: 'pl-kpis' }, [
+        el('div', { class: 'pl-kpi' }, [el('span', { text: 'Tiempo en Postura' }), oPost]),
+        el('div', { class: 'pl-kpi' }, [el('span', { text: 'Tiempo en Perforación' }), oPerf])
+      ]));
+
+      /* 2. Equipo */
+      var s2 = sec('🛠️', '2. Equipo de Perforación', 'vd');
+      var tDiam = txt(d, 'diametro', 'Ej. 3.5'); tDiam.setAttribute('inputmode', 'decimal');
+      s2.appendChild(fila([
+        campoPl('Diámetro [pulg]', tDiam),
+        campoPl('ID del Equipo', txt(d, 'idEquipo', 'Ej. EQ-01'))
+      ]));
+
+      /* 3. Labor */
+      var s3 = sec('📍', '3. Zanja, Fase y Paradas', 'am');
+      var c1 = txt(d, 'calleZanja1', 'Ej. 41'), c2 = txt(d, 'calleZanja2', 'Ej. 43');
+      s3.appendChild(fila([
+        campoPl('Núm. Zanja', txt(d, 'numZanja', 'Ej. Z-01')),
+        campoPl('Calles Zanja (entre)', el('div', { class: 'pl-y' }, [c1, el('i', { text: 'y' }), c2]))
+      ]));
+      s3.appendChild(fila([
+        campoPl('Fase', sel(d, 'fase', 'fase', '-- Seleccione --')),
+        campoPl('Calle UCL', txt(d, 'calleUcl', 'Ej. UCL-01'))
+      ]));
+      s3.appendChild(fila([
+        campoPl('Parada Inicial', txt(d, 'paradaIni', 'Ej. P1')),
+        campoPl('Parada Final (neg)', txt(d, 'paradaFin', 'Ej. P5'))
+      ]));
+
+      /* 4. Pérdida operacional */
+      var s4 = sec('⚠️', '4. Pérdida Operacional Durante la Perforación', 'rj');
+      s4.appendChild(el('p', { class: 'pl-sec-n', text: 'Observación y tiempo (hh:mm). Si escribes solo minutos, por ejemplo 90, se convierte a 01:30.' }));
+      var dl = el('datalist', { id: 'dl-problemas' });
+      J.LISTAS.problemas.forEach(function (v) { dl.appendChild(el('option', { value: v })); });
+      var caja = el('div', { class: 'jp-perd' });
+      var total = el('div', { class: 'jp-perd-total' });
+      function actualizarTotal() {
+        var mins = J.totalPerdidas({ perdidas: perd });
+        total.innerHTML = '';
+        total.appendChild(document.createTextNode('Total pérdida operacional: ' + J.fmtHM(mins)));
+      }
+      function pintarPerd() {
+        caja.innerHTML = '';
+        caja.appendChild(el('div', { class: 'jp-perd-head' }, [el('span', { text: 'Observación' }), el('span', { text: 'Tiempo', style: 'text-align:center' }), el('span')]));
+        perd.forEach(function (x, i) {
+          var dd = el('input', { type: 'text', list: 'dl-problemas', value: x.desc || '', placeholder: 'Describe la pérdida', 'aria-label': 'Observación de la pérdida' });
+          var tt = el('input', { type: 'text', class: 't', value: x.tiempo || '', placeholder: 'hh:mm', maxlength: 5, inputmode: 'numeric', 'aria-label': 'Tiempo perdido (hh:mm)' });
+          dd.addEventListener('input', function () { x.desc = dd.value; });
+          tt.addEventListener('input', function () { x.tiempo = tt.value; actualizarTotal(); });
+          tt.addEventListener('blur', function () {
+            var v = normalizarTiempo(tt.value);
+            if (v === null) { tt.value = ''; x.tiempo = ''; } else { tt.value = v; x.tiempo = v; }
+            actualizarTotal();
+          });
+          var del = el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { perd.splice(i, 1); if (!perd.length) perd.push({ desc: '', tiempo: '' }); pintarPerd(); } });
+          caja.appendChild(el('div', { class: 'jp-perd-fila' }, [dd, tt, del]));
+        });
+        caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'jp-btn', text: '＋ Agregar pérdida', onclick: function () { perd.push({ desc: '', tiempo: '' }); pintarPerd(); } })]));
+        caja.appendChild(total);
+        actualizarTotal();
+      }
+      pintarPerd();
+      s4.appendChild(dl); s4.appendChild(caja);
+    }, function () {
+      var bad = false;
+      perd.forEach(function (x) { if (x.tiempo && normalizarTiempo(x.tiempo) === null) bad = true; });
+      if (bad) { alert('Revisa los tiempos de pérdida: usa el formato hh:mm.'); return false; }
+      Object.keys(d).forEach(function (k) { p.header[k] = d[k]; });
+      p.perdidas = perd.filter(function (x) { return x.desc || x.tiempo; }).map(function (x) { return { desc: x.desc, tiempo: normalizarTiempo(x.tiempo) || '' }; });
+      J.store.touch(); render();
+    });
   }
 
-  /* ---------- Paso 1: Identificación ---------- */
-  function pasoIdentificacion(host, p) {
-    cabeza(host, 'Identificación', 'Completa los datos del turno. Después seguimos con los horarios y el equipo.');
-    host.appendChild(bloque('Identificación', CAB1, p));
-  }
-  /* ---------- Paso 2: Horarios y equipo ---------- */
-  function pasoHorarios(host, p) {
-    cabeza(host, 'Horarios y equipo');
-    host.appendChild(bloque('Horarios y equipo', CAB2, p));
-  }
-  /* ---------- Paso 3: Labor ---------- */
-  function pasoLabor(host, p) {
-    cabeza(host, 'Labor');
-    host.appendChild(bloque('Labor', CAB3, p));
+  /* ---------- Modal: observaciones en terreno ---------- */
+  function modalObs() {
+    var p = P(), obs = p.obs.filter(Boolean); if (!obs.length) obs = [''];
+    abrirModal('Observaciones en terreno', function (m) {
+      var box = el('div');
+      function pintar(enfocar) {
+        box.innerHTML = '';
+        obs.forEach(function (v, i) {
+          var inp = el('input', { type: 'text', class: 'jp-in', value: v, placeholder: 'Observación ' + (i + 1) });
+          inp.addEventListener('input', function () { obs[i] = inp.value; });
+          var fila = el('div', { class: 'jp-multi' }, [inp]);
+          if (obs.length > 1) fila.appendChild(el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { obs.splice(i, 1); pintar(); } }));
+          box.appendChild(fila);
+          if (enfocar && i === obs.length - 1) setTimeout(function () { try { inp.focus(); } catch (e) { /* sin foco */ } }, 0);
+        });
+        box.appendChild(el('button', { type: 'button', class: 'jp-chip', text: '+ Agregar otra observación', onclick: function () { obs.push(''); pintar(true); } }));
+      }
+      pintar();
+      m.appendChild(el('div', { style: 'margin-top:14px' }, [box]));
+    }, function () {
+      p.obs = obs.map(function (x) { return x.trim(); }).filter(Boolean);
+      while (p.obs.length < 10) p.obs.push('');
+      J.store.touch(); render();
+    });
   }
 
-  /* ---------- Paso 4: Registro por tiro (dato por dato) ---------- */
+  /* ---------- Paso 1: Datos generales y turno ---------- */
+  function vistaDatos(host, p) {
+    var h = p.header, card = el('div', { class: 'jp-card' });
+    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 1: Datos Generales y Turno' }));
+    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Ingrese los datos básicos del seguimiento' }));
+
+    card.appendChild(el('label', { class: 'jp-lbl', text: 'Fecha:' }));
+    var f = el('input', { type: 'date', class: 'jp-in gris', value: h.fecha || '' });
+    f.addEventListener('input', function () { h.fecha = f.value; etiquetaPlanilla(p); J.store.touch(); });
+    card.appendChild(f);
+
+    card.appendChild(el('label', { class: 'jp-lbl', text: 'Turno:' }));
+    card.appendChild(sel(h, 'turno', 'turno', '-- Seleccione Turno --', function () { etiquetaPlanilla(p); J.store.touch(); }));
+
+    card.appendChild(el('div', { class: 'jp-sec' }, [
+      el('span', { text: '2. Datos de Postura y Personal' }),
+      el('button', { type: 'button', class: 'jp-b cel chico', text: '⚙️ Ingreso / Editar Datos', onclick: modalPostura })
+    ]));
+    function negrita(t, v) { var s = el('div'); s.appendChild(el('b', { text: t + ': ' })); s.appendChild(document.createTextNode(v)); return s; }
+    var linea1 = el('div'); linea1.appendChild(el('b', { text: 'Mina: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.mina) + ' | '));
+    linea1.appendChild(el('b', { text: 'Nivel: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.nivel) + ' | '));
+    linea1.appendChild(el('b', { text: 'Bloque: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.bloque)));
+    card.appendChild(el('div', { class: 'jp-resumen-box' }, [
+      linea1, negrita('ID Tronadura', sinAsignar(h.idTronadura)), el('hr'),
+      negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
+      negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', ')))
+    ]));
+
+    card.appendChild(el('div', { class: 'jp-fila2' }, [
+      el('a', { href: '../index.html', class: 'jp-b gris', text: 'Volver al Menú' }),
+      el('button', { type: 'button', class: 'jp-b azul', text: 'Ir a Gestión de ID ➜', onclick: function () { ir('id'); } })
+    ]));
+    host.appendChild(card);
+  }
+
+  /* ---------- Paso 2: Gestión de ID de trabajo ---------- */
+  function vistaId(host, p) {
+    var card = el('div', { class: 'jp-card' });
+    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 2: Gestión de ID de Trabajo' }));
+    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Cree un nuevo ID o seleccione uno ya existente' }));
+
+    /* crear */
+    var inp = el('input', { type: 'text', class: 'jp-in', placeholder: 'Ej. TRABAJO-01', 'aria-label': 'Nuevo ID de trabajo' });
+    var err = el('div', { class: 'jp-q-error' });
+    function crear() {
+      var n = inp.value.trim();
+      if (!n) { err.textContent = 'Escribe un nombre para el ID de trabajo.'; return; }
+      var ya = p.trabajos.filter(function (t) { return t.toLowerCase() === n.toLowerCase(); })[0];
+      if (ya) n = ya; else p.trabajos.push(n);
+      p.trabajoActual = n; ui.nuevaParada = paradasDe(p, n).length === 0; ui.busca = ''; J.store.touch(); ir('resumen');
+    }
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); crear(); } });
+    card.appendChild(el('div', { class: 'jp-panel' }, [
+      el('div', { class: 'jp-panel-t', text: '➕ CREAR NUEVO ID DE TRABAJO:' }), inp, err,
+      el('button', { type: 'button', class: 'jp-b verde', style: 'margin-top:10px', text: 'Crear e Ir a Paradas', onclick: crear })
+    ]));
+
+    /* existente */
+    var s = el('select', { class: 'jp-in', 'aria-label': 'ID de trabajo guardado' });
+    s.appendChild(el('option', { value: '', text: '-- Seleccione un ID guardado --' }));
+    p.trabajos.forEach(function (t) {
+      var n = tirosDe(p, t).length, o = el('option', { value: t, text: t + ' · ' + n + ' tiro(s)' });
+      if (t === p.trabajoActual) o.selected = true;
+      s.appendChild(o);
+    });
+    var err2 = el('div', { class: 'jp-q-error' });
+    var usar = el('button', { type: 'button', class: 'jp-b cel', text: 'Usar Seleccionado ➜', onclick: function () {
+      if (!s.value) { err2.textContent = 'Selecciona un ID de trabajo.'; return; }
+      p.trabajoActual = s.value; ui.nuevaParada = false; ui.busca = ''; J.store.touch(); ir('resumen');
+    } });
+    var borrar = el('button', { type: 'button', class: 'jp-b rojo', text: '🗑️ Eliminar', onclick: function () {
+      if (!s.value) { err2.textContent = 'Selecciona un ID de trabajo.'; return; }
+      var t = s.value, n = tirosDe(p, t).length;
+      if (!confirm('¿Eliminar el ID de trabajo "' + t + '"' + (n ? ' y sus ' + n + ' tiro(s)' : '') + '? No se puede deshacer.')) return;
+      p.filas = p.filas.filter(function (r) { return r.trabajo !== t; });
+      p.trabajos.splice(p.trabajos.indexOf(t), 1);
+      if (p.trabajoActual === t) p.trabajoActual = p.trabajos[0] || '';
+      J.store.touch(); render();
+    } });
+    card.appendChild(el('div', { class: 'jp-panel' }, [
+      el('div', { class: 'jp-panel-t', text: '📁 SELECCIONAR ID DE TRABAJO EXISTENTE:' }), s, err2,
+      el('div', { class: 'jp-fila2', style: 'margin-top:10px' }, [usar, borrar])
+    ]));
+    card.appendChild(el('button', { type: 'button', class: 'jp-b gris chico', style: 'margin-top:16px', text: '⬅ Volver al Paso 1', onclick: function () { ir('datos'); } }));
+    host.appendChild(card);
+    setTimeout(function () { try { if (!p.trabajos.length) inp.focus(); } catch (e) { /* sin foco */ } }, 0);
+  }
+
+  /* ---------- Descargas (reemplaza al antiguo «Guardar Registro Completo») ---------- */
+  function bloqueDescarga(p) {
+    var s = el('select', { class: 'jp-in', 'aria-label': 'Referencia del abatimiento' }, [
+      el('option', { value: 'horizontal', text: 'horizontal' }), el('option', { value: 'vertical', text: 'vertical' })]);
+    s.value = p.refAbat || 'horizontal';
+    s.addEventListener('change', function () { p.refAbat = s.value; J.store.touch(); });
+    return el('div', { class: 'jp-descarga' }, [
+      el('label', { class: 'jp-lbl', style: 'margin-top:4px', text: 'Abatimiento de los diagramas de disparo, medido desde la:' }), s,
+      el('div', { class: 'jp-pila', style: 'margin-top:12px' }, [
+        el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(P()); } }),
+        el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(P()); } })
+      ]),
+      el('small', { text: 'Los datos se guardan automáticamente en este dispositivo.' })
+    ]);
+  }
+
+  /* ---------- Resumen de paradas del trabajo ---------- */
+  function vistaResumen(host, p) {
+    var t = p.trabajoActual, card = el('div', { class: 'jp-card' });
+    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Resumen de Paradas - Trabajo: ' + t }));
+    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Revise sus registros guardados' }));
+    if (ui.aviso) card.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
+
+    var busca = el('input', { type: 'search', class: 'jp-in', placeholder: '🔍 Buscar ID de trabajo o parada...', value: ui.busca, 'aria-label': 'Buscar parada' });
+    card.appendChild(busca);
+    var caja = el('div', { class: 'jp-lista-paradas' });
+    function pintarLista() {
+      caja.innerHTML = '';
+      var q = ui.busca.trim().toLowerCase(), todas = paradasDe(p, t);
+      var ps = todas.filter(function (x) { return !q || x.toLowerCase().indexOf(q) >= 0 || t.toLowerCase().indexOf(q) >= 0; });
+      if (!todas.length) caja.appendChild(el('div', { class: 'jp-vacio', text: 'Este trabajo aún no tiene paradas. Toca «+ Agregar parada» para registrar la primera.' }));
+      else if (!ps.length) caja.appendChild(el('div', { class: 'jp-vacio', text: 'Ninguna parada coincide con la búsqueda.' }));
+      ps.forEach(function (par) {
+        var rows = tirosDe(p, t, par), m = metros(rows);
+        caja.appendChild(el('div', { class: 'jp-parada' }, [
+          el('div', null, [el('div', { class: 'jp-parada-t', text: '📍 Parada: ' + (par || '—') }),
+            el('div', { class: 'jp-parada-s', text: rows.length + (rows.length === 1 ? ' tiro registrado' : ' tiros registrados') + (m ? ' · ' + J.fmt(m, 1) + ' m perforados' : '') })]),
+          el('div', { class: 'jp-parada-b' }, [
+            el('button', { type: 'button', class: 'jp-b editar chico', text: '✏️ Editar', onclick: function () { ui.parada = par; ir('parada'); } }),
+            el('button', { type: 'button', class: 'jp-b rojo chico', title: 'Eliminar parada', text: '🗑️', onclick: function () {
+              if (!confirm('¿Eliminar la parada "' + par + '" con sus ' + rows.length + ' tiro(s)?')) return;
+              p.filas = p.filas.filter(function (r) { return !(r.trabajo === t && String(r.parada) === par); });
+              J.store.touch(); render();
+            } })
+          ])
+        ]));
+      });
+    }
+    busca.addEventListener('input', function () { ui.busca = busca.value; pintarLista(); });
+    pintarLista();
+    card.appendChild(el('div', { class: 'jp-panel' }, [caja]));
+
+    /* agregar parada */
+    if (ui.nuevaParada) {
+      var np = el('input', { type: 'text', class: 'jp-in', placeholder: 'Ej. P1', value: sugerirParada(p), 'aria-label': 'Número de parada' });
+      var e1 = el('div', { class: 'jp-q-error' });
+      var crearParada = function () {
+        var v = np.value.trim();
+        if (!v) { e1.textContent = 'Escribe el número o nombre de la parada.'; return; }
+        ui.parada = v; ui.nuevaParada = false;
+        if (tirosDe(p, t, v).length) { ir('parada'); return; }
+        nuevoTiro(p);
+      };
+      np.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); crearParada(); } });
+      card.appendChild(el('div', { class: 'jp-panel' }, [
+        el('div', { class: 'jp-panel-t', text: '📍 NUEVA PARADA:' }), np, e1,
+        el('div', { class: 'jp-fila2', style: 'margin-top:10px' }, [
+          el('button', { type: 'button', class: 'jp-b verde', text: 'Crear y registrar tiro', onclick: crearParada }),
+          el('button', { type: 'button', class: 'jp-b gris', text: 'Cancelar', onclick: function () { ui.nuevaParada = false; render(); } })
+        ])
+      ]));
+      setTimeout(function () { try { np.focus(); np.select(); } catch (e) { /* sin foco */ } }, 0);
+    } else {
+      card.appendChild(el('button', { type: 'button', class: 'jp-b cel', style: 'margin-top:12px', text: '+ Agregar parada', onclick: function () { ui.nuevaParada = true; ui.aviso = ''; render(); } }));
+    }
+
+    card.appendChild(el('div', { class: 'jp-pila' }, [
+      el('div', { class: 'jp-fila2', style: 'margin-top:0' }, [
+        el('button', { type: 'button', class: 'jp-b cel', text: '+ Registrar Otro ID de Trabajo', onclick: function () { ir('id'); } }),
+        el('button', { type: 'button', class: 'jp-b nar', text: '📝 Agregar Observación', onclick: modalObs })
+      ]),
+      el('button', { type: 'button', class: 'jp-b teal', text: '📋 Rellenar Datos Faltantes de Plantilla (Horarios/Operación)', onclick: modalPlantilla }),
+      bloqueDescarga(p)
+    ]));
+    host.appendChild(card);
+  }
+
+  /* ---------- Tiros de una parada (dato por dato) ---------- */
   function camposTiro(row) {
     return J.COLS.perf.filter(function (c) {
-      if (c.type === 'calc' || c.sinCaptura) return false;
+      if (c.type === 'calc' || c.sinCaptura || c.k === 'parada') return false;
       if (c.k === 'alturaBarra' && row.problema !== 'Barra Pegada') return false; // solo si hubo barra pegada
       return true;
     });
   }
   function filaAnterior(p, row) {
-    var i = p.filas.indexOf(row);
-    return i > 0 ? p.filas[i - 1] : null;
+    var rows = tirosDe(p, row.trabajo, row.parada), i = rows.indexOf(row);
+    return i > 0 ? rows[i - 1] : null;
   }
   function calcTexto(c, row) {
     if (c.k === 'mPerf') {
@@ -1170,25 +1624,25 @@
   }
 
   function nuevoTiro(p) {
-    var last = p.filas[p.filas.length - 1], r = J.store.filaVaciaPerf();
-    if (last) {
-      r.parada = last.parada;
-      if (/^\d+$/.test(String(last.tiro).trim())) r.tiro = String(parseInt(last.tiro, 10) + 1);
-    } else if (p.header.paradaIni) {
-      r.parada = p.header.paradaIni;
-    }
-    p.filas.push(r); J.store.touch();
-    ui.tiro = { row: r, nuevo: true, i: 0, err: '' }; ui.aviso = '';
+    var t = p.trabajoActual, rows = tirosDe(p, t, ui.parada), last = rows[rows.length - 1], r = J.store.filaVaciaPerf();
+    r.trabajo = t; r.parada = ui.parada;
+    if (last && /^\d+$/.test(String(last.tiro).trim())) r.tiro = String(parseInt(last.tiro, 10) + 1);
+    // el tiro se inserta junto a los de su parada (o de su trabajo) para que el Excel quede ordenado
+    var ref = last || tirosDe(p, t).slice(-1)[0], idx = ref ? p.filas.indexOf(ref) + 1 : p.filas.length;
+    p.filas.splice(idx, 0, r); J.store.touch();
+    ui.tiro = { row: r, nuevo: true, i: 0, err: '' }; ui.aviso = ''; ui.vista = 'parada';
     render();
   }
   function editarTiro(p, row) { ui.tiro = { row: row, nuevo: false, i: 0, err: '' }; ui.aviso = ''; render(); }
   function cancelarTiro(p) {
     var t = ui.tiro;
     if (t.nuevo) { var i = p.filas.indexOf(t.row); if (i >= 0) p.filas.splice(i, 1); }
-    ui.tiro = null; ui.aviso = ''; J.store.touch(); render();
+    ui.tiro = null; ui.aviso = ''; J.store.touch();
+    if (!tirosDe(p, p.trabajoActual, ui.parada).length) ui.vista = 'resumen';
+    render();
   }
   function terminarTiro(p) {
-    ui.aviso = nombreTiro(ui.tiro.row) + ' guardado. Puedes registrar otro tiro o continuar con la pérdida operacional.';
+    ui.aviso = nombreTiro(ui.tiro.row) + ' guardado. Puedes registrar otro tiro o volver al resumen de paradas.';
     ui.tiro = null; J.store.touch(); render();
   }
   function avanzar(p) {
@@ -1245,17 +1699,17 @@
     if (ct !== null) { calcBox = el('div', { class: 'jp-q-calc', text: ct }); q.appendChild(calcBox); }
     if (t.err) q.appendChild(el('div', { class: 'jp-q-error', text: t.err }));
 
-    // Atajo: repetir el valor del tiro anterior (parada y tiro ya vienen sugeridos)
+    // Atajo: repetir el valor del tiro anterior de la misma parada
     var pv = prev ? (c.k === 'hIni' ? prev.hFin : prev[c.k]) : '';
-    if (pv && !row[c.k] && c.k !== 'parada' && c.k !== 'tiro') {
-      q.appendChild(el('div', { style: 'margin-top:6px' }, [el('button', { type: 'button', class: 'jp-chip',
+    if (pv && !row[c.k] && c.k !== 'tiro') {
+      q.appendChild(el('div', { style: 'margin-top:6px;text-align:center' }, [el('button', { type: 'button', class: 'jp-chip',
         text: (c.k === 'hIni' ? 'Usar hora de término del tiro anterior: ' : 'Usar el del tiro anterior: ') + pv,
         onclick: function () { row[c.k] = pv; J.store.touch(); render(); } })]));
     }
 
     var acc = el('div', { class: 'jp-q-acciones' }, [
       el('button', { type: 'button', class: 'jp-btn', text: '← Anterior', disabled: t.i === 0 ? 'disabled' : null, onclick: retroceder }),
-      el('button', { type: 'button', class: 'jp-btn', text: c.type === 'select' ? (c.k === 'problema' ? 'Sin problemas' : 'Omitir') : 'Omitir', onclick: function () {
+      el('button', { type: 'button', class: 'jp-btn', text: c.k === 'problema' ? 'Sin problemas' : 'Omitir', onclick: function () {
         row[c.k] = ''; if (c.k === 'problema') row.alturaBarra = ''; J.store.touch(); avanzar(p);
       } }),
       el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: t.i >= cs.length - 1 ? '✔ Guardar tiro' : 'Siguiente →', onclick: function () { avanzar(p); } }),
@@ -1275,148 +1729,93 @@
     if (inp) setTimeout(function () { try { inp.focus(); if (inp.select) inp.select(); } catch (e) { /* sin foco */ } }, 0);
   }
 
-  function listaTiros(host, p) {
-    var filas = p.filas;
-    if (ui.aviso) host.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
+  function vistaParada(host, p) {
+    if (ui.tiro) { preguntaTiro(host, p); return; }
+    var t = p.trabajoActual, par = ui.parada, filas = tirosDe(p, t, par), card = el('div', { class: 'jp-card ancha' });
+    card.appendChild(el('h2', { class: 'jp-card-t', text: '📍 Parada: ' + par }));
+    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Trabajo: ' + t + ' · Cada tiro se registra dato por dato. Enter o «Siguiente» avanza; en las listas basta con tocar la opción.' }));
+    if (ui.aviso) card.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
     if (!filas.length) {
-      host.appendChild(el('div', { class: 'jp-vacio', text: 'Aún no hay tiros. Toca «Agregar tiro»: te voy preguntando cada dato, uno por uno.' }));
+      card.appendChild(el('div', { class: 'jp-vacio', text: 'Aún no hay tiros en esta parada. Toca «Agregar tiro».' }));
     } else {
-      var R = J.resumen(p);
-      var tb = el('tbody');
+      var tb = el('tbody'), mDis = 0, mPerf = 0, sc = 0, nc = 0;
       filas.forEach(function (r) {
+        var d = J.num(r.mDiseno), m = J.num(r.mPerf);
+        if (!isNaN(d)) mDis += d; if (!isNaN(m)) mPerf += m;
+        if (!isNaN(d) && !isNaN(m)) { sc += J.calc.cumpl(r); nc++; }
         tb.appendChild(el('tr', null, [
-          el('td', { text: r.parada || '—' }), el('td', { text: r.tiro || '—' }), el('td', { text: r.mDiseno || '—' }), el('td', { text: r.mPerf || '—' }),
+          el('td', { text: r.tiro || '—' }), el('td', { text: r.mDiseno || '—' }), el('td', { text: r.mPerf || '—' }),
           el('td', { text: r.mDiseno && r.mPerf ? Math.round(J.calc.cumpl(r) * 100) + '%' : '—' }),
           el('td', { text: r.abat ? r.abat + '°' : '—' }), el('td', { text: r.estado || '—' }), el('td', { text: r.problema || '—' }),
-          el('td', null, [
+          el('td', null, [el('div', { class: 'acc' }, [
             el('button', { type: 'button', class: 'jp-link', text: 'Editar', onclick: function () { editarTiro(p, r); } }),
             el('button', { type: 'button', class: 'jp-x', title: 'Eliminar tiro', text: '×', onclick: function () {
-              if (confirm('¿Eliminar ' + nombreTiro(r) + '?')) { p.filas.splice(p.filas.indexOf(r), 1); J.store.touch(); ui.aviso = ''; render(); }
+              if (confirm('¿Eliminar ' + nombreTiro(r) + '?')) {
+                p.filas.splice(p.filas.indexOf(r), 1); J.store.touch(); ui.aviso = '';
+                if (!tirosDe(p, t, par).length) ui.vista = 'resumen';
+                render();
+              }
             } })
-          ])
+          ])])
         ]));
       });
-      var tf = el('tfoot', null, [el('tr', null, [el('td', { text: 'Total' }), el('td', { text: String(R.nTiros) }), el('td', { text: J.fmt(R.mDis, 1) }), el('td', { text: J.fmt(R.mPerf, 1) }), el('td', { text: pctTxt(R.cumplProm) }), el('td', { colspan: '4' })])]);
-      var tabla = el('table', { class: 'jp-tabla-simple' }, [
-        el('thead', null, [el('tr', null, ['Parada', 'Tiro', 'Diseño [m]', 'Perforado [m]', 'Cumpl.', 'Abat.', 'Estado', 'Problema', ''].map(function (x) { return el('th', { text: x }); }))]),
-        tb, tf]);
-      host.appendChild(el('div', { class: 'jp-scroll' }, [tabla]));
+      var tf = el('tfoot', null, [el('tr', null, [el('td', { text: 'Total' }), el('td', { text: J.fmt(mDis, 1) }), el('td', { text: J.fmt(mPerf, 1) }), el('td', { text: pctTxt(nc ? sc / nc : NaN) }), el('td', { colspan: '4' })])]);
+      card.appendChild(el('div', { class: 'jp-scroll sin-scroll' }, [el('table', { class: 'jp-tabla-simple jp-tabla-tiros' }, [
+        el('thead', null, [el('tr', null, ['Tiro', 'Diseño [m]', 'Perforado [m]', 'Cumpl.', 'Abat.', 'Estado', 'Problema', ''].map(function (x) { return el('th', { text: x }); }))]),
+        tb, tf])]));
     }
-    host.appendChild(el('button', { type: 'button', class: 'jp-btn jp-btn-primary jp-btn-grande', text: '＋ Agregar tiro', onclick: function () { nuevoTiro(p); } }));
-  }
-  function pctTxt(v) { return isFinite(v) ? Math.round(v * 100) + '%' : '—'; }
-
-  function pasoTiros(host, p) {
-    if (ui.tiro) { preguntaTiro(host, p); return; }
-    cabeza(host, 'Registro por tiro', 'Cada tiro se registra dato por dato. Enter o «Siguiente» avanza; en las listas basta con tocar la opción.');
-    listaTiros(host, p);
+    card.appendChild(el('button', { type: 'button', class: 'jp-b verde', text: '＋ Agregar tiro', onclick: function () { nuevoTiro(p); } }));
+    card.appendChild(el('button', { type: 'button', class: 'jp-b gris', style: 'margin-top:10px', text: '← Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } }));
+    host.appendChild(card);
   }
 
-  /* ---------- Paso 5: Pérdida operacional durante la perforación ---------- */
-  function normalizarTiempo(v) {
-    v = String(v).trim(); if (!v) return '';
-    var mm = v.match(/^(\d{1,2}):(\d{1,2})$/);
-    if (mm) return ('0' + mm[1]).slice(-2) + ':' + ('0' + mm[2]).slice(-2);
-    if (/^\d+$/.test(v)) return J.fmtHM(+v);   // 90 -> 01:30 (minutos)
-    return null;
-  }
-  function pasoPerdidas(host, p) {
-    cabeza(host, 'Pérdida operacional durante la perforación', 'Anota cada pérdida con su observación y el tiempo (hh:mm). Si escribes solo minutos, por ejemplo 90, se convierte a 01:30.');
-    if (!p.perdidas.length) p.perdidas.push({ desc: '', tiempo: '' });
-    var caja = el('div', { class: 'jp-perd' });
-    caja.appendChild(el('div', { class: 'jp-perd-head' }, [el('span', { text: 'Observación' }), el('span', { text: 'Tiempo', style: 'text-align:center' }), el('span')]));
-    var dl = el('datalist', { id: 'dl-problemas' });
-    J.LISTAS.problemas.forEach(function (v) { dl.appendChild(el('option', { value: v })); });
-    caja.appendChild(dl);
-    var total = el('div', { class: 'jp-perd-total' });
-    function actualizar() {
-      var m = J.totalPerdidas(p);
-      total.innerHTML = '';
-      total.appendChild(document.createTextNode('Total pérdida operacional: ' + J.fmtHM(m)));
-      total.appendChild(el('small', { text: '(' + Math.round(m) + ' min en ' + p.perdidas.filter(function (x) { return !isNaN(J.toMin(x.tiempo)); }).length + ' registro(s))' }));
-    }
-    p.perdidas.forEach(function (x, i) {
-      var d = el('input', { type: 'text', list: 'dl-problemas', value: x.desc || '', placeholder: 'Describe la pérdida', 'aria-label': 'Observación de la pérdida' });
-      var m = el('input', { type: 'text', class: 't', value: x.tiempo || '', placeholder: 'hh:mm', maxlength: 5, inputmode: 'numeric', 'aria-label': 'Tiempo perdido (hh:mm)' });
-      d.addEventListener('input', function () { x.desc = d.value; J.store.touch(); });
-      m.addEventListener('input', function () { x.tiempo = m.value; actualizar(); J.store.touch(); });
-      m.addEventListener('blur', function () {
-        var v = normalizarTiempo(m.value);
-        if (v === null) { m.value = ''; x.tiempo = ''; } else { m.value = v; x.tiempo = v; }
-        actualizar(); J.store.touch();
-      });
-      var del = el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { p.perdidas.splice(i, 1); J.store.touch(); render(); } });
-      caja.appendChild(el('div', { class: 'jp-perd-fila' }, [d, m, del]));
-    });
-    caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'jp-btn', text: '＋ Agregar pérdida', onclick: function () { p.perdidas.push({ desc: '', tiempo: '' }); J.store.touch(); render(); } })]));
-    caja.appendChild(total);
-    actualizar();
-    host.appendChild(caja);
-  }
-
-  /* ---------- Paso 6: Finalizar ---------- */
-  function pasoFinal(host, p) {
-    cabeza(host, 'Finalizar', 'Revisa el resumen y descarga la planilla y el informe técnico.');
-    var R = J.resumen(p);
-    host.appendChild(el('div', { class: 'jp-kpis' }, [
-      [R.nTiros, 'tiros registrados'], [J.fmt(R.mDis, 1) + ' m', 'metros de diseño'], [J.fmt(R.mPerf, 1) + ' m', 'metros perforados'],
-      [isFinite(R.cumplProm) ? Math.round(R.cumplProm * 100) + '%' : '—', 'cumplimiento prom. carga de diseño'],
+  /* ---------- Finalizar: resumen y descargas ---------- */
+  function vistaFinal(host, p) {
+    var R = J.resumen(p), card = el('div', { class: 'jp-card' });
+    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Registro Completo' }));
+    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Registro guardado en este dispositivo. Descarga la planilla y el informe técnico.' }));
+    card.appendChild(el('div', { class: 'jp-kpis' }, [
+      [R.nTiros, 'tiros registrados'], [p.trabajos.length, 'ID(s) de trabajo'], [R.paradas.length, 'paradas'],
+      [J.fmt(R.mDis, 1) + ' m', 'metros de diseño'], [J.fmt(R.mPerf, 1) + ' m', 'metros perforados'],
+      [pctTxt(R.cumplProm), 'cumplimiento prom. carga de diseño'],
       [J.fmtHM(R.tPerf), 'tiempo en perforación'], [J.fmtHM(R.tPerdidas), 'pérdida operacional total']
     ].map(function (k) { return el('div', { class: 'jp-kpi' }, [el('b', { text: String(k[0]) }), el('span', { text: k[1] })]); })));
-
-    var sel = el('select', { 'aria-label': 'Referencia del abatimiento' }, [
+    var s = el('select', { class: 'jp-in', 'aria-label': 'Referencia del abatimiento' }, [
       el('option', { value: 'horizontal', text: 'horizontal' }), el('option', { value: 'vertical', text: 'vertical' })]);
-    sel.value = p.refAbat || 'horizontal';
-    sel.addEventListener('change', function () { p.refAbat = sel.value; J.store.touch(); });
-    host.appendChild(el('div', { class: 'jp-opciones' }, [el('label', null, ['Para los diagramas, el abatimiento se mide desde la ', sel])]));
-
-    host.appendChild(el('h2', { text: 'Otras observaciones en terreno' }));
-    var ob = el('div', { class: 'jp-obs' });
-    p.obs.forEach(function (v, i) {
-      var inp = el('input', { type: 'text', value: v || '', 'aria-label': 'Observación ' + (i + 1) });
-      inp.addEventListener('input', function () { p.obs[i] = inp.value; J.store.touch(); });
-      ob.appendChild(inp);
-    });
-    host.appendChild(ob);
-
-    host.appendChild(el('div', { class: 'jp-descargas' }, [
-      el('button', { type: 'button', class: 'jp-btn jp-btn-primary jp-btn-grande', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(p); } }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-primary jp-btn-grande', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(p); } })
+    s.value = p.refAbat || 'horizontal';
+    s.addEventListener('change', function () { p.refAbat = s.value; J.store.touch(); });
+    card.appendChild(el('label', { class: 'jp-lbl', text: 'Para los diagramas de disparo, el abatimiento se mide desde la:' }));
+    card.appendChild(s);
+    card.appendChild(el('div', { class: 'jp-pila', style: 'margin-top:18px' }, [
+      el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(p); } }),
+      el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(p); } }),
+      el('button', { type: 'button', class: 'jp-b gris', text: '← Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } })
     ]));
+    host.appendChild(card);
   }
 
-  /* ---------- Render general ---------- */
-  var RENDERS = [pasoIdentificacion, pasoHorarios, pasoLabor, pasoTiros, pasoPerdidas, pasoFinal];
-
-  function irA(n) {
-    if (ui.tiro && ui.tiro.nuevo) { // al salir se descarta un tiro nuevo que quedó vacío
-      var p = J.store.current(), t = ui.tiro;
-      var vacio = J.COLS.perf.every(function (c) { return c.type === 'calc' || c.k === 'parada' || c.k === 'tiro' || !t.row[c.k]; });
+  /* ---------- Navegación y render ---------- */
+  function descartarTiroVacio(p) {
+    if (ui.tiro && ui.tiro.nuevo) {
+      var t = ui.tiro, vacio = J.COLS.perf.every(function (c) { return c.type === 'calc' || c.k === 'parada' || c.k === 'tiro' || c.k === 'trabajo' || !t.row[c.k]; });
       if (vacio) { var i = p.filas.indexOf(t.row); if (i >= 0) p.filas.splice(i, 1); }
     }
-    ui.tiro = null; ui.aviso = ''; ui.paso = n; render();
-    window.scrollTo(0, 0);
   }
-
+  function ir(v) {
+    descartarTiroVacio(P());
+    ui.tiro = null; ui.aviso = ''; ui.vista = v;
+    render(); window.scrollTo(0, 0);
+  }
+  var VISTAS = { datos: vistaDatos, id: vistaId, resumen: vistaResumen, parada: vistaParada, final: vistaFinal };
   function render() {
-    var p = J.store.current();
-    var pasos = U.$('#pasos'); pasos.innerHTML = '';
-    PASOS.forEach(function (nom, i) {
-      var b = el('button', { type: 'button', class: (i === ui.paso ? 'activo' : '') + (i < ui.paso ? ' hecho' : ''), onclick: function () { irA(i); } },
-        [el('span', { class: 'n', text: i < ui.paso ? '✓' : String(i + 1) }), nom]);
-      pasos.appendChild(el('li', null, [b]));
-    });
-    var host = U.$('#paso'); host.innerHTML = '';
-    RENDERS[ui.paso](host, p);
-
-    var nav = U.$('#navPaso'); nav.innerHTML = '';
-    if (ui.tiro) return; // mientras se pregunta un tiro, la navegación es la de la pregunta
-    nav.appendChild(ui.paso > 0 ? el('button', { type: 'button', class: 'jp-btn', text: '← Atrás', onclick: function () { irA(ui.paso - 1); } }) : el('span'));
-    nav.appendChild(ui.paso < PASOS.length - 1 ? el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: 'Siguiente →', onclick: function () { irA(ui.paso + 1); } }) : el('span'));
+    var p = P(), host = U.$('#paso'); host.innerHTML = '';
+    if (!p.trabajoActual && (ui.vista === 'resumen' || ui.vista === 'parada' || ui.vista === 'final')) ui.vista = 'id';
+    if (ui.vista === 'parada' && !ui.parada) ui.vista = 'resumen';
+    VISTAS[ui.vista](host, p);
   }
 
   /* ---------- Arranque ---------- */
-  U.toolbar('#toolbar', { onChange: function () { ui.tiro = null; ui.aviso = ''; render(); } });
+  refrescarToolbar();
   render();
   window.addEventListener('beforeunload', function () { J.store.saveNow(); });
 })();
