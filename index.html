@@ -19,14 +19,12 @@
                 <label for="usuarioInput">Usuario Responsable:</label>
                 <input type="text" id="usuarioInput" list="listaUsuarios" placeholder="Escriba su nombre..." autocomplete="off">
                 <datalist id="listaUsuarios">
-                    <!-- JavaScript insertará los usuarios almacenados en localStorage -->
                 </datalist>
             </div>
 
             <button class="btn-primary" onclick="ingresarApp()">Ingresar</button>
         </section>
 
-        <!-- SECCIÓN 2: VISTA DE MENÚ (Primero usuario, luego selección de proceso) -->
         <section id="seccionMenu" class="card login-card" style="display: none;">
             <div class="user-info-header">
                 <p>Usuario Activo: <strong id="usuarioLogueado">Cargando...</strong></p>
