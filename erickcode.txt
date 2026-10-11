@@ -554,7 +554,13 @@
             </div>
             <div class="grid-2">
                 <div class="form-group-field">
-                    <label>Altura / Distancia Geófono [m]:</label>
+                    <label>Altura Distancia Geófono [m]:</label>
+                    <input type="text" id="alturaGeofono" placeholder="Opcional">
+                </div>
+            </div>
+               <div class="grid-2">
+                <div class="form-group-field">
+                    <label> Distancia Geófono [m]:</label>
                     <input type="text" id="distanciaGeofono" placeholder="Opcional">
                 </div>
             </div>
@@ -887,6 +893,7 @@
                 paradasInicioFin: document.getElementById("paradasInicioFin") ? document.getElementById("paradasInicioFin").value : "",
                 ubicacionGeofono: document.getElementById("ubicacionGeofono") ? document.getElementById("ubicacionGeofono").value : "",
                 distanciaGeofono: document.getElementById("distanciaGeofono") ? document.getElementById("distanciaGeofono").value : "",
+                alturaGeofono: document.getElementById("alturaGeofono") ? document.getElementById("alturaGeofono").value : "",
                 hInicioAmarre: document.getElementById("hInicioAmarre") ? document.getElementById("hInicioAmarre").value : "",
                 hFinAmarre: document.getElementById("hFinAmarre") ? document.getElementById("hFinAmarre").value : "",
                 trabajos: trabajosGuardados
@@ -1305,139 +1312,219 @@
                 return;
             }
 
-            try {
-                // 1. Cargamos la plantilla base (ExcelJS conserva colores, bordes y celdas combinadas)
-                const response = await fetch('../plantillas/plantilla.xlsx');
-                const arrayBuffer = await response.arrayBuffer();
+           try {
+    // 1. Cargamos la plantilla base (ExcelJS conserva colores, bordes y celdas combinadas)
+    const response = await fetch('../plantillas/plantilla.xlsx');
+    const arrayBuffer = await response.arrayBuffer();
 
-                const workbook = new ExcelJS.Workbook();
-                await workbook.xlsx.load(arrayBuffer);
-                const worksheet = workbook.worksheets[0];
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
+    const worksheet = workbook.worksheets[0];
 
-                function asignarValorCelda(cellRef, valor) {
-                    worksheet.getCell(cellRef).value = valor;
+    function asignarValorCelda(cellRef, valor) {
+        worksheet.getCell(cellRef).value = valor;
+    }
+
+    // =========================
+    // COLUMNA D
+    // =========================
+    asignarValorCelda('D6', document.getElementById("fechaAnfo").value);
+    asignarValorCelda('D7', document.getElementById("turnoAnfo").value);
+    asignarValorCelda('D8', document.getElementById("modalMina").value);
+    asignarValorCelda('D9', document.getElementById("modalNivel").value);
+    asignarValorCelda('D10', document.getElementById("modalBloque").value);
+    asignarValorCelda('D11', document.getElementById("modalIdTronadura").value);
+    asignarValorCelda('D12', document.getElementById("modalSupJeJ").value);
+    asignarValorCelda('D13', document.getElementById("modalEncargado").value);
+
+    const supervisoresDet = Array.from(document.querySelectorAll('[name="supervisorDet"]'))
+        .map(i => i.value.trim()).filter(Boolean).join(", ");
+    const responsablesDet = Array.from(document.querySelectorAll('[name="responsableDet"]'))
+        .map(i => i.value.trim()).filter(Boolean).join(", ");
+
+    asignarValorCelda('D14', supervisoresDet);
+    asignarValorCelda('D15', responsablesDet);
+
+    // =========================
+    // COLUMNA H
+    // =========================
+    asignarValorCelda('H6', document.getElementById("hLlegadaJeJ")?.value || "");
+    asignarValorCelda('H7', document.getElementById("hSalidaJeJ")?.value || "");
+    asignarValorCelda('H8', document.getElementById("hLlegadaPyT")?.value || "");
+    asignarValorCelda('H9', document.getElementById("hInicioCarguio")?.value || "");
+    asignarValorCelda('H10', document.getElementById("hFinCarguio")?.value || "");
+    asignarValorCelda('H11', document.getElementById("hSalidaPyT")?.value || "");
+    asignarValorCelda('H14', parseFloat(document.getElementById("diametroTiros")?.value) || "");
+    asignarValorCelda('H15', document.getElementById("tiroVod")?.value || "");
+
+    // =========================
+    // COLUMNA K
+    // =========================
+    asignarValorCelda('K6', parseFloat(document.getElementById("presionCompresor")?.value) || 0);
+    asignarValorCelda('K7', parseFloat(document.getElementById("presionPera")?.value) || 0);
+    asignarValorCelda('K13', document.getElementById("ubicacionGeofono")?.value || "");
+    asignarValorCelda('K14', parseFloat(document.getElementById("alturaGeofono")?.value) || "");
+    asignarValorCelda('K15', parseFloat(document.getElementById("distanciaGeofono")?.value) || "");
+
+    // =========================
+    // COLUMNA N
+    // =========================
+    asignarValorCelda('N6', document.getElementById("numZanja")?.value || "");
+    asignarValorCelda('N7', document.getElementById("calleZanja")?.value || "");
+    asignarValorCelda('N9', document.getElementById("faseZanja")?.value || "");
+
+    // =========================
+    // COLUMNA O
+    // =========================
+    asignarValorCelda('O10', document.getElementById("calleUcl")?.value || "");
+    asignarValorCelda('O11', document.getElementById("paradasInicioFin")?.value || "");
+    asignarValorCelda('O13', document.getElementById("hInicioAmarre")?.value || "");
+    asignarValorCelda('O14', document.getElementById("hFinAmarre")?.value || "");
+
+    // =========================
+    // COLUMNA Q
+    // =========================
+    asignarValorCelda('P7', document.getElementById("obsPerdidaCarguio")?.value || "");
+    asignarValorCelda('P12', document.getElementById("obsPerdidaAmarre")?.value || "");
+
+    // =========================
+    // COLUMNA U
+    // =========================
+    asignarValorCelda('Y7', document.getElementById("tiempoPerdidaCarguio")?.value || "");
+    asignarValorCelda('Y12', document.getElementById("tiempoPerdidaAmarre")?.value || "");
+
+    // =========================
+    // TABLA DE TIROS (DESDE LA FILA 17)
+    // =========================
+    let rowIndex = 17;
+    const VERDE_PARADA = 'FF99FFCC';
+    let colorAlternado = false;
+
+    trabajosGuardados.forEach(trabajo => {
+        trabajo.paradas.forEach(parada => {
+            colorAlternado = !colorAlternado; // cada parada nueva cambia de color
+
+            parada.tiros.forEach(tiro => {
+                const row = worksheet.getRow(rowIndex);
+
+                // COLUMNA B
+                const celdaParada = row.getCell(2);
+                celdaParada.value = parada.idParada;
+                celdaParada.style = Object.assign({}, celdaParada.style);
+
+                if (colorAlternado) {
+                    celdaParada.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: VERDE_PARADA }
+                    };
+                } else {
+                    celdaParada.fill = { type: 'pattern', pattern: 'none' };
                 }
 
-                asignarValorCelda('D6', document.getElementById("fechaAnfo").value);
-                asignarValorCelda('D7', document.getElementById("turnoAnfo").value);
-                asignarValorCelda('D8', document.getElementById("modalMina").value);
-                asignarValorCelda('D9', document.getElementById("modalNivel").value);
-                asignarValorCelda('D10', document.getElementById("modalBloque").value);
-                asignarValorCelda('D11', document.getElementById("modalIdTronadura").value);
-                asignarValorCelda('D12', document.getElementById("modalSupJeJ").value);
-                asignarValorCelda('D13', document.getElementById("modalEncargado").value);
+                // COLUMNA C
+                row.getCell(3).value = parseInt(tiro.tiroNum);
 
-                const supervisoresDet = Array.from(document.querySelectorAll('[name="supervisorDet"]'))
-                    .map(i => i.value.trim()).filter(Boolean).join(", ");
-                const responsablesDet = Array.from(document.querySelectorAll('[name="responsableDet"]'))
-                    .map(i => i.value.trim()).filter(Boolean).join(", ");
-                asignarValorCelda('D14', supervisoresDet);
-                asignarValorCelda('D15', responsablesDet);
-                asignarValorCelda('H6', document.getElementById("hLlegadaJeJ")?.value || "");
-                asignarValorCelda('H7', document.getElementById("hSalidaJeJ")?.value || "");
-                asignarValorCelda('H8', document.getElementById("hLlegadaPyT")?.value || "");
-                asignarValorCelda('H9', document.getElementById("hInicioCarguio")?.value || "");
-                asignarValorCelda('H10', document.getElementById("hFinCarguio")?.value || "");
-                asignarValorCelda('H11', document.getElementById("hSalidaPyT")?.value || "");
-                asignarValorCelda('H14', parseFloat(document.getElementById("diametroTiros")?.value) || "");
-                asignarValorCelda('H15', document.getElementById("tiroVod")?.value || "");
-                asignarValorCelda('K6', parseFloat(document.getElementById("presionCompresor")?.value) || 0);
-                asignarValorCelda('K7', parseFloat(document.getElementById("presionPera")?.value) || 0);
-                asignarValorCelda('K13', document.getElementById("ubicacionGeofono")?.value || "");
-                asignarValorCelda('K14', document.getElementById("distanciaGeofono")?.value || "");
-                asignarValorCelda('N6', document.getElementById("numZanja")?.value || "");
-                asignarValorCelda('N7', document.getElementById("calleZanja")?.value || "");
-                asignarValorCelda('N9', document.getElementById("faseZanja")?.value || "");
-                asignarValorCelda('O10', document.getElementById("calleUcl")?.value || "");
-                asignarValorCelda('O11', document.getElementById("paradasInicioFin")?.value || "");
-                asignarValorCelda('O13', document.getElementById("hInicioAmarre")?.value || "");
-                asignarValorCelda('O14', document.getElementById("hFinAmarre")?.value || "");
-                let rowIndex = 17;
-                const VERDE_PARADA = 'FF99FFCC'; 
-                let colorAlternado = false;
+                // COLUMNA D
+                row.getCell(4).value = parseFloat(tiro.longDiseno);
 
-                trabajosGuardados.forEach(trabajo => {
-                    trabajo.paradas.forEach(parada => {
-                        colorAlternado = !colorAlternado; // cada parada nueva cambia de color
-                        parada.tiros.forEach(tiro => {
-                            const row = worksheet.getRow(rowIndex);
-                            const celdaParada = row.getCell(2);
-                            celdaParada.value = parada.idParada;
-                            celdaParada.style = Object.assign({}, celdaParada.style);
-                            if (colorAlternado) {
-                                celdaParada.fill = {
-                                    type: 'pattern',
-                                    pattern: 'solid',
-                                    fgColor: { argb: VERDE_PARADA }
-                                };
-                            } else {
-                                celdaParada.fill = { type: 'pattern', pattern: 'none' };
-                            }
-                            row.getCell(3).value = parseInt(tiro.tiroNum);
-                            row.getCell(4).value = parseFloat(tiro.longDiseno);
-                            row.getCell(5).value = parseFloat(tiro.taco);
-                            row.getCell(6).value = parseFloat(tiro.largoMomento);
-                            row.getCell(7).value = parseFloat(tiro.tacoReal);
-                            row.getCell(8).value = parseFloat(tiro.longCargada);
-                            row.getCell(9).value = tiro.estado;
-                            row.getCell(10).value = tiro.intentosDestape || "";
-                            row.getCell(11).value = tiro.agua;
-                            row.getCell(12).value = tiro.posNeg;
-                            row.getCell(13).value = parseInt(tiro.numPera);
-                            row.getCell(14).value = tiro.camaExplosivo || "";
-                            row.getCell(15).value = tiro.ceboSup;
-                            row.getCell(16).value = tiro.aranaSup;
-                            row.getCell(17).value = parseInt(tiro.cantCartuchos);
-                            row.getCell(18).value = tiro.ceboInf || "";
-                            row.getCell(19).value = tiro.aranaInf;
-                            row.getCell(20).value = parseInt(tiro.cantCartuchosInf);
-                            row.getCell(21).value = parseInt(tiro.numRetenedores);
-                            row.getCell(22).value = tiro.tipoRetenedor;
-                            row.commit();
+                // COLUMNA E
+                row.getCell(5).value = parseFloat(tiro.taco);
 
-                            rowIndex++;
-                        });
-                    });
-                });
+                // COLUMNA F
+                row.getCell(6).value = parseFloat(tiro.largoMomento);
 
-                const outBuffer = await workbook.xlsx.writeBuffer();
-                const blob = new Blob([outBuffer], {
-                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                });
-                const nombreArchivo = `Seguimiento_ANFO_Turno_${document.getElementById("turnoAnfo").value}_${Date.now()}.xlsx`;
-                const enlace = document.createElement('a');
-                enlace.href = URL.createObjectURL(blob);
-                enlace.download = nombreArchivo;
-                document.body.appendChild(enlace);
-                enlace.click();
-                document.body.removeChild(enlace);
-                URL.revokeObjectURL(enlace.href);
+                // COLUMNA G
+                row.getCell(7).value = parseFloat(tiro.tacoReal);
 
-                localStorage.removeItem("jej_anfo_draft");
-                alert("¡Archivo Excel generado y descargado con éxito manteniendo el formato de la plantilla!");
-                window.location.href = "../index.html";
+                // COLUMNA H
+                row.getCell(8).value = parseFloat(tiro.longCargada);
 
-            } catch (error) {
-                console.error("Error al generar el Excel:", error);
-                alert("Hubo un error al procesar la plantilla. Asegúrate de que plantilla.xlsx esté accesible.");
-            }
-        }
+                // COLUMNA I
+                row.getCell(9).value = tiro.estado;
 
-        // Funciones para el Modal de Datos de Plantilla
-        function abrirModalPlantillaFinal() {
-            document.getElementById("modalPlantillaFinal").style.display = "flex";
-        }
+                // COLUMNA J
+                row.getCell(10).value = tiro.intentosDestape || "";
 
-        function cerrarModalPlantillaFinal() {
-            document.getElementById("modalPlantillaFinal").style.display = "none";
-        }
+                // COLUMNA K
+                row.getCell(11).value = tiro.agua;
 
-        function guardarModalPlantillaFinal() {
-            ejecutarAutosave();
-            cerrarModalPlantillaFinal();
-            alert("Datos de la plantilla guardados correctamente.");
-        }
+                // COLUMNA L
+                row.getCell(12).value = tiro.posNeg;
 
+                // COLUMNA M
+                row.getCell(13).value = parseInt(tiro.numPera);
+
+                // COLUMNA N
+                row.getCell(14).value = tiro.camaExplosivo || "";
+
+                // COLUMNA O
+                row.getCell(15).value = tiro.ceboSup;
+
+                // COLUMNA P
+                row.getCell(16).value = tiro.aranaSup;
+
+                // COLUMNA Q
+                row.getCell(17).value = parseInt(tiro.cantCartuchos);
+
+                // COLUMNA R
+                row.getCell(18).value = tiro.ceboInf || "";
+
+                // COLUMNA S
+                row.getCell(19).value = tiro.aranaInf;
+
+                // COLUMNA T
+                row.getCell(20).value = parseInt(tiro.cantCartuchosInf);
+
+                // COLUMNA U
+                row.getCell(21).value = parseInt(tiro.numRetenedores);
+
+                // COLUMNA V
+                row.getCell(22).value = tiro.tipoRetenedor;
+
+                row.commit();
+                rowIndex++;
+            });
+        });
+    });
+
+    const outBuffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([outBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    const nombreArchivo = `Seguimiento_ANFO_Turno_${document.getElementById("turnoAnfo").value}_${Date.now()}.xlsx`;
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = nombreArchivo;
+    document.body.appendChild(enlace);
+    enlace.click();
+    document.body.removeChild(enlace);
+    URL.revokeObjectURL(enlace.href);
+
+    localStorage.removeItem("jej_anfo_draft");
+    alert("¡Archivo Excel generado y descargado con éxito manteniendo el formato de la plantilla!");
+    window.location.href = "../index.html";
+
+} catch (error) {
+    console.error("Error al generar el Excel:", error);
+    alert("Hubo un error al procesar la plantilla. Asegúrate de que plantilla.xlsx esté accesible.");
+}
+
+function abrirModalPlantillaFinal() {
+    document.getElementById("modalPlantillaFinal").style.display = "flex";
+}
+
+function cerrarModalPlantillaFinal() {
+    document.getElementById("modalPlantillaFinal").style.display = "none";
+}
+
+function guardarModalPlantillaFinal() {
+    ejecutarAutosave();
+    cerrarModalPlantillaFinal();
+    alert("Datos de la plantilla guardados correctamente.");
+}
+       }
     </script>
 </body>
 </html>
