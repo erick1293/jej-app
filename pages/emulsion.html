@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguimiento Emulsión - App JEJ</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+    <script src="../js/vendor/exceljs.min.js"></script>
     <style>
         .card-wide {
             background: #ffffff;
@@ -367,9 +367,11 @@
                 <button type="button" onclick="abrirModalObservaciones()" class="btn-primary" style="background-color: #d97706; flex: 1; font-size: 13px;">📝 Agregar Observación</button>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+            <div style="margin-top: 10px;">
                 <button type="button" onclick="abrirModalPlantillaFinal()" class="btn-primary" style="background-color: #0d9488; font-size: 14px; padding: 10px;">📋 Rellenar Datos Faltantes de Plantilla (Tiempos/Presiones)</button>
-               <button type="button" onclick="guardarFormularioYExportarExcel()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="guardarFormularioEmulsionYExportarExcel()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
                     ⬇ Descargar Excel
                 </button>
                 <button type="button" onclick="generarInformeTecnicoHTML()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
@@ -450,7 +452,7 @@
 
     <!-- MODAL DATOS FALTANTES PLANTILLA -->
     <div id="modalPlantillaFinal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Completar Datos de Plantilla (Emulsión)</h3>
 
             <div class="section-title">1. Tiempos de Postura y Carguío</div>
@@ -606,6 +608,8 @@
 
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
+    <script src="../js/carguio-wizard.js"></script>
+    <script src="../js/informe-carguio.js"></script>
     <script>
         cargarBarMenu(true);
         let trabajosGuardados = []; 
@@ -1059,6 +1063,20 @@
                 btnSig.innerHTML = "Siguiente Tiro ➔";
                 btnSig.style.backgroundColor = "#2563eb";
             }
+
+            window.JEJCarguioWizard.mostrarTiro({
+                containerId: "paso5",
+                context: `Trabajo ${idTrabajoActual} · Parada ${idParadaActual} · Tiro ${numeroTiro} de ${totalTirosParadaActual}`,
+                finishText: numeroTiro === totalTirosParadaActual ? "Finalizar parada ✓" : "Siguiente tiro →",
+                onNext: siguienteTiroEmulsion,
+                onPrevious: anteriorTiroEmulsion,
+                onCancel: function () {
+                    tirosTemporales = [];
+                    ocultarTodosPasos();
+                    document.getElementById("paso3").style.display = "block";
+                    cargarSelectParadas();
+                }
+            });
         }
 
         function guardarDatosTiroActual() {
@@ -1199,7 +1217,12 @@
         }
 
         function abrirModalPlantillaFinal() {
-            document.getElementById("modalPlantillaFinal").style.display = "flex";
+            window.JEJCarguioWizard.abrirPlantilla({
+                rootId: "modalPlantillaFinal",
+                context: "Datos de plantilla · Emulsión",
+                onFinish: guardarModalPlantillaFinal,
+                onCancel: cerrarModalPlantillaFinal
+            });
         }
 
         function cerrarModalPlantillaFinal() {
@@ -1212,6 +1235,17 @@
             alert("Datos de la plantilla guardados correctamente.");
         }
 
+        function generarInformeTecnicoHTML() {
+            const totalTiros = trabajosGuardados.reduce((total, trabajo) =>
+                total + trabajo.paradas.reduce((subtotal, parada) => subtotal + parada.tiros.length, 0), 0);
+            if (!totalTiros) {
+                alert("Registre al menos un tiro antes de generar el informe técnico.");
+                return;
+            }
+            guardarHistoricoTrabajos();
+            window.JEJInformeCarguio.abrir({ tipo: "EMULSION", trabajos: trabajosGuardados });
+        }
+
         // FUNCIÓN DE EXPORTACIÓN A EXCEL PARA EMULSIÓN USANDO EXCELJS
        async function guardarFormularioEmulsionYExportarExcel() {
             let totalParadas = 0;
@@ -1222,9 +1256,11 @@
                 return;
             }
 
+            guardarHistoricoTrabajos();
+
             try {
                 // 1. Cargamos la plantilla base de emulsión
-                const response = await fetch('../plantillas/plantilla_emulsion.xlsx');
+                const response = await fetch('../plantillas/plantillaEmulsion.xlsx');
                 const arrayBuffer = await response.arrayBuffer();
 
                 const workbook = new ExcelJS.Workbook();
@@ -1395,9 +1431,7 @@
                 document.body.removeChild(enlace);
                 URL.revokeObjectURL(enlace.href);
 
-                localStorage.removeItem("jej_emulsion_draft");
                 alert("¡Archivo Excel de Emulsión generado con éxito manteniendo la nueva estructura!");
-                window.location.href = "../index.html";
 
             } catch (error) {
                 console.error("Error al generar el Excel:", error);
