@@ -416,14 +416,11 @@
   function normalizar(p) {
     var base = nuevaPlanilla();
     p.header = Object.assign(base.header, p.header || {});
-    // pérdidas: se descartan las filas vacías (la pantalla agrega una en blanco al editar)
     p.perdidas = (p.perdidas || []).filter(function (x) { return x && (x.desc || x.tiempo); });
-    // tiros: se descartan las filas totalmente vacías de versiones anteriores
     p.filas = (p.filas || []).map(function (f) { var o = Object.assign(filaVaciaPerf(), f); delete o.obs; return o; }).filter(filaTieneDatos);
     p.obs = p.obs && p.obs.length ? p.obs : base.obs;
     p.refAbat = p.refAbat === 'vertical' ? 'vertical' : 'horizontal';
-    delete p.carguio; // el carguío ya no se usa en esta planilla
-    // ID de trabajo: los tiros antiguos sin trabajo pasan a "Trabajo 01"
+    delete p.carguio; 
     p.trabajos = Array.isArray(p.trabajos) ? p.trabajos.filter(Boolean) : [];
     p.filas.forEach(function (f) {
       if (!f.trabajo) f.trabajo = 'Trabajo 01';
