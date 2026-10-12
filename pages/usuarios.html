@@ -25,7 +25,7 @@
             margin-bottom: 5px;
             color: #1e293b;
         }
-        .form-group-field input {
+        .form-group-field input, .form-group-field select {
             padding: 10px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
@@ -45,9 +45,18 @@
         .item-pers {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 8px;
             border-bottom: 1px solid #e2e8f0;
             font-size: 14px;
+        }
+        .badge-turno {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -55,22 +64,25 @@
 
     <main class="card-wide">
         <h2>Gestión de Personal DET / JeJ</h2>
-        <p class="subtitle">Registra los supervisores frecuentes para autocompletar formularios</p>
+        <p class="subtitle">Administra los supervisores y operadores por turno para autocompletar formularios</p>
 
-       <form id="formPersonal" onsubmit="guardarPersonal(event)">
+        <form id="formPersonal" onsubmit="guardarPersonal(event)">
             <div class="form-group-field">
                 <label for="tipoPersonal">Rol del Personal:</label>
-                <select id="tipoPersonal" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                <select id="tipoPersonal" required>
                     <option value="" disabled selected>-- Seleccione Rol --</option>
-                    <option value="supervisorDet">Supervisor DET</option>
-                    <option value="responsableDet">Responsable Carguío DET</option>
+                    <option value="ingenieroLider">Ingeniero Líder P&T</option>
                     <option value="supervisorJeJ">Supervisor JeJ</option>
+                    <option value="operadorJeJ">Operador / Encargado JeJ</option>
+                    <option value="jefeTurnoDet">Jefe de Turno DET</option>
+                    <option value="supervisorDet">Supervisor DET</option>
+                    <option value="responsableDet">Responsable Carguío DET / Encargado DET</option>
                 </select>
             </div>
 
             <div class="form-group-field">
                 <label for="turnoPersonal">Asociar a Turno:</label>
-                <select id="turnoPersonal" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                <select id="turnoPersonal" required>
                     <option value="" disabled selected>-- Seleccione Turno --</option>
                     <option value="A">Turno A</option>
                     <option value="B">Turno B</option>
@@ -83,13 +95,11 @@
                 <input type="text" id="nombrePersonal" placeholder="Ej. Andrés Bugeño" required autocomplete="off">
             </div>
 
-            <button type="submit" class="btn-primary" style="width: 100%;">Guardar Personal</button>
-        </form>
-
+            <button type="submit" class="btn-primary" style="width: 100%; background-color: #16a34a;">Registrar Personal</button>
         </form>
 
         <div class="listado-personal">
-            <h3>Personal Registrado</h3>
+            <h3>Personal Registrado y Asignado por Turno</h3>
             <div id="contenedorLista">Cargando...</div>
         </div>
 
@@ -104,46 +114,40 @@
         cargarBarMenu(true);
 
         document.addEventListener("DOMContentLoaded", () => {
+            inicializarPersonalBaseSiEsNecesario();
             mostrarListadoPersonal();
         });
 
-        function guardarPersonal(e) {
-            e.preventDefault();
-            const rol = document.getElementById("tipoPersonal").value;
-            const nombre = document.getElementById("nombrePersonal").value.trim();
-
-            if (!rol || !nombre) return;
-
-            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
-            if (!personalMap[rol]) personalMap[rol] = [];
-
-            if (!personalMap[rol].includes(nombre)) {
-                personalMap[rol].push(nombre);
-                localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
-                alert("Personal guardado con éxito.");
-                document.getElementById("nombrePersonal").value = "";
-                mostrarListadoPersonal();
-            } else {
-                alert("Este nombre ya está registrado en este rol.");
-            }
-        }
-
-        function mostrarListadoPersonal() {
-            const contenedor = document.getElementById("contenedorLista");
+        // Inicializar datos base según las tablas de los turnos A y B de referencia
+        function inicializarPersonalBaseSiEsNecesario() {
             let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
             
-            contenedor.innerHTML = "";
-            let hayRegistros = false;
-
-            for (let rol in personalMap) {
-                personalMap[rol].forEach(nombre => {
-                    hayRegistros = true;
-                    contenedor.innerHTML += `<div class="item-pers"><span><strong>[${rol}]</strong> ${nombre}</span></div>`;
-                });
-            }
-
-            if (!hayRegistros) {
-                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay personal registrado aún.</p>";
+            if (Object.keys(personalMap).length === 0) {
+                personalMap = {
+                    "ingenieroLider": [
+                        { nombre: "Hector Flores", turno: "A" },
+                        { nombre: "Hector Flores", turno: "B" }
+                    ],
+                    "operadorJeJ": [
+                        { nombre: localStorage.getItem("jej_usuario_activo") || "Erick Meneses", turno: "A" },
+                        { nombre: localStorage.getItem("jej_usuario_activo") || "Erick Meneses", turno: "B" }
+                    ],
+                    "jefeTurnoDet": [
+                        { nombre: "Carlos Castro", turno: "A" },
+                        { nombre: "Carlos Castro", turno: "B" }
+                    ],
+                    "supervisorDet": [
+                        { nombre: "Nicolas Valdovino", turno: "A" },
+                        { nombre: "Nicolas Valdovino", turno: "B" }
+                    ],
+                    "responsableDet": [
+                        { nombre: "Andres Bugeño", turno: "A" },
+                        { nombre: "Milton", turno: "B" },
+                        { nombre: "Sergio Guerrero", turno: "A" },
+                        { nombre: "Patricio Vera", turno: "B" }
+                    ]
+                };
+                localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
             }
         }
 
@@ -158,17 +162,28 @@
             let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
             if (!personalMap[rol]) personalMap[rol] = [];
 
-            // Guardamos como objeto que incluye nombre y turno
-            const existe = personalMap[rol].some(p => p.nombre === nombre && p.turno === turno);
+            const existe = personalMap[rol].some(p => p.nombre.toLowerCase() === nombre.toLowerCase() && p.turno === turno);
 
             if (!existe) {
                 personalMap[rol].push({ nombre, turno });
                 localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
-                alert("Personal guardado con éxito.");
+                alert("Personal registrado con éxito.");
                 document.getElementById("nombrePersonal").value = "";
                 mostrarListadoPersonal();
             } else {
-                alert("Este nombre ya está registrado para este turno y rol.");
+                alert("Este nombre ya se encuentra registrado para este rol y turno.");
+            }
+        }
+
+        function eliminarPersonal(rol, nombre, turno) {
+            if (confirm(`¿Desea eliminar a "${nombre}" del rol [${rol}] en el Turno ${turno}?`)) {
+                let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+                if (personalMap[rol]) {
+                    personalMap[rol] = personalMap[rol].filter(p => !(p.nombre === nombre && p.turno === turno));
+                    if (personalMap[rol].length === 0) delete personalMap[rol];
+                    localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
+                    mostrarListadoPersonal();
+                }
             }
         }
 
@@ -182,7 +197,15 @@
             for (let rol in personalMap) {
                 personalMap[rol].forEach(item => {
                     hayRegistros = true;
-                    contenedor.innerHTML += `<div class="item-pers"><span><strong>[${rol} - Turno ${item.turno}]</strong> ${item.nombre}</span></div>`;
+                    const turnoLabel = item.turno === "Ambos" ? "Ambos Turnos" : `Turno ${item.turno}`;
+                    contenedor.innerHTML += `
+                        <div class="item-pers">
+                            <span><strong>[${rol}]</strong> ${item.nombre}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="badge-turno">${turnoLabel}</span>
+                                <button type="button" onclick="eliminarPersonal('${rol}', '${item.nombre}', '${item.turno}')" style="background: #fee2e2; color: #991b1b; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">✕ Quitar</button>
+                            </div>
+                        </div>`;
                 });
             }
 
@@ -190,7 +213,6 @@
                 contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay personal registrado aún.</p>";
             }
         }
-
     </script>
 </body>
 </html>
