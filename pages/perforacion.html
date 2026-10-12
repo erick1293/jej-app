@@ -277,7 +277,6 @@
     bloque:     ['B-2', 'B-6', 'Ext Fw', 'DHz'],
     fase:       ['1', '1 2/3', '2', '3', '4'],
     problemas:  ['Barra Pegada', 'Repasos', 'Cambio Bit', 'Cambio Barras', 'Equipo fuera servicio'],
-    // Estas dos no venían en tu Excel: ajústalas a tu criterio de terreno
     estadoTiro: ['Bueno', 'Tapado', 'Colapsado', 'Desviado', 'Obstruido'],
     signo:      ['Negativo', 'Positivo']
   };
@@ -287,7 +286,7 @@
   var COLS = {
     perf: [
       { k: 'parada',     label: 'PARADA',                       type: 'text',   w: 6,  bg: '00B0F0' },
-      { k: 'tiro',       label: 'TIRO',                         type: 'text',   w: 6,  bg: '00B0F0' },
+      { k: 'tiro',       label: 'TIRO',                         type: 'num',   w: 6,  bg: '00B0F0' },
       { k: 'mDiseno',    label: 'Mts Diseño',                   type: 'num',    w: 9,  bg: 'DCE6F1', unit: 'm' },
       { k: 'taco',       label: 'Taco teórico',                 type: 'num',    w: 8,  bg: 'DCE6F1', unit: 'm' },
       { k: 'mPerf',      label: 'Mts Perforados',               type: 'num',    w: 10, bg: 'DCE6F1', unit: 'm' },
@@ -1639,7 +1638,7 @@
       el('button', { type: 'button', class: 'jp-b verde', style: 'margin-top:10px', text: 'Crear e Ir a Paradas', onclick: crear })
     ]));
 
-    /* existente */
+    
     var s = el('select', { class: 'jp-in', 'aria-label': 'ID de trabajo guardado' });
     s.appendChild(el('option', { value: '', text: '-- Seleccione un ID guardado --' }));
     p.trabajos.forEach(function (t) {
