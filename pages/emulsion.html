@@ -107,7 +107,7 @@
         }
     </style>
 </head>
-<body>
+<body class="pagina-fondo">
 
     <main class="card-wide">
         
@@ -340,6 +340,42 @@
                         <label>Cebo Inferior:</label>
                         <input type="text" id="emulsionCeboInf" placeholder="Opcional">
                     </div>
+                </div>
+
+                <div class="section-title" style="font-size: 14px; margin-top: 10px;">Detalle de la Carga de Columna [m]</div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Long. al Terminar la Cama:</label>
+                        <input type="number" step="0.01" id="emulsionLongTerminarCama" placeholder="Opcional">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Long. 1er Cebo (cama + 0.3 m):</label>
+                        <input type="number" step="0.01" id="emulsionLong1erCebo" placeholder="Opcional">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Long. al Terminar Carga Intermedia:</label>
+                        <input type="number" step="0.01" id="emulsionLongTerminarIntermedia" placeholder="Opcional">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Long. 2do Cebo (intermedia + 0.3 m):</label>
+                        <input type="number" step="0.01" id="emulsionLong2doCebo" placeholder="Opcional">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Long. Carga Inferior:</label>
+                        <input type="number" step="0.01" id="emulsionLongCargaInferior" placeholder="Opcional">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Long. Retenedor:</label>
+                        <input type="number" step="0.01" id="emulsionLongRetenedor" placeholder="Opcional">
+                    </div>
+                </div>
+                <div class="form-group-field">
+                    <label>Long. Taco de Greda:</label>
+                    <input type="number" step="0.01" id="emulsionLongTacoGreda" placeholder="Opcional">
                 </div>
             </div>
 
@@ -609,6 +645,8 @@
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
     <script src="../js/carguio-wizard.js"></script>
+    <script src="../js/informe-base.js"></script>
+    <script src="../js/diagrama-carga.js"></script>
     <script src="../js/informe-carguio.js"></script>
     <script>
         cargarBarMenu(true);
@@ -1052,6 +1090,9 @@
             document.getElementById("emulsionAranaSup").value = tiroExistente ? tiroExistente.aranaSup : "Si";
             document.getElementById("emulsionCantCartuchos").value = tiroExistente ? tiroExistente.cantCartuchos : 1;
             document.getElementById("emulsionCeboInf").value = tiroExistente ? tiroExistente.ceboInf : "";
+            [["emulsionLongTerminarCama","longTerminarCama"],["emulsionLong1erCebo","long1erCebo"],["emulsionLongTerminarIntermedia","longTerminarIntermedia"],
+             ["emulsionLong2doCebo","long2doCebo"],["emulsionLongCargaInferior","longCargaInferior"],["emulsionLongRetenedor","longRetenedor"],["emulsionLongTacoGreda","longTacoGreda"]]
+                .forEach(function (par) { document.getElementById(par[0]).value = tiroExistente && tiroExistente[par[1]] !== undefined ? tiroExistente[par[1]] : ""; });
 
             toggleIntentosDestapeEmulsion();
 
@@ -1102,7 +1143,14 @@
                 ceboSup: document.getElementById("emulsionCeboSup").value,
                 aranaSup: document.getElementById("emulsionAranaSup").value,
                 cantCartuchos: document.getElementById("emulsionCantCartuchos").value,
-                ceboInf: document.getElementById("emulsionCeboInf").value
+                ceboInf: document.getElementById("emulsionCeboInf").value,
+                longTerminarCama: document.getElementById("emulsionLongTerminarCama").value,
+                long1erCebo: document.getElementById("emulsionLong1erCebo").value,
+                longTerminarIntermedia: document.getElementById("emulsionLongTerminarIntermedia").value,
+                long2doCebo: document.getElementById("emulsionLong2doCebo").value,
+                longCargaInferior: document.getElementById("emulsionLongCargaInferior").value,
+                longRetenedor: document.getElementById("emulsionLongRetenedor").value,
+                longTacoGreda: document.getElementById("emulsionLongTacoGreda").value
             };
 
             tirosTemporales[indiceTiroActual - 1] = datosTiro;
@@ -1265,85 +1313,86 @@
 
                 const workbook = new ExcelJS.Workbook();
                 await workbook.xlsx.load(arrayBuffer);
-                const worksheet = workbook.worksheets[0];
+                const worksheet = workbook.getWorksheet("JEJ") || workbook.worksheets[0];
 
                 function asignarValorCelda(cellRef, valor) {
                     worksheet.getCell(cellRef).value = valor;
                 }
 
                 // =========================
-                // CABECERAS GENERALES (Columna D)
+                // CABECERAS GENERALES (alineadas a la plantilla oficial: hoja «JEJ»)
                 // =========================
-                asignarValorCelda('D6', document.getElementById("fechaAnfo").value);
-                asignarValorCelda('D7', document.getElementById("turnoAnfo").value);
-                asignarValorCelda('D8', document.getElementById("modalMina").value);
-                asignarValorCelda('D9', document.getElementById("modalNivel").value);
-                asignarValorCelda('D10', document.getElementById("modalBloque").value);
-                asignarValorCelda('D11', document.getElementById("modalIdTronadura").value);
-                asignarValorCelda('D12', document.getElementById("modalSupJeJ").value);
-                asignarValorCelda('D13', document.getElementById("modalEncargado").value);
+                const val = (id) => (document.getElementById(id)?.value || "").trim();
+                const horaExcel = (v) => {
+                    const m = /^(\d{1,2}):(\d{2})$/.exec(String(v || "").trim());
+                    return m ? (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) / 1440 : (v || "");
+                };
+                const fechaExcel = (v) => {
+                    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(v || "").trim());
+                    return m ? new Date(Date.UTC(+m[3], +m[2] - 1, +m[1])) : (v || "");
+                };
+                const numONada = (v) => { const n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? (v || "") : n; };
+
+                // Columna D: datos generales (D10 «ID Tronadura» es fórmula de la plantilla: no se toca)
+                asignarValorCelda('D5', fechaExcel(val("fechaEmulsion")));
+                asignarValorCelda('D6', val("turnoEmulsion"));
+                asignarValorCelda('D7', val("modalMina"));
+                asignarValorCelda('D8', val("modalNivel"));
+                asignarValorCelda('D9', val("modalBloque"));
+                asignarValorCelda('D11', val("modalSupJeJ"));
+                asignarValorCelda('D12', val("modalEncargado"));
 
                 const supervisoresDet = Array.from(document.querySelectorAll('[name="supervisorDet"]'))
                     .map(i => i.value.trim()).filter(Boolean).join(", ");
                 const responsablesDet = Array.from(document.querySelectorAll('[name="responsableDet"]'))
                     .map(i => i.value.trim()).filter(Boolean).join(", ");
+                asignarValorCelda('D13', supervisoresDet);
+                asignarValorCelda('D14', responsablesDet);
 
-                asignarValorCelda('D14', supervisoresDet);
-                asignarValorCelda('D15', responsablesDet);
+                // Columna H: horarios y parámetros (H11 y H12 son fórmulas de la plantilla)
+                asignarValorCelda('H5', horaExcel(val("hLlegadaJeJ")));
+                asignarValorCelda('H6', horaExcel(val("hSalidaJeJ")));
+                asignarValorCelda('H7', horaExcel(val("hLlegadaPyT")));
+                asignarValorCelda('H8', horaExcel(val("hInicioCarguio")));
+                asignarValorCelda('H9', horaExcel(val("hFinCarguio")));
+                asignarValorCelda('H10', horaExcel(val("hSalidaPyT")));
+                asignarValorCelda('H13', numONada(val("diametroTiros")));
+                asignarValorCelda('H14', val("tiroVod"));
 
-                // =========================
-                // HORARIOS Y PARÁMETROS (Columna H)
-                // =========================
-                asignarValorCelda('H6', document.getElementById("hLlegadaJeJ")?.value || "");
-                asignarValorCelda('H7', document.getElementById("hSalidaJeJ")?.value || "");
-                asignarValorCelda('H8', document.getElementById("hLlegadaPyT")?.value || "");
-                asignarValorCelda('H9', document.getElementById("hInicioCarguio")?.value || "");
-                asignarValorCelda('H10', document.getElementById("hFinCarguio")?.value || "");
-                asignarValorCelda('H11', document.getElementById("hSalidaPyT")?.value || "");
-                asignarValorCelda('H14', parseFloat(document.getElementById("diametroTiros")?.value) || "");
-                asignarValorCelda('H15', document.getElementById("tiroVod")?.value || "");
+                // Zanja, fase, calle UCL, paradas y geófono (columnas O / P)
+                asignarValorCelda('O5', numONada(val("numZanja")));
+                const calles = val("calleZanja").split(/[\/,\s-]+/).filter(Boolean);
+                asignarValorCelda('O6', numONada(calles[0] || ""));
+                asignarValorCelda('P6', numONada(calles[1] || ""));
+                asignarValorCelda('O8', numONada(val("faseZanja")));
+                asignarValorCelda('O9', val("calleUcl"));
+                const paradasIF = val("paradasInicioFin").split(/\s*(?:a|-|\/)\s*/i).filter(Boolean);
+                asignarValorCelda('O10', paradasIF[0] || "");
+                asignarValorCelda('O11', paradasIF[1] || "");
+                asignarValorCelda('O12', val("ubicacionGeofono"));
+                const geo = val("distanciaGeofono").split("/").map(s => s.trim());
+                asignarValorCelda('O13', numONada(val("alturaGeofono") || (geo.length > 1 ? geo[0] : "")));
+                asignarValorCelda('O14', numONada(val("alturaGeofono") ? val("distanciaGeofono") : (geo.length > 1 ? geo[1] : geo[0] || "")));
 
-                // =========================
-                // GEÓFONO Y OTROS (Columna K)
-                // =========================
-                asignarValorCelda('K13', document.getElementById("ubicacionGeofono")?.value || "");
-                asignarValorCelda('K14', parseFloat(document.getElementById("alturaGeofono")?.value) || "");
-                asignarValorCelda('K15', parseFloat(document.getElementById("distanciaGeofono")?.value) || "");
+                // Matriz de emulsión (R5…R12) si el formulario las trae
+                asignarValorCelda('R5', numONada(val("temperaturaMatriz")));
+                asignarValorCelda('R11', numONada(val("tiempoGasificacion")));
 
-                // =========================
-                // ZANJA, FASE Y CALLE (Columnas N y O)
-                // =========================
-                asignarValorCelda('N6', document.getElementById("numZanja")?.value || "");
-                asignarValorCelda('N7', document.getElementById("calleZanja")?.value || "");
-                asignarValorCelda('N9', document.getElementById("faseZanja")?.value || "");
-                asignarValorCelda('O10', document.getElementById("calleUcl")?.value || "");
-                asignarValorCelda('O11', document.getElementById("paradasInicioFin")?.value || "");
+                // Amarre: inicio (U5), fin (X5); AA5 es fórmula de la plantilla
+                asignarValorCelda('U5', horaExcel(val("hInicioAmarre")));
+                asignarValorCelda('X5', horaExcel(val("hFinAmarre")));
 
-                // =========================
-                // TEMPERATURA E INICIO/FIN AMARRE (U5, X5, AA5, AC5, AC12)
-                // =========================
-                asignarValorCelda('U5', parseFloat(document.getElementById("temperaturaMatriz")?.value) || "");
-                asignarValorCelda('X5', document.getElementById("hInicioAmarre")?.value || "");
-                asignarValorCelda('AA5', document.getElementById("hFinAmarre")?.value || "");
-                // Tiempos de duración en celdas AC5 / AC12 según corresponda
-                asignarValorCelda('AC5', document.getElementById("tiempoTotalAmarre")?.value || "");
-                asignarValorCelda('AC12', document.getElementById("tiempoGasificacion")?.value || "");
-
-                // =========================
-                // PÉRDIDAS OPERACIONALES (T7 y T12)
-                // =========================
-                asignarValorCelda('T7', document.getElementById("obsPerdidaCarguio")?.value || "");
-                // Tiempo de pérdida de carguío (columna de tiempo al lado)
-                asignarValorCelda('AC7', document.getElementById("tiempoPerdidaCarguio")?.value || "");
-
-                asignarValorCelda('T12', document.getElementById("obsPerdidaAmarre")?.value || "");
-                asignarValorCelda('AC12', document.getElementById("tiempoPerdidaAmarre")?.value || "");
+                // Pérdidas operacionales (texto en T7 / T12, tiempo en AC7 / AC12)
+                asignarValorCelda('T7', val("obsPerdidaCarguio"));
+                asignarValorCelda('AC7', horaExcel(val("tiempoPerdidaCarguio")));
+                asignarValorCelda('T12', val("obsPerdidaAmarre"));
+                asignarValorCelda('AC12', horaExcel(val("tiempoPerdidaAmarre")));
 
                 // =========================
                 // TABLA DE TIROS DE EMULSIÓN (DESDE LA FILA 17)
                 // Sin peras, adaptada con Emulsión Cargada y los nuevos campos
                 // =========================
-                let rowIndex = 17;
+                let rowIndex = 16; // la plantilla oficial parte los tiros en la fila 16
                 const VERDE_PARADA = 'FF99FFCC';
                 let colorAlternado = false;
 
@@ -1382,8 +1431,7 @@
                             row.getCell(10).value = parseFloat(tiro.tacoFondoReal) || 0;
                             // K: NÚM GREDAS REAL
                             row.getCell(11).value = parseInt(tiro.numGredasReal) || 0;
-                            // L: METROS CARGADOS [M]
-                            row.getCell(12).value = parseFloat(tiro.longCargada);
+                            // L: METROS CARGADOS [M] → fórmula de la plantilla (=F-G), no se sobreescribe
                             // M: ESTADO TIRO
                             row.getCell(13).value = tiro.estado;
                             // N: TIRO CON AGUA
@@ -1391,7 +1439,7 @@
                             // O: TIRO NEGATIVO / POSITIVO
                             row.getCell(15).value = tiro.posNeg;
                             // P: EMULSION CARGADA [kg] (Sustituye a la pera)
-                            row.getCell(16).value = parseFloat(tiro.emulsionCargada) || 0;
+                            row.getCell(16).value = parseFloat(tiro.kilosEmulsion) || parseFloat(tiro.emulsionCargada) || 0;
                             // Q: CAMA EXPLOSIVO [M]
                             row.getCell(17).value = tiro.camaExplosivo || "";
                             // R: CEBO SUPERIOR
@@ -1411,18 +1459,31 @@
                             // Y: USO RETENEDOR
                             row.getCell(25).value = tiro.usoRetenedor || "No";
 
+                            // AO..AU: DETALLE DE LA CARGA DE COLUMNA
+                            [tiro.longTerminarCama, tiro.long1erCebo, tiro.longTerminarIntermedia, tiro.long2doCebo, tiro.longCargaInferior, tiro.longRetenedor, tiro.longTacoGreda]
+                                .forEach(function (v, k) {
+                                    const n = parseFloat(v);
+                                    if (!isNaN(n)) row.getCell(41 + k).value = n;
+                                });
+
                             row.commit();
                             rowIndex++;
                         });
                     });
                 });
 
+                // Un número NaN (campo vacío) corrompe el .xlsx: se deja la celda vacía
+                worksheet.eachRow({ includeEmpty: false }, function (fila) {
+                    fila.eachCell({ includeEmpty: false }, function (celda) {
+                        if (typeof celda.value === "number" && !isFinite(celda.value)) celda.value = null;
+                    });
+                });
                 const outBuffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([outBuffer], {
                     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 });
 
-                const nombreArchivo = `Seguimiento_Emulsion_Turno_${document.getElementById("turnoAnfo").value}_${Date.now()}.xlsx`;
+                const nombreArchivo = `Seguimiento_Emulsion_Turno_${document.getElementById("turnoEmulsion").value}_${Date.now()}.xlsx`;
                 const enlace = document.createElement('a');
                 enlace.href = URL.createObjectURL(blob);
                 enlace.download = nombreArchivo;

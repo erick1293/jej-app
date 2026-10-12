@@ -220,9 +220,23 @@
   .jp-modal .jp-perd-fila { grid-template-columns: 1fr 80px 30px; }
 }
 
+/* ===== Asistente dato por dato: multi-nombre y pérdidas dentro de la tarjeta ===== */
+.jp-q-multi { max-width: 420px; margin: 14px auto 8px; }
+.jp-q-multi .jp-multi { margin-bottom: 8px; }
+.jp-q-multi .jp-multi input { flex: 1; text-align: center; font-size: 1.2rem; padding: 12px; border: 1px solid #94a3b8; border-radius: 8px; min-width: 0; box-sizing: border-box; }
+.jp-q-multi .jp-multi input:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
+.jp-q-perd { max-width: 560px; margin: 12px auto 8px; }
+.jp-q .jp-perd { border: 0; background: transparent; overflow: visible; }
+.jp-q .jp-perd-head { background: transparent; padding: 0 2px 4px; font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
+.jp-q .jp-perd-fila { border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 8px; background: #fff; overflow: hidden; grid-template-columns: 1fr 96px 34px; }
+.jp-q .jp-perd-fila input { padding: 12px 10px; }
+.jp-q .jp-perd-pie { padding: 2px 0 8px; border: 0; }
+.jp-q .jp-perd-total { border: 1px solid #f3e6a8; border-radius: 10px; }
+@media (max-width: 420px) { .jp-q .jp-perd-fila { grid-template-columns: 1fr 80px 30px; } }
+
     </style>
 </head>
-<body>
+<body class="pagina-fondo">
 
     <!-- CONTENIDO ESPECÍFICO DE LA PÁGINA -->
     <main class="jp-page">
@@ -1156,7 +1170,7 @@
   'use strict';
   var J = window.JEJ, U = J.ui, el = U.el;
 
-  var ui = { vista: 'datos', tiro: null, aviso: '', parada: '', busca: '', nuevaParada: false };
+  var ui = { vista: 'datos', tiro: null, aviso: '', parada: '', busca: '', nuevaParada: false, asist: null };
   function P() { return J.store.current(); }
 
   /* ---------- Consultas sobre trabajos / paradas / tiros ---------- */
@@ -1181,7 +1195,7 @@
     var o = document.querySelector('#toolbar option:checked'); if (o) o.textContent = J.store.etiqueta(p);
   }
   function refrescarToolbar() { U.toolbar('#toolbar', { onChange: alCambiarPlanilla }); }
-  function alCambiarPlanilla() { ui.vista = 'datos'; ui.tiro = null; ui.aviso = ''; ui.parada = ''; ui.busca = ''; ui.nuevaParada = false; render(); }
+  function alCambiarPlanilla() { ui.vista = 'datos'; ui.asist = null; ui.tiro = null; ui.aviso = ''; ui.parada = ''; ui.busca = ''; ui.nuevaParada = false; render(); }
 
   /* ---------- Piezas de formulario ---------- */
   function mf(label, ctrl, cls) { return el('div', { class: 'jp-mf ' + (cls || '') }, [el('label', { text: label }), ctrl]); }
@@ -1246,34 +1260,7 @@
     document.body.appendChild(ov);
   }
 
-  /* ---------- Modal: Postura y Personal ---------- */
-  function modalPostura() {
-    var p = P(), d = {};
-    ['mina', 'nivel', 'bloque', 'idTronadura', 'encSeg', 'supJej', 'supDet', 'perforistaDet'].forEach(function (k) { d[k] = p.header[k] || ''; });
-    abrirModal('Configuración de Postura y Personal', function (m) {
-      m.appendChild(el('h4', { text: '1. Ubicación y Postura' }));
-      var g = el('div', { class: 'jp-mgrid' });
-      g.appendChild(mf('Mina:', txt(d, 'mina')));
-      g.appendChild(mf('Nivel:', sel(d, 'nivel', 'nivel')));
-      g.appendChild(mf('Bloque:', sel(d, 'bloque', 'bloque')));
-      g.appendChild(mf('ID Tronadura:', txt(d, 'idTronadura', 'Ej. TR-04')));
-      m.appendChild(g);
-      m.appendChild(el('h4', { text: '2. Personal Responsable' }));
-      var g2 = el('div', { class: 'jp-mgrid' });
-      g2.appendChild(mf('Encargado Seguimiento JeJ (Tú):', txt(d, 'encSeg', '', 'gris'), 'full'));
-      var dlS = datalist('supJej', false);
-      g2.appendChild(dlS);
-      g2.appendChild(mf('Supervisor JeJ:', txt(d, 'supJej', 'Seleccione o escriba...', '', dlS.id), 'full'));
-      multiInput(g2, 'Supervisor(es) DET:', 'supDet', d, 'Agregar otro Supervisor DET');
-      multiInput(g2, 'Perforista(s) DET:', 'perforistaDet', d, 'Agregar otro Perforista DET');
-      m.appendChild(g2);
-    }, function () {
-      Object.keys(d).forEach(function (k) { p.header[k] = d[k]; });
-      J.store.touch(); refrescarToolbar(); render();
-    });
-  }
-
-  /* ---------- Modal: datos de plantilla (horarios, equipo, labor, pérdidas) ---------- */
+  /* ---------- Asistente dato por dato (Postura/Personal/Zanja y Plantilla) ---------- */
   function normalizarTiempo(v) {
     v = String(v).trim(); if (!v) return '';
     var mm = v.match(/^(\d{1,2}):(\d{1,2})$/);
@@ -1281,118 +1268,219 @@
     if (/^\d+$/.test(v)) return J.fmtHM(+v);   // 90 -> 01:30 (minutos)
     return null;
   }
-  function modalPlantilla() {
-    var p = P(), d = {}, perd = p.perdidas.map(function (x) { return { desc: x.desc, tiempo: x.tiempo }; });
-    ['hLlegJej', 'hSalJej', 'hLlegPyt', 'hSalPyt', 'hIniPerf', 'hFinPerf', 'diametro', 'idEquipo', 'numZanja', 'calleZanja1', 'calleZanja2', 'fase', 'calleUcl', 'paradaIni', 'paradaFin']
-      .forEach(function (k) { d[k] = p.header[k] || ''; });
-    if (!perd.length) perd.push({ desc: '', tiempo: '' });
+  function horaActual() { var n = new Date(); return ('0' + n.getHours()).slice(-2) + ':' + ('0' + n.getMinutes()).slice(-2); }
 
-    abrirModal('Completar Datos de Plantilla (Horarios y Operación)', function (m) {
-      /* helpers de diseño */
-      function sec(icono, titulo, cls) {
-        var body = el('div', { class: 'pl-sec-b' });
-        var box = el('div', { class: 'pl-sec ' + (cls || '') }, [el('div', { class: 'pl-sec-h' }, [el('span', { text: icono }), el('span', { text: titulo })]), body]);
-        m.appendChild(box);
-        return body;
-      }
-      function campoPl(label, ctrl, extra) {
-        var l = el('div', { class: 'pl-l' }, [el('span', { text: label })]);
-        if (extra) l.appendChild(extra);
-        return el('div', { class: 'pl-f' }, [l, ctrl]);
-      }
-      function horaPl(label, k) {
-        var inp = hora(d, k, calcs);
-        var ahora = el('button', { type: 'button', class: 'pl-ahora', text: 'Ahora', title: 'Poner la hora actual', onclick: function () {
-          var n = new Date(); inp.value = ('0' + n.getHours()).slice(-2) + ':' + ('0' + n.getMinutes()).slice(-2);
-          d[k] = inp.value; calcs();
-        } });
-        return campoPl(label, inp, ahora);
-      }
-      function fila(hijos) { return el('div', { class: 'pl-fila' }, hijos); }
+  function pasosPostura() {
+    var U1 = '🏔️ Ubicación y Postura', U2 = '👷 Personal Responsable', U3 = '📍 Zanja, Fase y Paradas';
+    return [
+      { k: 'mina', label: 'Mina', type: 'text', ph: 'Ej. Esmeralda', grupo: U1, bg: '00B0F0' },
+      { k: 'nivel', label: 'Nivel', type: 'select', list: 'nivel', grupo: U1, bg: '00B0F0' },
+      { k: 'bloque', label: 'Bloque', type: 'select', list: 'bloque', grupo: U1, bg: '00B0F0' },
+      { k: 'idTronadura', label: 'ID Tronadura', type: 'text', ph: 'Ej. TR-04', grupo: U1, bg: '00B0F0' },
+      { k: 'encSeg', label: 'Encargado Seguimiento JeJ (Tú)', type: 'text', grupo: U2, bg: '4ade80' },
+      { k: 'supJej', label: 'Supervisor JeJ', type: 'text', ph: 'Seleccione o escriba...', dl: 'supJej', grupo: U2, bg: '4ade80' },
+      { k: 'supDet', label: 'Supervisor(es) DET', type: 'multi', add: 'Agregar otro Supervisor DET', grupo: U2, bg: '4ade80' },
+      { k: 'perforistaDet', label: 'Perforista(s) DET', type: 'multi', add: 'Agregar otro Perforista DET', grupo: U2, bg: '4ade80' },
+      { k: 'numZanja', label: 'Núm. Zanja', type: 'text', ph: 'Ej. Z-01', grupo: U3, bg: 'fbbf24' },
+      { k: 'calleZanja1', k2: 'calleZanja2', label: 'Calles Zanja (entre)', type: 'par', ph: 'Ej. 41', ph2: 'Ej. 43', grupo: U3, bg: 'fbbf24' },
+      { k: 'fase', label: 'Fase', type: 'select', list: 'fase', grupo: U3, bg: 'fbbf24' },
+      { k: 'calleUcl', label: 'Calle UCL', type: 'text', ph: 'Ej. UCL-01', grupo: U3, bg: 'fbbf24' },
+      { k: 'paradaIni', label: 'Parada Inicial', type: 'text', ph: 'Ej. P1', grupo: U3, bg: 'fbbf24' },
+      { k: 'paradaFin', label: 'Parada Final (neg)', type: 'text', ph: 'Ej. P5', grupo: U3, bg: 'fbbf24' }
+    ];
+  }
+  function pasosPlantilla() {
+    var H = '⏱️ Horarios · ', E = '🛠️ Equipo de Perforación';
+    return [
+      { k: 'hLlegJej', label: 'Llegada · Postura JeJ', type: 'time', grupo: H + '🚜 Postura JeJ', bg: '93c5fd' },
+      { k: 'hSalJej', label: 'Salida · Postura JeJ', type: 'time', grupo: H + '🚜 Postura JeJ', bg: '93c5fd' },
+      { k: 'hLlegPyt', label: 'Llegada · Postura PyT', type: 'time', grupo: H + '🧨 Postura PyT', bg: '93c5fd' },
+      { k: 'hSalPyt', label: 'Salida · Postura PyT', type: 'time', grupo: H + '🧨 Postura PyT', bg: '93c5fd',
+        calc: function (d) { return 'Tiempo en Postura: ' + J.fmtHM(J.tPostura(d)); } },
+      { k: 'hIniPerf', label: 'Inicio · Perforación', type: 'time', grupo: H + '⛏️ Perforación', bg: '93c5fd' },
+      { k: 'hFinPerf', label: 'Fin · Perforación', type: 'time', grupo: H + '⛏️ Perforación', bg: '93c5fd',
+        calc: function (d) { return 'Tiempo en Perforación: ' + J.fmtHM(J.tPerforacion(d)); } },
+      { k: 'diametro', label: 'Diámetro', type: 'num', unit: 'pulg', ph: 'Ej. 3.5', grupo: E, bg: '4ade80' },
+      { k: 'idEquipo', label: 'ID del Equipo', type: 'text', ph: 'Ej. EQ-01', grupo: E, bg: '4ade80' },
+      { k: '_perdidas', label: 'Pérdida Operacional Durante la Perforación', type: 'perd', grupo: '⚠️ Pérdida Operacional', bg: 'F8CBAD' }
+    ];
+  }
 
-      /* 1. Horarios */
-      var oPost = el('output', { text: J.fmtHM(J.tPostura(d)) });
-      var oPerf = el('output', { text: J.fmtHM(J.tPerforacion(d)) });
-      function calcs() { oPost.textContent = J.fmtHM(J.tPostura(d)); oPerf.textContent = J.fmtHM(J.tPerforacion(d)); }
-      var s1 = sec('⏱️', '1. Horarios', 'az');
-      s1.appendChild(el('p', { class: 'pl-sec-n', text: 'Toca «Ahora» para poner la hora actual. Los tiempos se calculan solos.' }));
-      s1.appendChild(el('div', { class: 'pl-grupo', text: '🚜 Postura JeJ' }));
-      s1.appendChild(fila([horaPl('Llegada', 'hLlegJej'), horaPl('Salida', 'hSalJej')]));
-      s1.appendChild(el('div', { class: 'pl-grupo', text: '🧨 Postura PyT' }));
-      s1.appendChild(fila([horaPl('Llegada', 'hLlegPyt'), horaPl('Salida', 'hSalPyt')]));
-      s1.appendChild(el('div', { class: 'pl-grupo', text: '⛏️ Perforación' }));
-      s1.appendChild(fila([horaPl('Inicio', 'hIniPerf'), horaPl('Fin', 'hFinPerf')]));
-      s1.appendChild(el('div', { class: 'pl-kpis' }, [
-        el('div', { class: 'pl-kpi' }, [el('span', { text: 'Tiempo en Postura' }), oPost]),
-        el('div', { class: 'pl-kpi' }, [el('span', { text: 'Tiempo en Perforación' }), oPerf])
-      ]));
-
-      /* 2. Equipo */
-      var s2 = sec('🛠️', '2. Equipo de Perforación', 'vd');
-      var tDiam = txt(d, 'diametro', 'Ej. 3.5'); tDiam.setAttribute('inputmode', 'decimal');
-      s2.appendChild(fila([
-        campoPl('Diámetro [pulg]', tDiam),
-        campoPl('ID del Equipo', txt(d, 'idEquipo', 'Ej. EQ-01'))
-      ]));
-
-      /* 3. Labor */
-      var s3 = sec('📍', '3. Zanja, Fase y Paradas', 'am');
-      var c1 = txt(d, 'calleZanja1', 'Ej. 41'), c2 = txt(d, 'calleZanja2', 'Ej. 43');
-      s3.appendChild(fila([
-        campoPl('Núm. Zanja', txt(d, 'numZanja', 'Ej. Z-01')),
-        campoPl('Calles Zanja (entre)', el('div', { class: 'pl-y' }, [c1, el('i', { text: 'y' }), c2]))
-      ]));
-      s3.appendChild(fila([
-        campoPl('Fase', sel(d, 'fase', 'fase', '-- Seleccione --')),
-        campoPl('Calle UCL', txt(d, 'calleUcl', 'Ej. UCL-01'))
-      ]));
-      s3.appendChild(fila([
-        campoPl('Parada Inicial', txt(d, 'paradaIni', 'Ej. P1')),
-        campoPl('Parada Final (neg)', txt(d, 'paradaFin', 'Ej. P5'))
-      ]));
-
-      /* 4. Pérdida operacional */
-      var s4 = sec('⚠️', '4. Pérdida Operacional Durante la Perforación', 'rj');
-      s4.appendChild(el('p', { class: 'pl-sec-n', text: 'Observación y tiempo (hh:mm). Si escribes solo minutos, por ejemplo 90, se convierte a 01:30.' }));
-      var dl = el('datalist', { id: 'dl-problemas' });
-      J.LISTAS.problemas.forEach(function (v) { dl.appendChild(el('option', { value: v })); });
-      var caja = el('div', { class: 'jp-perd' });
-      var total = el('div', { class: 'jp-perd-total' });
-      function actualizarTotal() {
-        var mins = J.totalPerdidas({ perdidas: perd });
-        total.innerHTML = '';
-        total.appendChild(document.createTextNode('Total pérdida operacional: ' + J.fmtHM(mins)));
-      }
-      function pintarPerd() {
-        caja.innerHTML = '';
-        caja.appendChild(el('div', { class: 'jp-perd-head' }, [el('span', { text: 'Observación' }), el('span', { text: 'Tiempo', style: 'text-align:center' }), el('span')]));
-        perd.forEach(function (x, i) {
-          var dd = el('input', { type: 'text', list: 'dl-problemas', value: x.desc || '', placeholder: 'Describe la pérdida', 'aria-label': 'Observación de la pérdida' });
-          var tt = el('input', { type: 'text', class: 't', value: x.tiempo || '', placeholder: 'hh:mm', maxlength: 5, inputmode: 'numeric', 'aria-label': 'Tiempo perdido (hh:mm)' });
-          dd.addEventListener('input', function () { x.desc = dd.value; });
-          tt.addEventListener('input', function () { x.tiempo = tt.value; actualizarTotal(); });
-          tt.addEventListener('blur', function () {
-            var v = normalizarTiempo(tt.value);
-            if (v === null) { tt.value = ''; x.tiempo = ''; } else { tt.value = v; x.tiempo = v; }
-            actualizarTotal();
-          });
-          var del = el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { perd.splice(i, 1); if (!perd.length) perd.push({ desc: '', tiempo: '' }); pintarPerd(); } });
-          caja.appendChild(el('div', { class: 'jp-perd-fila' }, [dd, tt, del]));
-        });
-        caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'jp-btn', text: '＋ Agregar pérdida', onclick: function () { perd.push({ desc: '', tiempo: '' }); pintarPerd(); } })]));
-        caja.appendChild(total);
-        actualizarTotal();
-      }
-      pintarPerd();
-      s4.appendChild(dl); s4.appendChild(caja);
-    }, function () {
-      var bad = false;
-      perd.forEach(function (x) { if (x.tiempo && normalizarTiempo(x.tiempo) === null) bad = true; });
-      if (bad) { alert('Revisa los tiempos de pérdida: usa el formato hh:mm.'); return false; }
-      Object.keys(d).forEach(function (k) { p.header[k] = d[k]; });
-      p.perdidas = perd.filter(function (x) { return x.desc || x.tiempo; }).map(function (x) { return { desc: x.desc, tiempo: normalizarTiempo(x.tiempo) || '' }; });
-      J.store.touch(); render();
+  function abrirAsistente(tipo) {
+    var p = P(), pasos = tipo === 'postura' ? pasosPostura() : pasosPlantilla(), d = {};
+    pasos.forEach(function (s) {
+      if (s.type === 'perd') return;
+      d[s.k] = p.header[s.k] || '';
+      if (s.k2) d[s.k2] = p.header[s.k2] || '';
     });
+    var perd = tipo === 'plantilla' ? p.perdidas.map(function (x) { return { desc: x.desc, tiempo: x.tiempo }; }) : [];
+    if (tipo === 'plantilla' && !perd.length) perd.push({ desc: '', tiempo: '' });
+    ui.asist = { tipo: tipo, pasos: pasos, d: d, perd: perd, i: 0, err: '' };
+    ui.aviso = '';
+    render(); window.scrollTo(0, 0);
+  }
+  function asistenteCerrar() { ui.asist = null; render(); window.scrollTo(0, 0); }
+
+  // Revisa los tiempos de pérdida y los normaliza (hh:mm). Devuelve false si hay un formato inválido.
+  function asistenteValidarPerd(a) {
+    if (!a.perd.length) return true;
+    var ok = true;
+    a.perd.forEach(function (x) {
+      if (!x.tiempo) return;
+      var v = normalizarTiempo(x.tiempo);
+      if (v === null) ok = false; else x.tiempo = v;
+    });
+    if (!ok) a.err = 'Revisa los tiempos de pérdida: usa el formato hh:mm.';
+    return ok;
+  }
+  function asistenteGuardar() {
+    var a = ui.asist, p = P();
+    if (a.tipo === 'plantilla' && !asistenteValidarPerd(a)) {
+      a.i = a.pasos.length - 1; render(); return;
+    }
+    Object.keys(a.d).forEach(function (k) { p.header[k] = a.d[k]; });
+    if (a.tipo === 'plantilla') {
+      p.perdidas = a.perd.filter(function (x) { return x.desc || x.tiempo; }).map(function (x) { return { desc: x.desc, tiempo: x.tiempo || '' }; });
+    }
+    J.store.touch(); refrescarToolbar();
+    ui.asist = null; render(); window.scrollTo(0, 0);
+  }
+  function asistenteAvanzar() {
+    var a = ui.asist, s = a.pasos[a.i];
+    a.err = '';
+    if (s.type === 'perd' && !asistenteValidarPerd(a)) { render(); return; }
+    if (a.i >= a.pasos.length - 1) { asistenteGuardar(); return; }
+    a.i++; render();
+  }
+  function asistenteRetroceder() { var a = ui.asist; a.err = ''; if (a.i > 0) { a.i--; render(); } }
+
+  // Varios nombres en un mismo dato (se guardan separados por " / ")
+  function multiPaso(q, s, d) {
+    var vals = partes(d[s.k]); if (!vals.length) vals = [''];
+    var dl = datalist(s.k, true), box = el('div', { class: 'jp-q-multi' });
+    function sync() { d[s.k] = vals.map(function (x) { return x.trim(); }).filter(Boolean).join(' / '); }
+    function pintar(enfocar) {
+      box.innerHTML = '';
+      vals.forEach(function (v, i) {
+        var inp = el('input', { type: 'text', placeholder: 'Seleccione o escriba...', value: v, list: dl.id, 'aria-label': s.label + ' ' + (i + 1) });
+        inp.addEventListener('input', function () { vals[i] = inp.value; sync(); });
+        var fila = el('div', { class: 'jp-multi' }, [inp]);
+        if (vals.length > 1) fila.appendChild(el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { vals.splice(i, 1); sync(); pintar(); } }));
+        box.appendChild(fila);
+        if ((enfocar && i === vals.length - 1) || (!enfocar && i === 0 && !v)) setTimeout(function () { try { inp.focus(); } catch (e) { /* sin foco */ } }, 0);
+      });
+      box.appendChild(el('div', { style: 'text-align:center' }, [el('button', { type: 'button', class: 'jp-chip', text: '+ ' + s.add, onclick: function () { vals.push(''); pintar(true); } })]));
+    }
+    pintar();
+    q.appendChild(dl); q.appendChild(box);
+  }
+
+  // Lista de pérdidas operacionales (observación + tiempo hh:mm)
+  function perdidasPaso(q, a) {
+    var perd = a.perd;
+    q.appendChild(el('p', { class: 'jp-q-ayuda', text: 'Observación y tiempo (hh:mm). Si escribes solo minutos, por ejemplo 90, se convierte a 01:30.' }));
+    var dl = el('datalist', { id: 'dl-problemas' });
+    J.LISTAS.problemas.forEach(function (v) { dl.appendChild(el('option', { value: v })); });
+    var caja = el('div', { class: 'jp-perd' }), total = el('div', { class: 'jp-perd-total' });
+    function actualizarTotal() { total.textContent = 'Total pérdida operacional: ' + J.fmtHM(J.totalPerdidas({ perdidas: perd })); }
+    function pintar() {
+      caja.innerHTML = '';
+      caja.appendChild(el('div', { class: 'jp-perd-head' }, [el('span', { text: 'Observación' }), el('span', { text: 'Tiempo', style: 'text-align:center' }), el('span')]));
+      perd.forEach(function (x, i) {
+        var dd = el('input', { type: 'text', list: 'dl-problemas', value: x.desc || '', placeholder: 'Describe la pérdida', 'aria-label': 'Observación de la pérdida' });
+        var tt = el('input', { type: 'text', class: 't', value: x.tiempo || '', placeholder: 'hh:mm', maxlength: 5, inputmode: 'numeric', 'aria-label': 'Tiempo perdido (hh:mm)' });
+        dd.addEventListener('input', function () { x.desc = dd.value; });
+        tt.addEventListener('input', function () { x.tiempo = tt.value; actualizarTotal(); });
+        tt.addEventListener('blur', function () {
+          var v = normalizarTiempo(tt.value);
+          if (v === null) { tt.value = ''; x.tiempo = ''; } else { tt.value = v; x.tiempo = v; }
+          actualizarTotal();
+        });
+        var del = el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { perd.splice(i, 1); if (!perd.length) perd.push({ desc: '', tiempo: '' }); pintar(); } });
+        caja.appendChild(el('div', { class: 'jp-perd-fila' }, [dd, tt, del]));
+      });
+      caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'jp-btn', text: '＋ Agregar pérdida', onclick: function () { perd.push({ desc: '', tiempo: '' }); pintar(); } })]));
+      caja.appendChild(total);
+      actualizarTotal();
+    }
+    pintar();
+    q.appendChild(dl); q.appendChild(el('div', { class: 'jp-q-perd' }, [caja]));
+  }
+
+  function asistenteVista(host, p) {
+    var a = ui.asist, ps = a.pasos, d = a.d;
+    if (a.i > ps.length - 1) a.i = ps.length - 1;
+    var s = ps[a.i], ultimo = a.i >= ps.length - 1;
+    var q = el('div', { class: 'jp-q', style: 'border-left-color:#' + s.bg });
+
+    var salto = el('select', { 'aria-label': 'Ir a otro dato' });
+    ps.forEach(function (x, i) { var o = el('option', { value: String(i), text: (i + 1) + '. ' + x.label }); if (i === a.i) o.selected = true; salto.appendChild(o); });
+    salto.addEventListener('change', function () { a.i = +salto.value; a.err = ''; render(); });
+    q.appendChild(el('div', { class: 'jp-q-top' }, [el('b', { text: s.grupo }), el('span', { text: 'Dato ' + (a.i + 1) + ' de ' + ps.length }), salto]));
+    q.appendChild(el('div', { class: 'jp-q-barra' }, [el('i', { style: 'width:' + Math.round((a.i + 1) / ps.length * 100) + '%' })]));
+    q.appendChild(el('h3', { text: s.label }));
+
+    var calcBox = null, inp = null;
+    function actualizarCalc() { if (calcBox && s.calc) calcBox.textContent = s.calc(d); }
+
+    if (s.type === 'select') {
+      var opts = el('div', { class: 'jp-opts' });
+      J.LISTAS[s.list].forEach(function (v) {
+        opts.appendChild(el('button', { type: 'button', class: 'jp-opt' + (d[s.k] === v ? ' sel' : ''), text: v, onclick: function () { d[s.k] = v; asistenteAvanzar(); } }));
+      });
+      if (d[s.k] && J.LISTAS[s.list].indexOf(d[s.k]) < 0) {
+        opts.appendChild(el('button', { type: 'button', class: 'jp-opt sel', text: d[s.k], onclick: function () { asistenteAvanzar(); } }));
+      }
+      q.appendChild(opts);
+    } else if (s.type === 'multi') {
+      multiPaso(q, s, d);
+    } else if (s.type === 'perd') {
+      perdidasPaso(q, a);
+    } else if (s.type === 'par') {
+      var i1 = el('input', { type: 'text', value: d[s.k] || '', placeholder: s.ph || '', 'aria-label': 'Primera calle' });
+      var i2 = el('input', { type: 'text', value: d[s.k2] || '', placeholder: s.ph2 || '', 'aria-label': 'Segunda calle' });
+      i1.addEventListener('input', function () { d[s.k] = i1.value; });
+      i2.addEventListener('input', function () { d[s.k2] = i2.value; });
+      i1.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); i2.focus(); } });
+      i2.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); asistenteAvanzar(); } });
+      q.appendChild(el('div', { class: 'jp-q-input' }, [i1, el('span', { class: 'u', text: 'y' }), i2]));
+      inp = i1;
+    } else {
+      inp = el('input', { type: s.type === 'time' ? 'time' : 'text', value: d[s.k] || '', placeholder: s.ph || '', 'aria-label': s.label });
+      if (s.type === 'num') inp.setAttribute('inputmode', 'decimal');
+      if (s.dl) { var dlx = datalist(s.dl, false); q.appendChild(dlx); inp.setAttribute('list', dlx.id); }
+      inp.addEventListener('input', function () { d[s.k] = inp.value; a.err = ''; actualizarCalc(); });
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); asistenteAvanzar(); } });
+      q.appendChild(el('div', { class: 'jp-q-input' }, [inp, s.unit ? el('span', { class: 'u', text: s.unit }) : null]));
+      if (s.type === 'time') {
+        q.appendChild(el('div', { style: 'text-align:center' }, [el('button', { type: 'button', class: 'jp-chip', text: 'Ahora', title: 'Poner la hora actual', onclick: function () {
+          inp.value = horaActual(); d[s.k] = inp.value; actualizarCalc();
+        } })]));
+      }
+    }
+    if (s.calc) { calcBox = el('div', { class: 'jp-q-calc', text: s.calc(d) }); q.appendChild(calcBox); }
+    if (a.err) q.appendChild(el('div', { class: 'jp-q-error', text: a.err }));
+
+    var acc = el('div', { class: 'jp-q-acciones' }, [
+      el('button', { type: 'button', class: 'jp-btn', text: '← Anterior', disabled: a.i === 0 ? 'disabled' : null, onclick: asistenteRetroceder }),
+      el('button', { type: 'button', class: 'jp-btn', text: 'Omitir', onclick: function () { a.err = ''; if (ultimo) asistenteGuardar(); else { a.i++; render(); } } }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: ultimo ? '✔ Guardar datos' : 'Siguiente →', onclick: asistenteAvanzar }),
+      ultimo ? null : el('button', { type: 'button', class: 'jp-btn', text: 'Guardar y salir', onclick: asistenteGuardar }),
+      el('span', { class: 'jp-sep' }),
+      el('button', { type: 'button', class: 'jp-btn jp-btn-danger', text: 'Cancelar', onclick: function () { if (confirm('¿Cancelar? Se descartan los cambios hechos en este asistente.')) asistenteCerrar(); } })
+    ]);
+    q.appendChild(acc);
+
+    // Lo ya ingresado
+    var llenos = ps.filter(function (x) { return x.type !== 'perd' && x !== s && (d[x.k] || (x.k2 && d[x.k2])); });
+    if (llenos.length) {
+      q.appendChild(el('div', { class: 'jp-q-resumen' }, llenos.map(function (x) {
+        var v = x.k2 ? [d[x.k], d[x.k2]].filter(Boolean).join(' y ') : d[x.k];
+        return el('span', { text: x.label + ': ' + v });
+      })));
+    }
+    host.appendChild(q);
+    if (inp) setTimeout(function () { try { inp.focus(); if (inp.select) inp.select(); } catch (e) { /* sin foco */ } }, 0);
   }
 
   /* ---------- Modal: observaciones en terreno ---------- */
@@ -1437,7 +1525,7 @@
 
     card.appendChild(el('div', { class: 'jp-sec' }, [
       el('span', { text: '2. Datos de Postura y Personal' }),
-      el('button', { type: 'button', class: 'jp-b cel chico', text: '⚙️ Ingreso / Editar Datos', onclick: modalPostura })
+      el('button', { type: 'button', class: 'jp-b cel chico', text: '⚙️ Ingreso / Editar Datos', onclick: function () { abrirAsistente('postura'); } })
     ]));
     function negrita(t, v) { var s = el('div'); s.appendChild(el('b', { text: t + ': ' })); s.appendChild(document.createTextNode(v)); return s; }
     var linea1 = el('div'); linea1.appendChild(el('b', { text: 'Mina: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.mina) + ' | '));
@@ -1446,7 +1534,10 @@
     card.appendChild(el('div', { class: 'jp-resumen-box' }, [
       linea1, negrita('ID Tronadura', sinAsignar(h.idTronadura)), el('hr'),
       negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
-      negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', ')))
+      negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', '))), el('hr'),
+      negrita('Zanja', sinAsignar(h.numZanja) + ((h.calleZanja1 || h.calleZanja2) ? ' (entre ' + sinAsignar(h.calleZanja1) + ' y ' + sinAsignar(h.calleZanja2) + ')' : '')),
+      negrita('Fase', sinAsignar(h.fase) + ' | Calle UCL: ' + sinAsignar(h.calleUcl)),
+      negrita('Paradas', sinAsignar(h.paradaIni) + ' a ' + sinAsignar(h.paradaFin))
     ]));
 
     card.appendChild(el('div', { class: 'jp-fila2' }, [
@@ -1590,7 +1681,7 @@
         el('button', { type: 'button', class: 'jp-b cel', text: '+ Registrar Otro ID de Trabajo', onclick: function () { ir('id'); } }),
         el('button', { type: 'button', class: 'jp-b nar', text: '📝 Agregar Observación', onclick: modalObs })
       ]),
-      el('button', { type: 'button', class: 'jp-b teal', text: '📋 Rellenar Datos Faltantes de Plantilla (Horarios/Operación)', onclick: modalPlantilla }),
+      el('button', { type: 'button', class: 'jp-b teal', text: '📋 Rellenar Datos Faltantes de Plantilla (Horarios/Operación)', onclick: function () { abrirAsistente('plantilla'); } }),
       bloqueDescarga(p)
     ]));
     host.appendChild(card);
@@ -1803,12 +1894,13 @@
   }
   function ir(v) {
     descartarTiroVacio(P());
-    ui.tiro = null; ui.aviso = ''; ui.vista = v;
+    ui.asist = null; ui.tiro = null; ui.aviso = ''; ui.vista = v;
     render(); window.scrollTo(0, 0);
   }
   var VISTAS = { datos: vistaDatos, id: vistaId, resumen: vistaResumen, parada: vistaParada, final: vistaFinal };
   function render() {
     var p = P(), host = U.$('#paso'); host.innerHTML = '';
+    if (ui.asist) { asistenteVista(host, p); return; }
     if (!p.trabajoActual && (ui.vista === 'resumen' || ui.vista === 'parada' || ui.vista === 'final')) ui.vista = 'id';
     if (ui.vista === 'parada' && !ui.parada) ui.vista = 'resumen';
     VISTAS[ui.vista](host, p);

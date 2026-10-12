@@ -46,6 +46,8 @@ function verificarEstadoSesion() {
     const seccionMenu = document.getElementById("seccionMenu");
     const lblUsuario = document.getElementById("usuarioLogueado");
 
+    if (typeof actualizarPanelUsuario === "function") actualizarPanelUsuario();
+
     if (usuarioActivo) {
         // Si ya hay un usuario activo guardado, mostramos directamente el menú en la misma página
         if (seccionLogin) seccionLogin.style.display = "none";
@@ -88,6 +90,7 @@ function ingresarApp() {
     usuariosMap[nombreUsuario] = Date.now();
     localStorage.setItem("jej_usuarios_map", JSON.stringify(usuariosMap));
     localStorage.setItem("jej_usuario_activo", nombreUsuario);
+    if (typeof registrarUltimaConexion === "function") registrarUltimaConexion(nombreUsuario);
     verificarEstadoSesion();
 }
 

@@ -8,10 +8,10 @@
 <style>
   .rs{--blue:#0284c7;--prim:#2563eb;--green:#16a34a;--orange:#d97706;--teal:#0d9488;--slate:#64748b;--ink:#0f172a;--line:#cbd5e1;--soft:#eef2fb;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
   .rs *{box-sizing:border-box}
-  .rs-head{padding:14px 18px 4px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  .rs-head{padding:0 0 4px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
   .rs-head h1{font-size:1.25rem;margin:0}
   .rs-head p{margin:2px 0 0;font-size:.78rem;color:#475569}
-  .tb{margin:10px 18px;padding:10px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .tb{margin:10px 0;padding:10px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .tb .sp{flex:1}
   .rs select,.rs input,.rs textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:1rem;background:#fff;color:var(--ink);font-family:inherit}
   .tb select{width:auto;padding:8px;font-size:.85rem}
@@ -58,12 +58,21 @@
   .nav{display:flex;gap:8px;margin-top:20px;align-items:center;flex-wrap:wrap}
   .nav .sp{flex:1}
   .vol{text-align:center;margin-top:10px;color:#475569;font-size:.9rem}
+  .gi{background:#fff7d6;border:1px solid #f3e6a8;border-radius:10px;padding:8px 12px;margin:12px auto 0;max-width:420px;font-size:.85rem;font-weight:700;text-align:center;line-height:1.6}
+  .mlt{max-width:420px;margin:0 auto}
+  .mrow{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+  .mrow .x{border:0;background:none;color:#94a3b8;font-size:1.4rem;cursor:pointer;padding:0 6px}
+  .mrow .x:hover{color:#b91c1c}
+  .big.gm{font-size:1.2rem!important}
+  .descarga{margin-top:12px}
+  .descarga .pila{display:flex;flex-direction:column;gap:10px}
+  .descarga small{display:block;text-align:center;color:#64748b;font-size:.78rem;margin-top:8px}
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 18px;border-radius:20px;font-size:.9rem;display:none;z-index:2000}
   .hid{display:none}
   .ind-row{display:flex;justify-content:space-between;font-size:.88rem;padding:6px 0;border-bottom:1px solid #e2e8f0}
 </style>
 </head>
-<body>
+<body class="pagina-fondo">
 <div class="rs">
 
   <div class="rs-head">
@@ -74,16 +83,6 @@
     <a href="../index.html" class="b sm out" style="text-decoration:none;background:#e2e8f0;border:none">Menú principal</a>
   </div>
 
-  <div class="tb">
-    <span style="font-size:.85rem">Planilla:</span>
-    <select id="selPl" onchange="cambiarPl(this.value)"></select>
-    <button class="b sm out" onclick="nuevaPlanilla()">+ Nueva planilla</button>
-    <button class="b sm out" style="color:#dc2626;border-color:#fca5a5" onclick="elimPlanilla()">Eliminar</button>
-    <span class="sp"></span>
-    <button class="b sm prim" onclick="descargarExcel()">⬇ Descargar Excel</button>
-    <button class="b sm prim" onclick="informe()">⬇ Descargar Informe Técnico</button>
-  </div>
-
   <!-- PASO 1 -->
   <section class="card" id="v1">
     <h3>Paso 1: Datos Generales y Turno</h3>
@@ -92,7 +91,7 @@
     <input type="date" id="fFecha" onchange="P().fecha=this.value;save();renderTb()">
     <label class="l">Turno:</label>
     <select id="fTurno" onchange="P().turno=this.value;save();renderTb()"><option>A</option><option>B</option></select>
-    <div class="sec"><span>2. Datos de Planilla y Personal</span><button class="b sm blue" onclick="abrirDatos()">⚙️ Ingreso / Editar Datos</button></div>
+    <div class="sec"><span>2. Datos de Planilla y Personal</span><button class="b sm blue" onclick="abrirG('datos')">⚙️ Ingreso / Editar Datos</button></div>
     <div class="info" id="infoDatos"></div>
     <div class="row">
       <a href="../index.html" class="b slate" style="text-decoration:none;text-align:center">Volver al Menú</a>
@@ -131,55 +130,21 @@
       <button class="b blue" onclick="ir(2)">+ Registrar Otra Calle</button>
       <button class="b orange" onclick="abrirObs()">📝 Agregar Observación</button>
     </div>
-    <button class="b teal full" style="margin-bottom:10px" onclick="abrirFalt()">📋 Rellenar Datos Faltantes de Planilla (Horarios/Indicadores)</button>
-    <button class="b green full" onclick="guardarCompleto()">💾 Guardar Registro Completo</button>
+    <button class="b teal full" onclick="abrirG('planilla')">📋 Rellenar Datos Faltantes de Planilla (Horarios/Indicadores)</button>
+    <div class="descarga">
+      <div class="pila">
+        <button class="b prim full" onclick="descargarExcel()">⬇ Descargar Excel</button>
+        <button class="b prim full" onclick="informe()">⬇ Descargar Informe Técnico</button>
+      </div>
+      <small>Los datos se guardan automáticamente en este dispositivo.</small>
+    </div>
   </section>
 
   <!-- PASO 4 -->
   <section class="card wz hid" id="v4"></section>
-</div>
 
-<!-- MODAL DATOS -->
-<div class="ov" id="mDatos"><div class="modal">
-  <h3>Configuración de Planilla y Personal</h3>
-  <h4>1. Ubicación</h4>
-  <div class="g2">
-    <div><label>Sector:</label><input id="dSector"></div>
-    <div><label>Grupo:</label><input id="dGrupo" type="number" min="1"></div>
-  </div>
-  <h4>2. Personal Responsable</h4>
-  <label class="l" style="margin-top:0">Encargado Seguimiento JeJ (Tú):</label>
-  <input id="dJEJ">
-  <label class="l">Encargado(s) Operación RS DET:</label>
-  <div id="dDET"></div>
-  <button class="dash" onclick="addDET()">+ Agregar otro Encargado DET</button>
-  <div class="row" style="margin-top:18px">
-    <button class="b slate" onclick="cerrar('mDatos')">Cancelar</button>
-    <button class="b green" onclick="guardarDatos()">Guardar y Aplicar</button>
-  </div>
-</div></div>
-
-<!-- MODAL FALTANTES -->
-<div class="ov" id="mFalt"><div class="modal">
-  <h3>Completar Datos de Planilla (Horarios e Indicadores)</h3>
-  <h4>1. Horarios de la Calle</h4>
-  <div class="g2">
-    <div><label>Hora inicio carguío:</label><input type="time" id="hCarguio"></div>
-    <div><label>Hora solicitud:</label><input type="time" id="hSolicitud"></div>
-    <div><label>Hora inicio aislación:</label><input type="time" id="hAislacion"></div>
-    <div><label>Hora quemada:</label><input type="time" id="hQuemada"></div>
-  </div>
-  <h4>2. Indicadores por Calle</h4>
-  <div class="ind-row"><span>1. Puntos total que necesitan RS</span><b id="x1">0</b></div>
-  <label class="l" style="margin-top:10px">2. Puntos no quemados por pretil deficiente:</label><input type="number" min="0" id="x2" oninput="calcX()">
-  <label class="l">3. Puntos no quemados por condición de goteo:</label><input type="number" min="0" id="x3" oninput="calcX()">
-  <label class="l">4. Colpa sobredimensionada sin barrenadura:</label><input type="number" min="0" id="x4" oninput="calcX()">
-  <div class="ind-row" style="margin-top:12px"><span>5. Puntos quemados total en calle</span><b id="x5">0</b></div>
-  <div class="row" style="margin-top:18px">
-    <button class="b slate" onclick="cerrar('mFalt')">Cancelar</button>
-    <button class="b green" onclick="guardarFalt()">Guardar</button>
-  </div>
-</div></div>
+  <!-- PASO 5: asistente dato por dato (datos de planilla y personal / horarios e indicadores) -->
+  <section class="card wz hid" id="v5"></section>
 
 <!-- MODAL OBS -->
 <div class="ov" id="mObs"><div class="modal">
@@ -193,7 +158,11 @@
 
 <div class="toast" id="toast"></div>
 
+</div><!-- /.rs -->
+
 <script src="../js/components.js"></script>
+<script src="../js/informe-base.js"></script>
+<script src="../js/informe-reduccion.js"></script>
 <script src="../js/app.js"></script>
 <script>
   cargarBarMenu(true);
@@ -254,9 +223,7 @@
   }
 
   /* ============ Barra de planillas ============ */
-  function renderTb(){
-    $('selPl').innerHTML=S.pl.map(p=>`<option value="${p.id}" ${p.id===S.act?'selected':''}>${esc(p.sector)} · ${p.fecha} · Turno ${p.turno}</option>`).join('');
-  }
+  function renderTb(){} // la barra de planillas se retiró (igual que en Perforación)
   function cambiarPl(id){S.act=id;save();V=1;render()}
   function nuevaPlanilla(){const p=nuevaPl();const a=P();p.sector=a.sector;p.grupo=a.grupo;p.encJEJ=a.encJEJ;p.encDET=[...a.encDET];S.pl.push(p);S.act=p.id;save();V=1;render();toast('Nueva planilla creada')}
   function elimPlanilla(){
@@ -268,8 +235,7 @@
 
   /* ============ Render general ============ */
   function render(){
-    renderTb();
-    ['v1','v2','v3','v4'].forEach((id,i)=>$(id).classList.toggle('hid',V!==i+1));
+    ['v1','v2','v3','v4','v5'].forEach((id,i)=>$(id).classList.toggle('hid',V!==i+1));
     if(V===1){
       const p=P();$('fFecha').value=p.fecha;$('fTurno').value=p.turno;
       $('infoDatos').innerHTML=`<b>Sector:</b> ${esc(p.sector||'-')} | <b>Grupo:</b> ${esc(p.grupo||'-')}<br>
@@ -283,22 +249,93 @@
     }
     if(V===3){$('t3').textContent='Resumen de Colpas - Calle: '+C().id;renderLista()}
     if(V===4)renderWz();
+    if(V===5)renderG();
   }
 
-  /* ============ Paso 1: datos ============ */
-  function abrirDatos(){
-    const p=P();$('dSector').value=p.sector;$('dGrupo').value=p.grupo;$('dJEJ').value=p.encJEJ;
-    $('dDET').innerHTML='';(p.encDET.length?p.encDET:['']).forEach(addDET);
-    $('mDatos').classList.add('on');
+  /* ============ Asistente dato por dato (datos y planilla) ============ */
+  const horaAhora=()=>{const n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')};
+  let G=null;
+  const UB='🏔️ Ubicación', PE='👷 Personal Responsable', HO='⏱️ Horarios de la Calle', IN='📊 Indicadores por Calle';
+  const infoInd=d=>{const t=C().colpas.length;return `1. Puntos total que necesitan RS: <b>${t}</b><br>5. Puntos quemados total en calle: <b>${Math.max(0,t-(num(d.i2)+num(d.i3)+num(d.i4)))}</b>`};
+  function gDef(tipo){
+    if(tipo==='datos'){
+      const p=P();
+      return {tit:'Configuración de Planilla y Personal',
+        pasos:[
+          {k:'sector',l:'SECTOR',t:'text',ph:'Ej. Esmeralda',g:UB,c:'#0ea5e9'},
+          {k:'grupo',l:'GRUPO',t:'num',step:1,g:UB,c:'#0ea5e9'},
+          {k:'encJEJ',l:'ENCARGADO SEGUIMIENTO JEJ (TÚ)',t:'text',g:PE,c:'#4ade80'},
+          {k:'encDET',l:'ENCARGADO(S) OPERACIÓN RS DET',t:'multi',add:'Agregar otro Encargado DET',g:PE,c:'#4ade80'}
+        ],
+        d:{sector:p.sector||'',grupo:p.grupo||'',encJEJ:p.encJEJ||'',encDET:p.encDET.length?[...p.encDET]:['']},
+        aplicar(d){p.sector=String(d.sector).trim();p.grupo=d.grupo;p.encJEJ=String(d.encJEJ).trim();p.encDET=d.encDET.map(x=>x.trim()).filter(Boolean)}};
+    }
+    const c=C();
+    return {tit:'Completar Datos de Planilla (Horarios e Indicadores)',
+      pasos:[
+        {k:'hCarguio',l:'HORA INICIO CARGUÍO',t:'time',g:HO,c:'#93c5fd'},
+        {k:'hSolicitud',l:'HORA SOLICITUD',t:'time',g:HO,c:'#93c5fd'},
+        {k:'hAislacion',l:'HORA INICIO AISLACIÓN',t:'time',g:HO,c:'#93c5fd'},
+        {k:'hQuemada',l:'HORA QUEMADA',t:'time',g:HO,c:'#93c5fd'},
+        {k:'i2',l:'PUNTOS NO QUEMADOS POR PRETIL DEFICIENTE',t:'num',step:1,g:IN,c:'#fbbf24',info:infoInd},
+        {k:'i3',l:'PUNTOS NO QUEMADOS POR CONDICIÓN DE GOTEO',t:'num',step:1,g:IN,c:'#fbbf24',info:infoInd},
+        {k:'i4',l:'COLPA SOBREDIMENSIONADA SIN BARRENADURA',t:'num',step:1,g:IN,c:'#fbbf24',info:infoInd}
+      ],
+      d:{hCarguio:c.h.carguio||'',hSolicitud:c.h.solicitud||'',hAislacion:c.h.aislacion||'',hQuemada:c.h.quemada||'',i2:c.i2||0,i3:c.i3||0,i4:c.i4||0},
+      aplicar(d){c.h={carguio:d.hCarguio,solicitud:d.hSolicitud,aislacion:d.hAislacion,quemada:d.hQuemada};c.i2=num(d.i2);c.i3=num(d.i3);c.i4=num(d.i4)}};
   }
-  function addDET(v){
-    const i=document.createElement('input');i.className='detIn';i.value=typeof v==='string'?v:'';i.placeholder='Nombre';i.style.marginBottom='8px';$('dDET').appendChild(i);
+  function abrirG(tipo){G={...gDef(tipo),s:0,volver:V};V=5;render();window.scrollTo(0,0)}
+  function gCapt(){
+    const s=G.pasos[G.s];
+    if(s.t==='multi')G.d[s.k]=[...document.querySelectorAll('.gm')].map(i=>i.value);
+    else{const el=$('wi');if(el)G.d[s.k]=el.value}
   }
-  function guardarDatos(){
-    const p=P();p.sector=$('dSector').value.trim();p.grupo=$('dGrupo').value;p.encJEJ=$('dJEJ').value.trim();
-    p.encDET=[...document.querySelectorAll('.detIn')].map(i=>i.value.trim()).filter(Boolean);
-    save();cerrar('mDatos');render();toast('Datos aplicados');
+  function renderG(){
+    const ps=G.pasos,n=ps.length,s=ps[G.s],d=G.d,ult=G.s===n-1,v=d[s.k]??'';
+    let inp='';
+    if(s.t==='multi'){
+      inp=`<div class="mlt">${d[s.k].map((x,i)=>`<div class="mrow"><input class="big gm" value="${esc(x)}" placeholder="Nombre" onkeydown="if(event.key==='Enter')gSig()">${d[s.k].length>1?`<button class="x" title="Quitar" onclick="gQuitar(${i})">×</button>`:''}</div>`).join('')}
+        <div style="text-align:center"><button class="dash" onclick="gAgregar()">+ ${esc(s.add)}</button></div></div>`;
+    }else if(s.t==='time'){
+      inp=`<input id="wi" class="big" type="time" value="${esc(v)}" onkeydown="if(event.key==='Enter')gSig()">
+        <div style="text-align:center"><button class="dash" style="margin-top:10px" onclick="gAhora()">Ahora</button></div>`;
+    }else if(s.t==='num'){
+      inp=`<input id="wi" class="big" type="number" inputmode="decimal" step="${s.step||0.1}" min="0" value="${esc(v)}" placeholder="0" oninput="gInfoUp()" onkeydown="if(event.key==='Enter')gSig()">`;
+    }else{
+      inp=`<input id="wi" class="big" value="${esc(v)}" placeholder="${esc(s.ph||'')}" onkeydown="if(event.key==='Enter')gSig()">`;
+    }
+    const llenos=ps.filter(x=>x!==s&&(Array.isArray(d[x.k])?d[x.k].some(Boolean):String(d[x.k]??'')!==''&&!(x.t==='num'&&num(d[x.k])===0&&!d[x.k])));
+    $('v5').style.borderLeftColor=s.c;
+    $('v5').innerHTML=`
+      <div class="wz-top"><b>${esc(s.g)}</b><span>Dato <b style="color:#2563eb">${G.s+1}</b> de ${n}</span>
+        <select onchange="gSaltar(this.value)">${ps.map((x,i)=>`<option value="${i}" ${i===G.s?'selected':''}>${i+1}. ${esc(x.l)}</option>`).join('')}</select></div>
+      <div class="bar"><i style="width:${((G.s+1)/n)*100}%"></i></div>
+      <h2>${esc(s.l)}</h2>${inp}
+      ${s.info?`<div class="gi" id="gInfo">${s.info(d)}</div>`:''}
+      <div class="nav">
+        <button class="b sm out" ${G.s===0?'disabled':''} onclick="gAnt()">← Anterior</button>
+        <button class="b sm out" onclick="gOmitir()">Omitir</button>
+        <button class="b sm prim" onclick="gSig()">${ult?'Guardar datos ✓':'Siguiente →'}</button>
+        ${ult?'':'<button class="b sm out" onclick="gGuardar()">Guardar y salir</button>'}
+        <span class="sp"></span>
+        <button class="b sm out" style="color:#dc2626;border-color:#fca5a5" onclick="gCancelar()">Cancelar</button>
+      </div>
+      ${llenos.length?`<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px 6px;margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0">${llenos.map(x=>`<span style="font-size:.72rem;background:#f1f5f9;border-radius:4px;padding:2px 6px;color:#334155">${esc(x.l.toLowerCase())}: ${esc(Array.isArray(d[x.k])?d[x.k].filter(Boolean).join(', '):d[x.k])}</span>`).join('')}</div>`:''}`;
+    const el=document.querySelector('#v5 input');if(el){el.focus();el.select&&el.select()}
   }
+  function gInfoUp(){gCapt();const s=G.pasos[G.s],t=$('gInfo');if(t&&s.info)t.innerHTML=s.info(G.d)}
+  function gAhora(){const el=$('wi');el.value=horaAhora();G.d[G.pasos[G.s].k]=el.value}
+  function gAgregar(){gCapt();G.d[G.pasos[G.s].k].push('');renderG();const l=document.querySelectorAll('.gm');l[l.length-1].focus()}
+  function gQuitar(i){gCapt();G.d[G.pasos[G.s].k].splice(i,1);renderG()}
+  function gSaltar(i){gCapt();G.s=+i;renderG()}
+  function gAnt(){gCapt();if(G.s>0){G.s--;renderG()}}
+  function gOmitir(){if(G.s<G.pasos.length-1){G.s++;renderG()}else gGuardar(true)}
+  function gSig(){gCapt();if(G.s<G.pasos.length-1){G.s++;renderG()}else gGuardar(true)}
+  function gGuardar(yaCapt){
+    if(!yaCapt)gCapt();
+    G.aplicar(G.d);save();V=G.volver;G=null;render();window.scrollTo(0,0);toast('Datos guardados');
+  }
+  function gCancelar(){if(confirm('¿Cancelar? Se descartan los cambios hechos en este asistente.')){V=G.volver;G=null;render()}}
 
   /* ============ Paso 2: calles ============ */
   function crearCalle(){
@@ -330,21 +367,6 @@
   /* Observaciones */
   function abrirObs(){$('oTxt').value=C().obs||'';$('mObs').classList.add('on')}
   function guardarObs(){C().obs=$('oTxt').value;save();cerrar('mObs');toast('Observación guardada')}
-
-  /* Faltantes */
-  function calcX(){
-    const c=C();const t=c.colpas.length;
-    $('x1').textContent=t;$('x5').textContent=Math.max(0,t-(num($('x2').value)+num($('x3').value)+num($('x4').value)));
-  }
-  function abrirFalt(){
-    const c=C();
-    $('hCarguio').value=c.h.carguio;$('hSolicitud').value=c.h.solicitud;$('hAislacion').value=c.h.aislacion;$('hQuemada').value=c.h.quemada;
-    $('x2').value=c.i2;$('x3').value=c.i3;$('x4').value=c.i4;calcX();$('mFalt').classList.add('on');
-  }
-  function guardarFalt(){
-    const c=C();c.h={carguio:$('hCarguio').value,solicitud:$('hSolicitud').value,aislacion:$('hAislacion').value,quemada:$('hQuemada').value};
-    c.i2=num($('x2').value);c.i3=num($('x3').value);c.i4=num($('x4').value);save();cerrar('mFalt');toast('Datos de planilla guardados');
-  }
 
   /* ============ Paso 4: asistente por dato ============ */
   let W={ci:-1,d:{},s:0};
@@ -438,13 +460,7 @@
   }
   function informe(){
     const p=P();if(!p.calles.length){toast('No hay calles para el informe');return}
-    const w=window.open('','_blank');if(!w){toast('Permita ventanas emergentes');return}
-    const css='@page{size:landscape;margin:10mm}body{font-family:Arial}';
-    const html=tag('html')+tag('head')+tag('meta','charset="UTF-8"')+tag('title')+'Informe RS '+esc(p.sector)+' '+p.fecha+ctag('title')
-      +tag('style')+css+ctag('style')+ctag('head')+tag('body')+todoHTML()+ctag('body')+ctag('html');
-    w.document.write(html);
-    w.document.close();
-    setTimeout(()=>{w.focus();w.print()},500);
+    window.JEJInformeReduccion.abrir(p);
   }
 
   render();
