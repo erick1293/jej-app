@@ -5,7 +5,21 @@
     <title>App JEJ - Gestión Offline</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="con-hero">
+
+    <!-- BANNER DE BIENVENIDA -->
+    <section class="hero" id="hero">
+        <div class="hero-text">
+            <span class="b">Una plataforma</span>
+            <span class="l">que fortalecerá</span>
+            <span class="b">tus conocimientos</span>
+        </div>
+        <img class="hero-logo" src="css/logo-blanco.png" alt="">
+        <svg class="hero-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 40 C 240 100, 560 118, 900 84 C 1140 58, 1300 30, 1440 52 L1440 120 L0 120 Z" fill="#e6ebf1"/>
+            <path d="M0 62 C 260 112, 600 112, 940 76 C 1180 52, 1310 36, 1440 60 L1440 120 L0 120 Z" fill="#f4f6f8"/>
+        </svg>
+    </section>
 
     <!-- CONTENIDO PRINCIPAL CENTRADO -->
     <main class="container-center">
@@ -51,6 +65,7 @@
 
   <script src="./js/components.js"></script>
 <script src="./js/app.js"></script>
+
 <script>
     if (typeof cargarBarMenu === 'function') {
         cargarBarMenu(false);

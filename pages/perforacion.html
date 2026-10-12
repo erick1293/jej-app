@@ -1290,8 +1290,11 @@
     ];
   }
   function pasosPlantilla() {
-    var H = '⏱️ Horarios · ', E = '🛠️ Equipo de Perforación';
+    var H = '⏱️ Horarios · ', E = '🛠️ Equipo de Perforación', I = '🏷️ Identificación y Paradas';
     return [
+      { k: 'idTronadura', label: 'ID Tronadura', type: 'text', ph: 'Ej. TR-04', grupo: I, bg: '00B0F0' },
+      { k: 'paradaIni', label: 'Parada Inicial', type: 'text', ph: 'Ej. P1', grupo: I, bg: '00B0F0' },
+      { k: 'paradaFin', label: 'Parada Final (neg)', type: 'text', ph: 'Ej. P5', grupo: I, bg: '00B0F0' },
       { k: 'hLlegJej', label: 'Llegada · Postura JeJ', type: 'time', grupo: H + '🚜 Postura JeJ', bg: '93c5fd' },
       { k: 'hSalJej', label: 'Salida · Postura JeJ', type: 'time', grupo: H + '🚜 Postura JeJ', bg: '93c5fd' },
       { k: 'hLlegPyt', label: 'Llegada · Postura PyT', type: 'time', grupo: H + '🧨 Postura PyT', bg: '93c5fd' },
@@ -1307,6 +1310,7 @@
   }
 
   function abrirAsistente(tipo) {
+    if (tipo === 'postura') { modalPostura(); return; }
     var p = P(), pasos = tipo === 'postura' ? pasosPostura() : pasosPlantilla(), d = {};
     pasos.forEach(function (s) {
       if (s.type === 'perd') return;
@@ -1483,6 +1487,71 @@
     if (inp) setTimeout(function () { try { inp.focus(); if (inp.select) inp.select(); } catch (e) { /* sin foco */ } }, 0);
   }
 
+  /* ---------- Modal: Configuración de Postura y Personal ---------- */
+  var NIVEL_TXT = { 'NP': 'NP (Nivel de Producción)', 'UCL': 'UCL (Calle UCL)', 'Panel 2': 'Panel 2' };
+  function modalPostura() {
+    var p = P(), h = p.header, d = {};
+    ['mina', 'nivel', 'bloque', 'fase', 'encSeg', 'supJej', 'supDet', 'perforistaDet', 'numZanja', 'calleZanja1', 'calleZanja2', 'calleUcl'].forEach(function (k) { d[k] = h[k] || ''; });
+    function selectTxt(k, valores, ph, on) {
+      var s = el('select', { class: 'jp-in' }), vs = valores.slice();
+      if (d[k] && vs.indexOf(d[k]) < 0) vs.push(d[k]);
+      s.appendChild(el('option', { value: '', text: ph }));
+      vs.forEach(function (v) { var o = el('option', { value: v, text: NIVEL_TXT[v] && k === 'nivel' ? NIVEL_TXT[v] : v }); if (v === d[k]) o.selected = true; s.appendChild(o); });
+      s.addEventListener('change', function () { d[k] = s.value; if (on) on(); });
+      return s;
+    }
+    var minas = ['Esmeralda'];
+    J.store.list().forEach(function (x) { if (x.header.mina && minas.indexOf(x.header.mina) < 0) minas.push(x.header.mina); });
+
+    abrirModal('Configuración de Postura y Personal', function (m) {
+      m.appendChild(el('h4', { text: '1. Ubicación y Postura' }));
+      var g1 = el('div', { class: 'jp-mgrid' });
+      var zona = el('div', { class: 'jp-mf full' });
+      function pintarZona() {
+        zona.innerHTML = '';
+        if (d.nivel === 'NP') {
+          zona.appendChild(el('div', { style: 'background:#e8f1fd;color:#2b5fc7;padding:9px 12px;border-radius:6px;margin-bottom:12px;font-size:1rem', text: 'Nivel de Producción' }));
+          var g = el('div', { class: 'jp-mgrid' });
+          g.appendChild(mf('Zanja (Z) · N° de zanja:', txt(d, 'numZanja', 'Ej. 47')));
+          g.appendChild(el('div'));
+          g.appendChild(mf('Entre calles (C) · N° Calle 1:', txt(d, 'calleZanja1', 'Ej. 41')));
+          g.appendChild(mf('Entre calles (C) · N° Calle 2:', txt(d, 'calleZanja2', 'Ej. 43')));
+          zona.appendChild(g);
+        } else if (d.nivel === 'UCL') {
+          zona.appendChild(el('div', { style: 'background:#e8f1fd;color:#2b5fc7;padding:9px 12px;border-radius:6px;margin-bottom:12px;font-size:1rem', text: 'Nivel UCL' }));
+          var g2 = el('div', { class: 'jp-mgrid' });
+          g2.appendChild(mf('Calle UCL (C UCL) · N° de calle:', txt(d, 'calleUcl', 'Ej. 12')));
+          zona.appendChild(g2);
+        }
+      }
+      g1.appendChild(mf('Mina:', selectTxt('mina', minas, '-- Mina --')));
+      g1.appendChild(mf('Nivel:', selectTxt('nivel', J.LISTAS.nivel, '-- Nivel --', pintarZona)));
+      g1.appendChild(mf('Bloque:', selectTxt('bloque', J.LISTAS.bloque, '-- Bloque --')));
+      g1.appendChild(mf('Fase (Transversal):', txt(d, 'fase', 'Ej. Fase 1')));
+      m.appendChild(g1);
+      pintarZona();
+      m.appendChild(el('div', { style: 'margin-top:12px' }, [zona]));
+
+      m.appendChild(el('h4', { text: '2. Personal Responsable' }));
+      var g2b = el('div', { class: 'jp-mgrid' });
+      var enc = txt(d, 'encSeg', ''); enc.classList.add('gris');
+      g2b.appendChild(mf('Encargado Seguimiento JeJ (Tú):', enc));
+      var sj = txt(d, 'supJej', 'Seleccione o escriba...', '', null);
+      var dlSj = datalist('supJej', false); sj.setAttribute('list', dlSj.id);
+      g2b.appendChild(mf('Supervisor JeJ:', sj)); g2b.appendChild(dlSj);
+      m.appendChild(g2b);
+      var box = el('div', { style: 'margin-top:12px' });
+      multiInput(box, 'Supervisor(es) DET:', 'supDet', d, 'Agregar otro Supervisor DET');
+      multiInput(box, 'Perforista(s) DET:', 'perforistaDet', d, 'Agregar otro Perforista DET');
+      m.appendChild(box);
+    }, function () {
+      if (d.nivel !== 'NP') { d.numZanja = ''; d.calleZanja1 = ''; d.calleZanja2 = ''; }
+      if (d.nivel !== 'UCL') d.calleUcl = '';
+      Object.keys(d).forEach(function (k) { h[k] = typeof d[k] === 'string' ? d[k].trim() : d[k]; });
+      J.store.touch(); refrescarToolbar(); render();
+    });
+  }
+
   /* ---------- Modal: observaciones en terreno ---------- */
   function modalObs() {
     var p = P(), obs = p.obs.filter(Boolean); if (!obs.length) obs = [''];
@@ -1532,12 +1601,13 @@
     linea1.appendChild(el('b', { text: 'Nivel: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.nivel) + ' | '));
     linea1.appendChild(el('b', { text: 'Bloque: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.bloque)));
     card.appendChild(el('div', { class: 'jp-resumen-box' }, [
-      linea1, negrita('ID Tronadura', sinAsignar(h.idTronadura)), el('hr'),
+      linea1, el('hr'),
       negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
       negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', '))), el('hr'),
-      negrita('Zanja', sinAsignar(h.numZanja) + ((h.calleZanja1 || h.calleZanja2) ? ' (entre ' + sinAsignar(h.calleZanja1) + ' y ' + sinAsignar(h.calleZanja2) + ')' : '')),
-      negrita('Fase', sinAsignar(h.fase) + ' | Calle UCL: ' + sinAsignar(h.calleUcl)),
-      negrita('Paradas', sinAsignar(h.paradaIni) + ' a ' + sinAsignar(h.paradaFin))
+      h.nivel === 'UCL'
+        ? negrita('Calle UCL (C UCL)', sinAsignar(h.calleUcl))
+        : negrita('Zanja (Z)', sinAsignar(h.numZanja) + ((h.calleZanja1 || h.calleZanja2) ? ' · entre calles (C) ' + sinAsignar(h.calleZanja1) + ' y ' + sinAsignar(h.calleZanja2) : '')),
+      negrita('Fase', sinAsignar(h.fase))
     ]));
 
     card.appendChild(el('div', { class: 'jp-fila2' }, [
@@ -1630,7 +1700,7 @@
       caja.innerHTML = '';
       var q = ui.busca.trim().toLowerCase(), todas = paradasDe(p, t);
       var ps = todas.filter(function (x) { return !q || x.toLowerCase().indexOf(q) >= 0 || t.toLowerCase().indexOf(q) >= 0; });
-      if (!todas.length) caja.appendChild(el('div', { class: 'jp-vacio', text: 'Este trabajo aún no tiene paradas. Toca «+ Agregar parada» para registrar la primera.' }));
+      if (!todas.length) caja.appendChild(el('div', { class: 'jp-vacio', text: 'Este trabajo aún no tiene paradas. Registra la primera con el formulario de abajo.' }));
       else if (!ps.length) caja.appendChild(el('div', { class: 'jp-vacio', text: 'Ninguna parada coincide con la búsqueda.' }));
       ps.forEach(function (par) {
         var rows = tirosDe(p, t, par), m = metros(rows);
@@ -1673,17 +1743,15 @@
       ]));
       setTimeout(function () { try { np.focus(); np.select(); } catch (e) { /* sin foco */ } }, 0);
     } else {
-      card.appendChild(el('button', { type: 'button', class: 'jp-b cel', style: 'margin-top:12px', text: '+ Agregar parada', onclick: function () { ui.nuevaParada = true; ui.aviso = ''; render(); } }));
+      card.appendChild(el('div', { class: 'jp-pila', style: 'margin-top:12px' }, [
+        el('div', { class: 'jp-fila2', style: 'margin-top:0' }, [
+          el('button', { type: 'button', class: 'jp-b cel', text: '+ Registrar otra parada', onclick: function () { ui.nuevaParada = true; ui.aviso = ''; render(); } }),
+          el('button', { type: 'button', class: 'jp-b nar', text: '📝 Agregar Observación', onclick: modalObs })
+        ]),
+        el('button', { type: 'button', class: 'jp-b teal', text: 'Continuar: completar datos y descargar ➜', disabled: paradasDe(p, t).length ? null : 'disabled', onclick: function () { irACierre(p); } }),
+        el('button', { type: 'button', class: 'jp-b gris chico', style: 'display:block;width:100%', text: '⬅ Volver a Gestión de ID de Trabajo', onclick: function () { ir('id'); } })
+      ]));
     }
-
-    card.appendChild(el('div', { class: 'jp-pila' }, [
-      el('div', { class: 'jp-fila2', style: 'margin-top:0' }, [
-        el('button', { type: 'button', class: 'jp-b cel', text: '+ Registrar Otro ID de Trabajo', onclick: function () { ir('id'); } }),
-        el('button', { type: 'button', class: 'jp-b nar', text: '📝 Agregar Observación', onclick: modalObs })
-      ]),
-      el('button', { type: 'button', class: 'jp-b teal', text: '📋 Rellenar Datos Faltantes de Plantilla (Horarios/Operación)', onclick: function () { abrirAsistente('plantilla'); } }),
-      bloqueDescarga(p)
-    ]));
     host.appendChild(card);
   }
 
@@ -1860,28 +1928,36 @@
     host.appendChild(card);
   }
 
-  /* ---------- Finalizar: resumen y descargas ---------- */
+  /* ---------- Paso 3 (ventana nueva): datos faltantes de plantilla + descargas ---------- */
+  function plantillaCompleta(p) {
+    return pasosPlantilla().every(function (x) {
+      if (x.type === 'perd') return p.perdidas.length > 0;
+      return !!p.header[x.k];
+    });
+  }
+  // Desde el resumen: si faltan datos abre directo el asistente; si ya están, muestra la ventana de descargas
+  function irACierre(p) {
+    descartarTiroVacio(p);
+    ui.tiro = null; ui.aviso = ''; ui.vista = 'final';
+    if (!plantillaCompleta(p)) abrirAsistente('plantilla'); else { render(); window.scrollTo(0, 0); }
+  }
   function vistaFinal(host, p) {
     var R = J.resumen(p), card = el('div', { class: 'jp-card' });
-    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Registro Completo' }));
-    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Registro guardado en este dispositivo. Descarga la planilla y el informe técnico.' }));
+    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 3: Datos Faltantes y Descarga' }));
+    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Complete los datos de la plantilla y descargue su registro.' }));
     card.appendChild(el('div', { class: 'jp-kpis' }, [
       [R.nTiros, 'tiros registrados'], [p.trabajos.length, 'ID(s) de trabajo'], [R.paradas.length, 'paradas'],
       [J.fmt(R.mDis, 1) + ' m', 'metros de diseño'], [J.fmt(R.mPerf, 1) + ' m', 'metros perforados'],
       [pctTxt(R.cumplProm), 'cumplimiento prom. carga de diseño'],
       [J.fmtHM(R.tPerf), 'tiempo en perforación'], [J.fmtHM(R.tPerdidas), 'pérdida operacional total']
     ].map(function (k) { return el('div', { class: 'jp-kpi' }, [el('b', { text: String(k[0]) }), el('span', { text: k[1] })]); })));
-    var s = el('select', { class: 'jp-in', 'aria-label': 'Referencia del abatimiento' }, [
-      el('option', { value: 'horizontal', text: 'horizontal' }), el('option', { value: 'vertical', text: 'vertical' })]);
-    s.value = p.refAbat || 'horizontal';
-    s.addEventListener('change', function () { p.refAbat = s.value; J.store.touch(); });
-    card.appendChild(el('label', { class: 'jp-lbl', text: 'Para los diagramas de disparo, el abatimiento se mide desde la:' }));
-    card.appendChild(s);
-    card.appendChild(el('div', { class: 'jp-pila', style: 'margin-top:18px' }, [
-      el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(p); } }),
-      el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(p); } }),
-      el('button', { type: 'button', class: 'jp-b gris', text: '← Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } })
+    var ok = plantillaCompleta(p);
+    card.appendChild(el('div', { class: 'jp-panel' }, [
+      el('div', { class: 'jp-panel-t', text: ok ? '✅ DATOS DE PLANTILLA COMPLETOS' : '⚠️ FALTAN DATOS DE PLANTILLA' }),
+      el('button', { type: 'button', class: 'jp-b teal', style: 'margin-top:8px', text: (ok ? '✏️ Editar' : '📋 Rellenar') + ' Datos de Plantilla (Horarios/Operación)', onclick: function () { abrirAsistente('plantilla'); } })
     ]));
+    card.appendChild(bloqueDescarga(p));
+    card.appendChild(el('button', { type: 'button', class: 'jp-b gris', style: 'margin-top:14px', text: '⬅ Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } }));
     host.appendChild(card);
   }
 

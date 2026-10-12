@@ -58,29 +58,68 @@ document.addEventListener("click", function (e) {
     }
 });
 
+/* ---------- Procesos (menú lateral y buscador) ---------- */
+const JEJ_PROCESOS = [
+    { t: "Seguimiento al carguío con ANFO", p: "anfo.html" },
+    { t: "Seguimiento al carguío con Emulsión", p: "emulsion.html" },
+    { t: "Seguimiento a la reducción secundaria", p: "reduccion.html" },
+    { t: "Seguimiento a la perforación", p: "perforacion.html" },
+    { t: "Gestionar Personal (DET / JeJ)", p: "usuarios.html" }
+];
+
+function _jejNorm(s) { return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+
+function jejBuscar(q) {
+    const box = document.getElementById("searchResults");
+    if (!box) return;
+    const n = _jejNorm(q).trim();
+    const res = n ? JEJ_PROCESOS.filter(x => _jejNorm(x.t).includes(n)) : [];
+    if (!n) { box.classList.remove("show"); box.innerHTML = ""; return; }
+    box.innerHTML = res.length
+        ? res.map(x => `<a href="${(window.__jejRuta || "")}pages/${x.p}">${_jejEscape(x.t)}</a>`).join("")
+        : `<span class="sr-vacio">Sin resultados</span>`;
+    box.classList.add("show");
+}
+
 function cargarBarMenu(esSubcarpeta = false) {
     const rutaPrefix = esSubcarpeta ? "../" : "";
     window.__jejRuta = rutaPrefix;
 
+
+    const buscador = `
+        <div class="hdr-search">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1e293b" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg>
+            <input type="text" id="searchInput" placeholder="Búsqueda..." autocomplete="off" oninput="jejBuscar(this.value)" aria-label="Buscar proceso">
+            <div id="searchResults" class="search-results"></div>
+        </div>`;
+
     const headerHTML = `
     <header class="bar-menu">
+        
+
         <div class="logo-container">
             <a href="${rutaPrefix}index.html" style="text-decoration: none; display: flex; align-items: center;">
-                <img src="${rutaPrefix}css/logo.jpg" alt="Logo JEJ" id="logoImg" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';">
+                <img src="${rutaPrefix}css/logo-blanco.png" alt="Logo JEJ" id="logoImg" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';">
                 <span id="logoFallback" class="logo-text" style="display:none;">JEJ</span>
             </a>
         </div>
 
+        ${esSubcarpeta ? '<div class="hdr-spacer"></div>' : buscador}
+
         <div class="header-right">
             <div id="userPanel" class="user-panel" style="display:none;"></div>
-            <div class="hamburger-container">
-                <button id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menú">☰</button>
-                <nav id="dropdownMenu" class="dropdown-menu">
-                    <ul>
-                        <li><a href="#" onclick="cerrarSesionDesdePagina('${rutaPrefix}')">Cerrar Sesión</a></li>
-                    </ul>
-                </nav>
-            </div>
+                <div class="hamburger-container">
+            <button id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menú">
+                <svg viewBox="0 0 24 24" width="28" height="28" stroke="#fff" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>
+            </button>
+            <nav id="dropdownMenu" class="dropdown-menu">
+                <ul>
+                    <li><a href="${rutaPrefix}index.html">Inicio</a></li>
+                    ${JEJ_PROCESOS.map(x => `<li><a href="${rutaPrefix}pages/${x.p}">${_jejEscape(x.t)}</a></li>`).join("")}
+                    <li><a href="#" onclick="cerrarSesionDesdePagina('${rutaPrefix}')">Cerrar sesión</a></li>
+                </ul>
+            </nav>
+        </div>
         </div>
     </header>
     `;
@@ -93,3 +132,8 @@ function cerrarSesionDesdePagina(rutaPrefix) {
     localStorage.removeItem("jej_usuario_activo");
     window.location.href = rutaPrefix + "index.html";
 }
+
+document.addEventListener("click", function (e) {
+    const box = document.getElementById("searchResults");
+    if (box && !(e.target.closest && e.target.closest(".hdr-search"))) box.classList.remove("show");
+});
