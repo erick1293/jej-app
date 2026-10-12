@@ -29,23 +29,15 @@ function actualizarPanelUsuario() {
     host.style.display = "flex";
     host.innerHTML = `
         <div class="user-card">
-            <div class="user-side">
-                <div class="user-avatar" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="9" r="4.2" fill="#e5e7eb"/><path d="M3.5 21c0-4.6 3.8-7.2 8.5-7.2s8.5 2.6 8.5 7.2z" fill="#e5e7eb"/></svg>
-                </div>
-                <button type="button" id="userChevron" class="user-chevron" aria-label="Opciones de usuario" aria-expanded="false" onclick="toggleUserMenu(event)">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 9l6 6 6-6" fill="none" stroke="#475569" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-            </div>
             <div class="user-text">
                 <span class="user-name">${_jejEscape(usuario).toUpperCase()}</span>
                 <span class="user-last">Última Conexión:<br>${ultima}</span>
             </div>
         </div>
-        <div id="userDropdown" class="user-dropdown">
-            <div class="user-dd-head"><b>${_jejEscape(usuario)}</b><small>Última conexión: ${ultima}</small></div>
-            <a href="#" onclick="cerrarSesionDesdePagina(window.__jejRuta || '')">Cerrar sesión</a>
-        </div>`;
+             <div id="userDropdown" class="user-dropdown">
+                   <div class="user-dd-head"><b>${_jejEscape(usuario)}</b><small>Última conexión: ${ultima}</small></div>
+                   <a href="#" onclick="cerrarSesionDesdePagina(window.__jejRuta || '')">Cerrar sesión</a>
+              </div>`;
 }
 
 function toggleUserMenu(e) {

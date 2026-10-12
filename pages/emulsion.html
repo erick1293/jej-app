@@ -418,33 +418,100 @@
 
     </main>
 
-    <!-- MODAL PERSONAL -->
+ <!-- MODAL PERSONAL (Ingreso / Editar Datos) -->
     <div id="modalPersonal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Configuración de Postura y Personal</h3>
 
+            <!-- 1. UBICACIÓN Y POSTURA -->
             <div class="section-title">1. Ubicación y Postura</div>
             <div class="grid-2">
                 <div class="form-group-field">
                     <label>Mina:</label>
-                    <input type="text" id="modalMina" value="Esmeralda">
+                    <select id="modalMina" onchange="actualizarIdTronaduraAuto()">
+                        <option value="andesita">Andesita</option>
+                        <option value="Diablo Regimiento">Diablo Regimiento</option>
+                        <option value="Diamante">Diamante</option>
+                        <option value="Esmeralda" selected>Esmeralda</option>
+                        <option value="NNM">NNM</option>
+                        <option value="Pacífico Superior">Pacífico Superior</option>
+                        <option value="Pilar Norte">Pilar Norte</option>
+                        <option value="Reservas Norte">Reservas Norte</option>
+                        <option value="TT8">TT8</option>
+                    </select>
                 </div>
                 <div class="form-group-field">
                     <label>Nivel:</label>
-                    <input type="text" id="modalNivel" value="NP">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Bloque:</label>
-                    <input type="text" id="modalBloque" value="Ext Fw">
-                </div>
-                <div class="form-group-field">
-                    <label>ID Tronadura:</label>
-                    <input type="text" id="modalIdTronadura" placeholder="Ej. TR-04">
+                    <select id="modalNivel" onchange="cambiarNivelModal(); actualizarIdTronaduraAuto();">
+                        <option value="NP" selected>NP (Nivel de Producción)</option>
+                        <option value="UCL">UCL (Nivel UCL)</option>
+                        <option value="Panel2">Panel 2</option>
+                    </select>
                 </div>
             </div>
 
+            <div class="grid-2">
+                <div class="form-group-field">
+                    <label>Bloque:</label>
+                    <select id="modalBloque" onchange="ejecutarAutosave()">
+                        <option value="B-2">B-2</option>
+                        <option value="B-6">B-6</option>
+                        <option value="Ext Fw" selected>Ext Fw</option> 
+                        <option value="DhZ">DhZ</option>
+                    </select>
+                </div>
+                <div class="form-group-field">
+                    <label>ID de Tronadura (Automático):</label>
+                    <input type="text" id="modalIdTronadura" readonly disabled style="background-color: #f1f5f9; font-weight: bold; color: #475569;" placeholder="Se actualiza automáticamente...">
+                </div>
+            </div>
+
+            <!-- Fase transversal compartida -->
+            <div class="form-group-field">
+                <label>Fase (Transversal):</label>
+                <input type="text" id="faseZanja" placeholder="Ej. Fase 1" oninput="actualizarIdTronaduraAuto()">
+            </div>
+
+            <!-- SECCIÓN CONDICIONAL: NIVEL DE PRODUCCIÓN (NP) -->
+            <div id="seccionNP" style="display: block;">
+                <div class="section-title" style="color: #2563eb; background: #eff6ff; padding: 4px 8px; border-radius: 4px;">Nivel de Producción</div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Núm. Zanja (Producción):</label>
+                        <input type="text" id="numZanja" placeholder="Ej. 47" oninput="actualizarIdTronaduraAuto()">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Calle Zanja (Producción):</label>
+                        <input type="text" id="calleZanja" placeholder="Ej. C41-43" oninput="actualizarIdTronaduraAuto()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN CONDICIONAL: NIVEL UCL -->
+            <div id="seccionUCL" style="display: none;">
+                <div class="section-title" style="color: #16a34a; background: #f0fdf4; padding: 4px 8px; border-radius: 4px;">Nivel UCL</div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label>Calle UCL:</label>
+                        <input type="text" id="calleUcl" placeholder="Ej. C41" oninput="actualizarIdTronaduraAuto()">
+                    </div>
+                    <div class="form-group-field">
+                        <label>Paradas Inicio / Fin:</label>
+                        <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN CONDICIONAL: PANEL 2 -->
+            <div id="seccionPanel2" style="display: none;">
+                <div class="section-title" style="color: #d97706; background: #fffbeb; padding: 4px 8px; border-radius: 4px;">Panel 2</div>
+                <div class="form-group-field">
+                    <label>Detalle Panel 2:</label>
+                    <input type="text" id="detallePanel2" placeholder="Ingrese detalles de Panel 2..." oninput="actualizarIdTronaduraAuto()">
+                </div>
+            </div>
+
+            <!-- 2. PERSONAL RESPONSABLE -->
             <div class="section-title">2. Personal Responsable</div>
             <div class="form-group-field">
                 <label>Encargado Seguimiento JeJ (Tú):</label>
@@ -1499,7 +1566,63 @@
                 alert("Hubo un error al procesar la plantilla de emulsión.");
             }
         }
-        
+        function cambiarNivelModal() {
+    const nivel = document.getElementById("modalNivel").value;
+    const secNP = document.getElementById("seccionNP");
+    const secUCL = document.getElementById("seccionUCL");
+    const secPanel2 = document.getElementById("seccionPanel2");
+
+    // Ocultar todas las secciones condicionales por defecto
+    secNP.style.display = "none";
+    secUCL.style.display = "none";
+    secPanel2.style.display = "none";
+
+    // Mostrar únicamente la que corresponda según la selección
+    if (nivel === "NP") {
+        secNP.style.display = "block";
+    } else if (nivel === "UCL") {
+        secUCL.style.display = "block";
+    } else if (nivel === "Panel2") {
+        secPanel2.style.display = "block";
+    }
+}
+
+function actualizarIdTronaduraAuto() {
+    const nivel = document.getElementById("modalNivel")?.value || "NP";
+    const zanjaRaw = document.getElementById("numZanja")?.value.trim() || "";
+    const calleZanja = document.getElementById("calleZanja")?.value.trim() || "";
+    const calleUcl = document.getElementById("calleUcl")?.value.trim() || "";
+    const detallePanel = document.getElementById("detallePanel2")?.value.trim() || "";
+    const faseRaw = document.getElementById("faseZanja")?.value.trim() || "";
+
+    // Formatear fase de manera consistente (ej. "Fase 1")
+    let faseFormateada = "";
+    if (faseRaw) {
+        faseFormateada = faseRaw.toLowerCase().startsWith("fase") ? faseRaw : "Fase " + faseRaw;
+    }
+
+    let idGenerado = "";
+
+    if (nivel === "NP") {
+        // Formato NP: Z + Núm. Zanja + Calle Zanja + Fase (Ej: Z47 C41-43 Fase 1)
+        const zanjaFormateada = zanjaRaw ? (zanjaRaw.toUpperCase().startsWith("Z") ? zanjaRaw : "Z" + zanjaRaw) : "";
+        idGenerado = [zanjaFormateada, calleZanja, faseFormateada].filter(Boolean).join(" ");
+    } else if (nivel === "UCL") {
+        // Formato UCL: Calle UCL + palabra 'UCL' + Fase (Ej: C41 UCL Fase 1)
+        idGenerado = [calleUcl, "UCL", faseFormateada].filter(Boolean).join(" ");
+    } else if (nivel === "Panel2") {
+        // Formato Panel 2: Detalle + Fase
+        idGenerado = [detallePanel, faseFormateada].filter(Boolean).join(" ");
+    }
+
+    // Reflejar el valor en el input de ID de Tronadura
+    const inputTronadura = document.getElementById("modalIdTronadura");
+    if (inputTronadura) {
+        inputTronadura.value = idGenerado;
+    }
+
+    ejecutarAutosave();
+}
     </script>
 </body>
 </html>
