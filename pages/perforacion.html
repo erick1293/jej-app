@@ -5,254 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguimiento a la Perforación - App JEJ</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <style>
-/* Estilos de la página de seguimiento (se cargan DESPUÉS de styles.css) */
-.jp-page { max-width: 100%; padding: 16px 20px 48px; box-sizing: border-box; color: #0f172a; font-family: inherit; }
-.jp-page h1 { font-size: 1.25rem; margin: 4px 0 2px; }
-.jp-page h2 { font-size: 1rem; margin: 22px 0 8px; }
-.jp-sub { color: #475569; font-size: .85rem; margin: 0 0 12px; }
-.jp-titulo-pagina { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
-.jp-menu-link { font-size: .85rem; color: #1e293b; background: #e2e8f0; padding: 6px 12px; border-radius: 6px; text-decoration: none; }
-.jp-menu-link:hover { background: #cbd5e1; }
-[hidden] { display: none !important; }
+    
 
-/* Barra superior */
-.jp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
-.jp-tb-label { font-size: .85rem; display: flex; gap: 6px; align-items: center; }
-.jp-toolbar select { max-width: 320px; }
-.jp-sep { flex: 1; }
-.jp-btn { border: 1px solid #cbd5e1; background: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: .85rem; }
-.jp-btn:hover { background: #f1f5f9; }
-.jp-btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
-.jp-btn-primary:hover { background: #1d4ed8; }
-.jp-btn-danger { color: #b91c1c; border-color: #fecaca; }
-.jp-btn-grande { padding: 12px 20px; font-size: .95rem; font-weight: 600; }
-.jp-btn[disabled] { opacity: .45; cursor: not-allowed; }
-
-/* Flujo por pasos */
-.jp-pasos { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; list-style: none; margin: 14px 0 16px; padding: 0; }
-.jp-pasos button { display: flex; align-items: center; gap: 7px; padding: 5px 13px 5px 5px; border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; font-size: .82rem; cursor: pointer; color: #334155; }
-.jp-pasos .n { width: 22px; height: 22px; border-radius: 50%; background: #e2e8f0; display: grid; place-items: center; font-size: .75rem; font-weight: 700; }
-.jp-pasos .activo { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; font-weight: 700; }
-.jp-pasos .activo .n { background: #2563eb; color: #fff; }
-.jp-pasos .hecho .n { background: #16a34a; color: #fff; }
-.jp-paso { max-width: 820px; margin: 0 auto; }
-.jp-paso-titulo { margin: 0 0 4px; font-size: 1.15rem; text-align: center; }
-.jp-paso-ayuda { color: #475569; font-size: .85rem; margin: 0 0 14px; text-align: center; }
-.jp-navpaso { display: flex; justify-content: space-between; gap: 8px; max-width: 820px; margin: 18px auto 0; }
-
-/* Bloques de datos (Identificación, Horarios, Labor): tarjetas centradas */
-.jp-bloque { border: 1px solid #dbe3ee; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(15,23,42,.06); }
-.jp-bloque > h3 { margin: 0; padding: 12px 16px; font-size: .95rem; text-align: center; background: #f1f5f9; border-bottom: 1px solid #dbe3ee; }
-.jp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; padding: 16px; }
-.jp-campo { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 10px 12px 12px; background: #f0f6fd; border: 1px solid #dbe7f6; border-top: 4px solid #93c5fd; border-radius: 10px; min-width: 0; }
-.jp-campo.verde { background: #effcef; border-color: #cdeccd; border-top-color: #4ade80; }
-.jp-campo.amar { background: #fff9e0; border-color: #f3e6a8; border-top-color: #fbbf24; }
-.jp-campo label { font-size: .78rem; font-weight: 700; color: #334155; text-align: center; letter-spacing: .02em; }
-.jp-campo input, .jp-campo select, .jp-campo output { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 10px; min-height: 44px; font-size: 1rem; text-align: center; text-align-last: center; background: #fff; min-width: 0; width: 100%; box-sizing: border-box; color: #0f172a; }
-.jp-campo output { display: flex; align-items: center; justify-content: center; font-weight: 700; background: #fff7d6; border-color: #f3e6a8; }
-.jp-campo input:focus, .jp-campo select:focus { outline: 3px solid rgba(37,99,235,.25); border-color: #2563eb; }
-.jp-doble { grid-column: 1 / -1; }
-.jp-par { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* Registro por tiro: una pregunta a la vez */
-.jp-q { border: 1px solid #cbd5e1; border-left-width: 8px; border-radius: 10px; background: #fff; padding: 14px 16px 14px; }
-.jp-q-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: .8rem; color: #475569; flex-wrap: wrap; }
-.jp-q-top b { color: #0f172a; font-size: .9rem; }
-.jp-q-top select { font-size: .8rem; max-width: 230px; }
-.jp-q-barra { height: 5px; background: #e2e8f0; border-radius: 3px; margin: 8px 0 14px; overflow: hidden; }
-.jp-q-barra i { display: block; height: 100%; background: #2563eb; }
-.jp-q h3 { margin: 0 0 2px; font-size: 1.2rem; text-align: center; }
-.jp-q-ayuda { margin: 0; font-size: .8rem; color: #64748b; text-align: center; }
-.jp-q-input { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px auto 8px; max-width: 420px; }
-.jp-q-input input { flex: 1; text-align: center; font-size: 1.4rem; padding: 12px 12px; border: 1px solid #94a3b8; border-radius: 8px; min-width: 0; box-sizing: border-box; }
-.jp-q-input input:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
-.jp-q-input .u { color: #64748b; font-size: .95rem; min-width: 34px; }
-.jp-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 14px auto 8px; max-width: 520px; }
-.jp-opt { padding: 14px 10px; border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; cursor: pointer; font-size: .95rem; }
-.jp-opt:hover { background: #f1f5f9; }
-.jp-opt.sel { background: #2563eb; border-color: #2563eb; color: #fff; }
-.jp-q-calc { display: block; text-align: center; width: fit-content; margin-left: auto; margin-right: auto; background: #fff7d6; border-radius: 6px; padding: 6px 10px; font-size: .85rem; font-weight: 700; margin: 4px 0; }
-.jp-q-error { color: #b91c1c; font-size: .82rem; margin: 4px 0; text-align: center; }
-.jp-q-acciones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; align-items: center; justify-content: center; }
-.jp-chip { border: 1px dashed #94a3b8; background: #f8fafc; border-radius: 999px; padding: 4px 10px; font-size: .78rem; cursor: pointer; color: #334155; }
-.jp-chip:hover { background: #e2e8f0; }
-.jp-q-resumen { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
-.jp-q-resumen span { font-size: .72rem; background: #f1f5f9; border-radius: 4px; padding: 2px 6px; color: #334155; }
-.jp-aviso { background: #dcfce7; color: #166534; border-radius: 8px; padding: 8px 12px; font-size: .88rem; margin-bottom: 10px; }
-.jp-vacio { border: 1px dashed #94a3b8; border-radius: 8px; padding: 18px; color: #475569; font-size: .9rem; background: #f8fafc; margin-bottom: 12px; }
-
-/* Tablas simples */
-.jp-scroll { overflow: auto; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; margin-bottom: 12px; }
-.jp-tabla-simple { border-collapse: collapse; font-size: .85rem; width: 100%; }
-.jp-tabla-simple th, .jp-tabla-simple td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: center; white-space: nowrap; }
-.jp-tabla-simple th { background: #f1f5f9; }
-.jp-tabla-simple tfoot td { background: #fff7d6; font-weight: 700; }
-.jp-x { border: 0; background: transparent; color: #94a3b8; cursor: pointer; font-size: 1.1rem; padding: 0 6px; }
-.jp-x:hover { color: #b91c1c; }
-.jp-link { border: 0; background: none; color: #2563eb; cursor: pointer; font-size: .85rem; padding: 0 4px; }
-.jp-link:hover { text-decoration: underline; }
-
-/* Pérdida operacional */
-.jp-perd { border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff; }
-.jp-perd-head { background: #fce4d6; font-weight: 700; font-size: .85rem; padding: 7px 10px; display: grid; grid-template-columns: 1fr 110px 30px; gap: 8px; }
-.jp-perd-fila { display: grid; grid-template-columns: 1fr 110px 30px; border-top: 1px solid #e2e8f0; align-items: stretch; }
-.jp-perd-fila input { border: 0; padding: 9px 10px; font-size: .9rem; min-width: 0; width: 100%; box-sizing: border-box; background: transparent; }
-.jp-perd-fila input:focus { outline: 2px solid #2563eb; outline-offset: -2px; background: #fff; }
-.jp-perd-fila input.t { border-left: 1px solid #e2e8f0; text-align: center; }
-.jp-perd-total { padding: 10px 12px; font-weight: 700; font-size: .95rem; text-align: right; background: #fff7d6; border-top: 1px solid #e2e8f0; }
-.jp-perd-total small { font-weight: 400; color: #475569; margin-left: 6px; }
-.jp-perd-pie { padding: 8px 10px; border-top: 1px solid #e2e8f0; }
-
-/* Finalizar */
-.jp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
-.jp-kpi { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; background: #fff; }
-.jp-kpi b { display: block; font-size: 1.3rem; }
-.jp-kpi span { font-size: .75rem; color: #475569; }
-.jp-obs { margin-top: 6px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
-.jp-obs > div { background: #fff2cc; text-align: center; font-weight: 700; font-size: .8rem; padding: 6px; }
-.jp-obs input { display: block; width: 100%; border: 0; border-top: 1px solid #e2e8f0; padding: 8px 10px; box-sizing: border-box; font-size: .88rem; }
-.jp-opciones { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: .85rem; margin: 10px 0; }
-.jp-descargas { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-
-/* ===== Flujo tipo tarjeta: datos → ID de trabajo → paradas ===== */
-.jp-paso { max-width: 560px; }
-.jp-card { background: #fff; border-radius: 16px; padding: 22px 20px; box-shadow: 0 2px 12px rgba(15,23,42,.10); }
-.jp-card-t { margin: 0; font-size: 1.4rem; text-align: left; line-height: 1.25; }
-.jp-card-sub { margin: 3px 0 14px; color: #64748b; font-size: .88rem; }
-.jp-lbl { display: block; font-weight: 700; font-size: .85rem; margin: 14px 0 6px; color: #1e293b; }
-.jp-in { width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1rem; background: #fff; color: #0f172a; font-family: inherit; }
-.jp-in.gris { background: #f0f4fa; }
-.jp-in.salida { display: flex; align-items: center; background: #fff7d6; border-color: #f3e6a8; font-weight: 700; }
-.jp-in:focus { outline: 3px solid rgba(37,99,235,.25); border-color: #2563eb; }
-.jp-sec { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
-.jp-sec span { font-size: 1.02rem; }
-.jp-resumen-box { margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: .88rem; line-height: 1.7; }
-.jp-resumen-box hr { border: 0; border-top: 1px solid #cbd5e1; margin: 8px 0; }
-.jp-b { display: block; width: 100%; border: 0; border-radius: 8px; padding: 13px 14px; font-size: .95rem; font-weight: 700; color: #fff; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; font-family: inherit; }
-.jp-b:hover { filter: brightness(.93); }
-.jp-b.gris { background: #64748b; } .jp-b.azul { background: #2563eb; } .jp-b.cel { background: #0284c7; }
-.jp-b.verde { background: #16a34a; } .jp-b.nar { background: #d97706; } .jp-b.teal { background: #0d9488; }
-.jp-b.rojo { background: #fee2e2; color: #b91c1c; } .jp-b.editar { background: #e0f2fe; color: #075985; }
-.jp-b.chico { display: inline-block; width: auto; padding: 9px 14px; font-size: .85rem; }
-.jp-fila2 { display: flex; gap: 10px; margin-top: 18px; }
-.jp-fila2 > * { flex: 1; }
-.jp-pila { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-.jp-panel { background: #f0f4fa; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px; margin-top: 14px; }
-.jp-panel-t { font-weight: 800; font-size: .85rem; letter-spacing: .02em; margin-bottom: 10px; color: #1e293b; }
-.jp-parada { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
-.jp-parada:last-child { margin-bottom: 0; }
-.jp-parada-t { font-weight: 800; font-size: 1.02rem; }
-.jp-parada-s { font-size: .78rem; color: #64748b; }
-.jp-parada-b { display: flex; gap: 6px; }
-.jp-multi { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
-.jp-lista-paradas .jp-vacio { margin: 0; }
-.jp-card .jp-kpis { margin: 10px 0; }
-
-/* Ventana modal */
-.jp-ov { position: fixed; inset: 0; background: rgba(71,85,105,.82); display: flex; padding: 16px; overflow: auto; z-index: 1000; }
-.jp-modal { background: #fff; border-radius: 14px; width: 100%; max-width: 560px; padding: 20px; margin: auto; box-shadow: 0 10px 30px rgba(15,23,42,.35); box-sizing: border-box; }
-.jp-modal h3 { margin: 0; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; font-size: 1.15rem; }
-.jp-modal h4 { margin: 18px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; font-size: 1.02rem; font-weight: 400; }
-.jp-mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
-.jp-mf { min-width: 0; }
-.jp-mf.full { grid-column: 1 / -1; }
-.jp-mf label { display: block; font-weight: 700; font-size: .8rem; margin-bottom: 5px; color: #1e293b; }
-.jp-modal .jp-par { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.jp-modal-acc { display: flex; gap: 10px; margin-top: 22px; }
-.jp-modal-acc > * { flex: 1; }
-@media (max-width: 420px) { .jp-mgrid { grid-template-columns: 1fr; } .jp-ov { padding: 8px; } }
-
-/* ===== Ajustes: tabla de tiros sin scroll + modal de plantilla ===== */
-.jp-paso { max-width: 900px; }
-.jp-card { max-width: 560px; margin-left: auto; margin-right: auto; }
-.jp-card.ancha { max-width: 900px; }
-.jp-scroll.sin-scroll { overflow: visible; }
-.jp-tabla-tiros { width: 100%; table-layout: auto; }
-.jp-tabla-tiros th, .jp-tabla-tiros td { white-space: normal; word-break: break-word; padding: 8px 5px; font-size: .84rem; }
-.jp-tabla-tiros th { font-size: .78rem; }
-.jp-tabla-tiros .acc { display: flex; align-items: center; justify-content: center; gap: 2px; flex-wrap: nowrap; white-space: nowrap; }
-@media (max-width: 480px) {
-  .jp-page { padding-left: 8px; padding-right: 8px; }
-  .jp-card { padding: 16px 10px; }
-  .jp-tabla-tiros th, .jp-tabla-tiros td { padding: 6px 2px; font-size: .72rem; }
-  .jp-tabla-tiros th { font-size: .68rem; }
-  .jp-tabla-tiros .jp-link { padding: 0 2px; font-size: .72rem; }
-}
-.jp-descarga { margin-top: 12px; }
-.jp-descarga small { display: block; text-align: center; color: #64748b; font-size: .78rem; margin-top: 8px; }
-
-/* Modal de plantilla */
-.jp-modal { max-width: 640px; }
-.jp-modal-acc { position: sticky; bottom: 0; background: #fff; padding: 12px 0 2px; margin-top: 18px; border-top: 1px solid #e2e8f0; }
-.pl-sec { border: 1px solid #dbe3ee; border-radius: 14px; margin-top: 14px; overflow: hidden; background: #fff; }
-.pl-sec-h { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-weight: 800; font-size: .95rem; background: #f1f5f9; border-bottom: 1px solid #dbe3ee; }
-.pl-sec.az .pl-sec-h { background: #e8f1fd; } .pl-sec.vd .pl-sec-h { background: #e7f8ea; }
-.pl-sec.am .pl-sec-h { background: #fff4d6; } .pl-sec.rj .pl-sec-h { background: #fde9e0; }
-.pl-sec-b { padding: 14px; }
-.pl-sec-n { margin: 0 0 10px; font-size: .82rem; color: #64748b; }
-.pl-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-.pl-fila:last-child { margin-bottom: 0; }
-.pl-fila.t3 { grid-template-columns: 1fr 1fr; }
-.pl-f { min-width: 0; }
-.pl-f > .pl-l { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 22px; margin-bottom: 4px; font-weight: 700; font-size: .8rem; color: #1e293b; }
-.pl-ahora { border: 0; background: #dbeafe; color: #1d4ed8; border-radius: 999px; padding: 2px 10px; font-size: .72rem; font-weight: 700; cursor: pointer; }
-.pl-ahora:hover { background: #bfdbfe; }
-.pl-grupo { font-weight: 800; font-size: .85rem; color: #334155; margin: 0 0 6px; }
-.pl-grupo + .pl-fila { margin-bottom: 14px; }
-.pl-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; padding-top: 12px; border-top: 1px dashed #cbd5e1; }
-.pl-kpi { background: #fff7d6; border: 1px solid #f3e6a8; border-radius: 10px; padding: 8px 10px; text-align: center; }
-.pl-kpi span { display: block; font-size: .72rem; color: #475569; font-weight: 700; }
-.pl-kpi output { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
-.pl-y { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; }
-.pl-y i { font-style: normal; color: #64748b; font-size: .85rem; }
-.jp-modal .jp-in { min-height: 44px; }
-.jp-modal .jp-perd { border: 0; background: transparent; overflow: visible; }
-.jp-modal .jp-perd-head { background: transparent; padding: 0 2px 4px; font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
-.jp-modal .jp-perd-fila { border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 8px; background: #fff; overflow: hidden; grid-template-columns: 1fr 96px 34px; }
-.jp-modal .jp-perd-fila input { padding: 12px 10px; }
-.jp-modal .jp-perd-pie { padding: 2px 0 8px; border: 0; }
-.jp-modal .jp-perd-total { border: 1px solid #f3e6a8; border-radius: 10px; }
-@media (max-width: 420px) {
-  .pl-fila, .pl-kpis { gap: 8px; }
-  .pl-sec-b { padding: 10px; }
-  .jp-modal { padding: 14px; }
-  .jp-modal .jp-perd-fila { grid-template-columns: 1fr 80px 30px; }
-}
-
-/* ===== Asistente dato por dato: multi-nombre y pérdidas dentro de la tarjeta ===== */
-.jp-q-multi { max-width: 420px; margin: 14px auto 8px; }
-.jp-q-multi .jp-multi { margin-bottom: 8px; }
-.jp-q-multi .jp-multi input { flex: 1; text-align: center; font-size: 1.2rem; padding: 12px; border: 1px solid #94a3b8; border-radius: 8px; min-width: 0; box-sizing: border-box; }
-.jp-q-multi .jp-multi input:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
-.jp-q-perd { max-width: 560px; margin: 12px auto 8px; }
-.jp-q .jp-perd { border: 0; background: transparent; overflow: visible; }
-.jp-q .jp-perd-head { background: transparent; padding: 0 2px 4px; font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
-.jp-q .jp-perd-fila { border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 8px; background: #fff; overflow: hidden; grid-template-columns: 1fr 96px 34px; }
-.jp-q .jp-perd-fila input { padding: 12px 10px; }
-.jp-q .jp-perd-pie { padding: 2px 0 8px; border: 0; }
-.jp-q .jp-perd-total { border: 1px solid #f3e6a8; border-radius: 10px; }
-@media (max-width: 420px) { .jp-q .jp-perd-fila { grid-template-columns: 1fr 80px 30px; } }
-
-    </style>
 </head>
 <body class="pagina-fondo">
 
     <!-- CONTENIDO ESPECÍFICO DE LA PÁGINA -->
-    <main class="jp-page">
+    <main class="card-wide">
         <div class="jp-titulo-pagina">
          
 
         <div id="toolbar"></div>
 
-        <section class="jp-paso" id="paso"></section>
+        <section class="jp-paso card-wide" id="paso"></section>
     </main>
 
     <!-- Librería para generar el Excel (.xlsx) -->
     <!-- Estructura base del modal: su contenido específico se completa desde JavaScript. -->
     <template id="plantillaModalJej">
-      <div class="jp-ov" data-modal-overlay>
-        <section class="jp-modal" role="dialog" aria-modal="true" data-modal-content></section>
+      <div class="jp-ov modal-overlay" data-modal-overlay>
+        <section class="jp-modal modal-content" role="dialog" aria-modal="true" data-modal-content></section>
       </div>
     </template>
     <script src="../pages/usuarios.html"></script>
@@ -758,7 +530,7 @@
   /* ---------- Campo de formulario ---------- */
   // def: {k,label,type:text|date|time|select|calc, list, cls}
   function campo(def, obj, onInput, calcFn) {
-    var wrap = el('div', { class: 'jp-campo ' + (def.cls || '') });
+    var wrap = el('div', { class: 'jp-campo form-group-field' + (def.cls || '') });
     wrap.appendChild(el('label', { text: def.label }));
     var inp;
     if (def.type === 'calc') {
@@ -895,7 +667,7 @@
   }
 
   function leyenda() {
-    return '<div class="lg">' +
+    return '<div class="jej-acciones-cabecera">' +
       '<span><i style="background:' + COL.taco + '"></i>Taco teórico</span>' +
       '<span><i style="background:' + COL.carga + '"></i>Largo de carga (perforado − taco)</span>' +
       '<span><i class="dash"></i>Largo de diseño (si difiere)</span>' +
@@ -951,56 +723,7 @@
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || ''); return m ? m[3] + '-' + m[2] + '-' + m[1] : (f || '—');
   }
 
-  var CSS = [
-    ':root{--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--navy:#12263f;--acc:#ea580c;--blue:#2563eb}',
-    '*{box-sizing:border-box}',
-    'body{margin:0;font-family:"Segoe UI",system-ui,Arial,sans-serif;color:var(--ink);background:#e9edf3;font-size:13px;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
-    '.barra{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:12px;color:var(--mut)}',
-    '.barra button{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}',
-    '.hoja{max-width:900px;margin:16px auto;background:#fff;box-shadow:0 1px 8px rgba(15,23,42,.12)}',
-    '.port{background:var(--navy);color:#fff;padding:26px 34px 22px;display:flex;justify-content:space-between;gap:20px;align-items:flex-end;border-bottom:5px solid var(--acc)}',
-    '.port .emp{font-size:12px;letter-spacing:.02em;opacity:.8;margin:0 0 6px}',
-    '.port h1{margin:0;font-size:24px;line-height:1.15;font-weight:700}',
-    '.port .id{font-size:13px;opacity:.9;margin-top:6px}',
-    '.port .der{text-align:right;font-size:12px;opacity:.9;white-space:nowrap}',
-    '.port .der b{display:block;font-size:20px;opacity:1}',
-    '.cuerpo{padding:6px 34px 26px}',
-    'h2{font-size:15px;margin:24px 0 8px;padding-left:10px;border-left:4px solid var(--acc);break-after:avoid}',
-    'h3{font-size:13.5px;margin:0 0 6px}',
-    '.ficha{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}',
-    '.ficha div{padding:6px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-size:12px}',
-    '.ficha div:nth-child(3n){border-right:0}',
-    '.ficha span{display:block;color:var(--mut);font-size:10.5px}',
-    '.ficha b{font-weight:600}',
-    '.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}',
-    '.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#f8fafc;break-inside:avoid}',
-    '.kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums;color:var(--navy)}',
-    '.kpi span{font-size:11px;color:var(--mut)}',
-    '.kpi.ok b{color:#15803d}.kpi.mal b{color:#b91c1c}',
-    'table{border-collapse:collapse;width:100%;font-size:11.5px;margin:6px 0}',
-    'th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}',
-    'th{background:#eef2f7;font-weight:600;color:#1e293b}',
-    'td.l,th.l{text-align:left}',
-    'tbody tr:nth-child(even) td{background:#fafbfd}',
-    'tfoot td{background:#fff7d6;font-weight:700}',
-    'tr{break-inside:avoid}',
-    '.tabla-ancha{overflow-x:auto}',
-    '.tabla-ancha table{font-size:10.5px}',
-    '.par{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;break-inside:avoid}',
-    '.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}',
-    '.dg figure{margin:0}',
-    '.dg svg{width:100%;height:auto;display:block}',
-    '.dg figcaption{font-size:11px;color:var(--mut);margin-top:4px;text-align:center}',
-    '.lg{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:#334155;margin:4px 0 8px}',
-    '.lg i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}',
-    '.lg i.dash{background:none;border-top:2px dashed #94a3b8;height:0;border-radius:0}',
-    '.lg i.ring{width:11px;height:11px;border:2px solid #dc2626;border-radius:50%;background:none}',
-    '.nota{font-size:11px;color:var(--mut);margin:6px 0 0}',
-    '.pie{padding:10px 34px 16px;font-size:10.5px;color:var(--mut);border-top:1px solid var(--line);display:flex;justify-content:space-between}',
-    '@page{size:A4;margin:11mm}',
-    '@media print{body{background:#fff}.barra{display:none}.hoja{margin:0;max-width:none;box-shadow:none}.cuerpo{padding:4px 6px 10px}.port{padding:20px 24px 16px}.pie{padding:8px 6px}.ficha div,.kpi{break-inside:avoid}}',
-    '@media(max-width:640px){.ficha{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.port{flex-direction:column;align-items:flex-start}.port .der{text-align:left}}'
-  ].join('\n');
+  var cssHref = new URL('../css/styles.css', window.location.href).href;
 
   function agrupar(p) {
     var g = {}, orden = [];
@@ -1020,14 +743,14 @@
     var B = [];
 
     /* ---- Portada ---- */
-    B.push('<div class="port"><div><p class="emp">J.E.J. Ingeniería · Servicio QA/QC Operaciones de Perforación y Tronadura · Contrato N° 4600026097</p>' +
+    B.push('<div class="wizard-card"><div><p class="emp">J.E.J. Ingeniería · Servicio QA/QC Operaciones de Perforación y Tronadura · Contrato N° 4600026097</p>' +
       '<h1>Informe técnico de perforación</h1>' +
       '<div class="id">' + (h.idTronadura ? 'ID Tronadura ' + esc(h.idTronadura) : 'ID de tronadura no informado') + (h.mina ? ' · ' + esc(h.mina) : '') + '</div></div>' +
       '<div class="der"><b>' + esc(fechaLarga(h.fecha)) + '</b>Turno ' + dash(h.turno) + '</div></div>');
-    B.push('<div class="cuerpo">');
+    B.push('<div class="resumen-box">');
 
     /* ---- Identificación ---- */
-    B.push('<h2>Identificación y labor</h2><div class="ficha">' + [
+    B.push('<h2>Identificación y labor</h2><div class="grid-2">' + [
       ['Fecha', fechaLarga(h.fecha)], ['Turno', h.turno], ['Mina', h.mina], ['Nivel', h.nivel], ['Bloque', h.bloque], ['ID Tronadura', h.idTronadura],
       ['Supervisor JeJ', h.supJej], ['Encargado seguimiento JeJ', h.encSeg], ['Supervisor DET', h.supDet], ['Perforista DET', h.perforistaDet],
       ['Equipo de perforación', h.idEquipo], ['Diámetro de perforación [pulg]', h.diametro],
@@ -1038,7 +761,7 @@
 
     /* ---- Indicadores ---- */
     var dif = isFinite(R.desvio) ? (R.desvio >= 0 ? '+' : '') + J.fmt(R.desvio * 100, 1) + '%' : '—';
-    B.push('<h2>Indicadores del turno</h2><div class="kpis">' + [
+    B.push('<h2>Indicadores del turno</h2><div class="grid-2">' + [
       [R.nTiros, 'tiros registrados', ''],
       [J.fmt(R.mDis, 1) + ' m', 'metros de diseño', ''],
       [J.fmt(R.mPerf, 1) + ' m', 'metros perforados', ''],
@@ -1047,7 +770,7 @@
       [isFinite(R.rendimiento) ? J.fmt(R.rendimiento, 1) + ' m/h' : '—', 'rendimiento de perforación', ''],
       [tm(R.tPerdidas), 'pérdida operacional total', R.tPerdidas > 0 ? 'mal' : ''],
       [tm(R.tPerf), 'tiempo en perforación', '']
-    ].map(function (k) { return '<div class="kpi ' + k[2] + '"><b>' + k[0] + '</b><span>' + k[1] + '</span></div>'; }).join('') + '</div>');
+    ].map(function (k) { return '<div class="item-parada-card ' + k[2] + '"><b>' + k[0] + '</b><span>' + k[1] + '</span></div>'; }).join('') + '</div>');
 
     /* ---- Horarios ---- */
     B.push('<h2>Horarios</h2><table><thead><tr><th>Llegada JeJ</th><th>Salida JeJ</th><th>Llegada PyT</th><th>Inicio perforación</th><th>Fin perforación</th><th>Salida PyT</th><th>Tiempo en postura</th><th>Tiempo en perforación</th></tr></thead><tbody><tr>' +
@@ -1066,7 +789,7 @@
 
     /* ---- Registro por tiro ---- */
     if (filas.length) {
-      B.push('<h2>Registro por tiro</h2><div class="tabla-ancha"><table><thead><tr>' + (multi ? '<th>Trabajo</th>' : '') + '<th>Parada</th><th>Tiro</th><th>Diseño [m]</th><th>Taco [m]</th><th>Perforado [m]</th><th>Cumpl. carga</th><th>Abat. [°]</th><th>Rot. [°]</th><th>Sentido</th><th>Estado</th><th>Agua</th><th>Entub. [m]</th><th>Problema</th><th>T. perf. [min]</th></tr></thead><tbody>' +
+      B.push('<h2>Registro por tiro</h2><div class=""><table><thead><tr>' + (multi ? '<th>Trabajo</th>' : '') + '<th>Parada</th><th>Tiro</th><th>Diseño [m]</th><th>Taco [m]</th><th>Perforado [m]</th><th>Cumpl. carga</th><th>Abat. [°]</th><th>Rot. [°]</th><th>Sentido</th><th>Estado</th><th>Agua</th><th>Entub. [m]</th><th>Problema</th><th>T. perf. [min]</th></tr></thead><tbody>' +
         filas.map(function (r) {
           var t = J.calc.tTiro(r), prob = r.problema ? esc(r.problema) + (r.alturaBarra ? ' (' + esc(r.alturaBarra) + ' m)' : '') : '—';
           return '<tr>' + (multi ? '<td>' + dash(r.trabajo) + '</td>' : '') + '<td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td><td>' + dash(r.mDiseno) + '</td><td>' + dash(r.taco) + '</td><td>' + dash(r.mPerf) + '</td><td>' +
@@ -1077,7 +800,7 @@
       /* ---- Parámetros operacionales ---- */
       var keys = ['pPerc', 'pRot', 'pAv', 'pAgua', 'pComp', 'golpes', 'rpm', 'vAv', 'caudal', 'hIni', 'hFin'];
       if (filas.some(function (r) { return keys.some(function (k) { return r[k] !== ''; }); })) {
-        B.push('<h2>Parámetros de perforación</h2><div class="tabla-ancha"><table><thead><tr><th>Parada</th><th>Tiro</th><th>P. percusión [bar]</th><th>P. rotación [bar]</th><th>P. avance [bar]</th><th>P. agua [bar]</th><th>P. compresor aceite [bar]</th><th>Golpes/min</th><th>RPM</th><th>Vel. avance</th><th>Caudal agua [m³/min]</th><th>Inicio</th><th>Término</th></tr></thead><tbody>' +
+        B.push('<h2>Parámetros de perforación</h2><div class=""><table><thead><tr><th>Parada</th><th>Tiro</th><th>P. percusión [bar]</th><th>P. rotación [bar]</th><th>P. avance [bar]</th><th>P. agua [bar]</th><th>P. compresor aceite [bar]</th><th>Golpes/min</th><th>RPM</th><th>Vel. avance</th><th>Caudal agua [m³/min]</th><th>Inicio</th><th>Término</th></tr></thead><tbody>' +
           filas.map(function (r) {
             return '<tr><td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td>' + ['pPerc', 'pRot', 'pAv', 'pAgua', 'pComp', 'golpes', 'rpm', 'vAv', 'caudal', 'hIni', 'hFin'].map(function (k) { return '<td>' + dash(r[k]) + '</td>'; }).join('') + '</tr>';
           }).join('') + '</tbody></table></div>');
@@ -1093,11 +816,11 @@
     if (!A.orden.length) B.push('<p class="nota">Aún no hay tiros registrados.</p>');
     A.orden.forEach(function (k) {
       var rows = A.g[k], s = J.diagram.vista(rows, 'seccion', ref);
-      if (!s.n) { B.push('<div class="par"><h3>' + esc(k) + '</h3><p class="nota">Sin tiros con ángulo de abatimiento: no hay diagrama que dibujar.</p></div>'); return; }
+      if (!s.n) { B.push('<div class="wizard-card"><h3>' + esc(k) + '</h3><p class="nota">Sin tiros con ángulo de abatimiento: no hay diagrama que dibujar.</p></div>'); return; }
       var pl = J.diagram.vista(rows, 'planta', ref), nota = '';
       if (s.omitidos) nota += s.omitidos + ' tiro(s) sin ángulo de abatimiento no se dibujan. ';
       if (s.supuestos) nota += s.supuestos + ' tiro(s) sin rotación: se asumió 90° (hacia la derecha). ';
-      B.push('<div class="par"><h3>' + esc(k) + ' · ' + s.n + ' tiro(s) dibujados</h3><div class="dg"><figure>' + s.svg + '<figcaption>Sección transversal</figcaption></figure>' +
+      B.push('<div class="wizard-card"><h3>' + esc(k) + ' · ' + s.n + ' tiro(s) dibujados</h3><div class="grid-2"><figure>' + s.svg + '<figcaption>Sección transversal</figcaption></figure>' +
         (pl.fueraDePlano ? '<figure>' + pl.svg + '<figcaption>Vista en planta</figcaption></figure>' : '') + '</div>' +
         '<table><thead><tr><th>Tiro</th><th>Largo perforado [m]</th><th>Largo diseño [m]</th><th>Taco [m]</th><th>Abatimiento</th><th>Rotación</th><th>Sentido</th><th>Estado</th></tr></thead><tbody>' +
         rows.map(function (r) {
@@ -1123,14 +846,14 @@
       if (ob.length) B.push('<ul>' + ob.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>');
     }
 
-    B.push('</div><div class="pie"><span>J.E.J. Ingeniería · Contrato N° 4600026097</span><span>Generado el ' + new Date().toLocaleString('es-CL') + '</span></div>');
+    B.push('</div><div class="section-title"><span>J.E.J. Ingeniería · Contrato N° 4600026097</span><span>Generado el ' + new Date().toLocaleString('es-CL') + '</span></div>');
 
     var titulo = 'Informe técnico ' + (h.idTronadura || 'perforación') + (h.fecha ? ' · ' + h.fecha : '');
     var LT = '<';
     return LT + '!DOCTYPE html>' + LT + 'html lang="es">' + LT + 'head>' + LT + 'meta charset="UTF-8">' + LT + 'meta name="viewport" content="width=device-width, initial-scale=1">' +
-      LT + 'title>' + esc(titulo) + LT + '/title>' + LT + 'style>' + CSS + LT + '/style>' + LT + '/head>' + LT + 'body>' +
-      LT + 'div class="barra">' + LT + 'span>Para guardar el informe: Imprimir → Destino «Guardar como PDF».' + LT + '/span>' + LT + 'button type="button" onclick="window.print()">Imprimir / Guardar PDF' + LT + '/button>' + LT + '/div>' +
-      LT + 'div class="hoja">' + B.join('') + LT + '/div>' + LT + '/body>' + LT + '/html>';
+      LT + 'title>' + esc(titulo) + LT + '/title>' + LT + 'link rel="stylesheet" href="' + esc(cssHref) + '">' + LT + '/head>' + LT + 'body>' +
+      LT + 'div class="jej-acciones-cabecera">' + LT + 'span>Para guardar el informe: Imprimir → Destino «Guardar como PDF».' + LT + '/span>' + LT + 'button type="button" class="btn-primary" onclick="window.print()">Imprimir / Guardar PDF' + LT + '/button>' + LT + '/div>' +
+      LT + 'div class="card-wide">' + B.join('') + LT + '/div>' + LT + '/body>' + LT + '/html>';
   }
 
   function nombreArchivo(p) {
@@ -1197,9 +920,9 @@
   function alCambiarPlanilla() { ui.vista = 'datos'; ui.asist = null; ui.tiro = null; ui.aviso = ''; ui.parada = ''; ui.busca = ''; ui.nuevaParada = false; render(); }
 
   /* ---------- Piezas de formulario ---------- */
-  function mf(label, ctrl, cls) { return el('div', { class: 'jp-mf ' + (cls || '') }, [el('label', { text: label }), ctrl]); }
+  function mf(label, ctrl, cls) { return el('div', { class: 'jp-mf form-group-field' + (cls || '') }, [el('label', { text: label }), ctrl]); }
   function txt(o, k, ph, cls, list, on) {
-    var i = el('input', { type: 'text', class: 'jp-in ' + (cls || ''), placeholder: ph || '', value: o[k] || '' });
+    var i = el('input', { type: 'text', class: 'jp-in' + (cls || ''), placeholder: ph || '', value: o[k] || '' });
     if (list) i.setAttribute('list', list);
     i.addEventListener('input', function () { o[k] = i.value; if (on) on(); });
     return i;
@@ -1242,7 +965,7 @@
       box.appendChild(el('button', { type: 'button', class: 'jp-chip', text: '+ ' + textoAdd, onclick: function () { vals.push(''); pintar(true); } }));
     }
     pintar();
-    host.appendChild(el('div', { class: 'jp-mf full' }, [el('label', { text: label }), dl, box]));
+    host.appendChild(el('div', { class: 'jp-mf form-group-field full' }, [el('label', { text: label }), dl, box]));
   }
 
   /* ---------- Ventana modal ---------- */
@@ -1253,10 +976,11 @@
     m.appendChild(el('h3', { text: titulo }));
     armar(m);
     m.appendChild(el('div', { class: 'jp-modal-acc' }, [
-      el('button', { type: 'button', class: 'jp-b gris', text: 'Cancelar', onclick: cerrar }),
-      el('button', { type: 'button', class: 'jp-b verde', text: textoGuardar || 'Guardar y Aplicar', onclick: function () { if (onGuardar() !== false) cerrar(); } })
+      el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: cerrar }),
+      el('button', { type: 'button', class: 'btn-primary', text: textoGuardar || 'Guardar y Aplicar', onclick: function () { if (onGuardar() !== false) cerrar(); } })
     ]));
     ov.appendChild(m);
+    ov.style.display = "flex";
     document.body.appendChild(ov);
   }
 
@@ -1403,7 +1127,7 @@
         var del = el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { perd.splice(i, 1); if (!perd.length) perd.push({ desc: '', tiempo: '' }); pintar(); } });
         caja.appendChild(el('div', { class: 'jp-perd-fila' }, [dd, tt, del]));
       });
-      caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'jp-btn', text: '＋ Agregar pérdida', onclick: function () { perd.push({ desc: '', tiempo: '' }); pintar(); } })]));
+      caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'btn-primary', text: '＋ Agregar pérdida', onclick: function () { perd.push({ desc: '', tiempo: '' }); pintar(); } })]));
       caja.appendChild(total);
       actualizarTotal();
     }
@@ -1415,7 +1139,7 @@
     var a = ui.asist, ps = a.pasos, d = a.d;
     if (a.i > ps.length - 1) a.i = ps.length - 1;
     var s = ps[a.i], ultimo = a.i >= ps.length - 1;
-    var q = el('div', { class: 'jp-q', style: 'border-left-color:#' + s.bg });
+    var q = el('div', { class: 'jp-q wizard-card', style: 'border-left-color:#' + s.bg });
 
     var salto = el('select', { 'aria-label': 'Ir a otro dato' });
     ps.forEach(function (x, i) { var o = el('option', { value: String(i), text: (i + 1) + '. ' + x.label }); if (i === a.i) o.selected = true; salto.appendChild(o); });
@@ -1465,13 +1189,13 @@
     if (s.calc) { calcBox = el('div', { class: 'jp-q-calc', text: s.calc(d) }); q.appendChild(calcBox); }
     if (a.err) q.appendChild(el('div', { class: 'jp-q-error', text: a.err }));
 
-    var acc = el('div', { class: 'jp-q-acciones' }, [
-      el('button', { type: 'button', class: 'jp-btn', text: '← Anterior', disabled: a.i === 0 ? 'disabled' : null, onclick: asistenteRetroceder }),
-      el('button', { type: 'button', class: 'jp-btn', text: 'Omitir', onclick: function () { a.err = ''; if (ultimo) asistenteGuardar(); else { a.i++; render(); } } }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: ultimo ? '✔ Guardar datos' : 'Siguiente →', onclick: asistenteAvanzar }),
-      ultimo ? null : el('button', { type: 'button', class: 'jp-btn', text: 'Guardar y salir', onclick: asistenteGuardar }),
+    var acc = el('div', { class: 'jp-q-acciones grid-2' }, [
+      el('button', { type: 'button', class: 'btn-primary', text: '← Anterior', disabled: a.i === 0 ? 'disabled' : null, onclick: asistenteRetroceder }),
+      el('button', { type: 'button', class: 'btn-primary', text: 'Omitir', onclick: function () { a.err = ''; if (ultimo) asistenteGuardar(); else { a.i++; render(); } } }),
+      el('button', { type: 'button', class: 'btn-primary', text: ultimo ? '✔ Guardar datos' : 'Siguiente →', onclick: asistenteAvanzar }),
+      ultimo ? null : el('button', { type: 'button', class: 'btn-primary', text: 'Guardar y salir', onclick: asistenteGuardar }),
       el('span', { class: 'jp-sep' }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-danger', text: 'Cancelar', onclick: function () { if (confirm('¿Cancelar? Se descartan los cambios hechos en este asistente.')) asistenteCerrar(); } })
+      el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: function () { if (confirm('¿Cancelar? Se descartan los cambios hechos en este asistente.')) asistenteCerrar(); } })
     ]);
     q.appendChild(acc);
 
@@ -1505,13 +1229,13 @@
 
     abrirModal('Configuración de Postura y Personal', function (m) {
       m.appendChild(el('h4', { text: '1. Ubicación y Postura' }));
-      var g1 = el('div', { class: 'jp-mgrid' });
-      var zona = el('div', { class: 'jp-mf full' });
+      var g1 = el('div', { class: 'jp-mgrid grid-2' });
+      var zona = el('div', { class: 'jp-mf form-group-field full' });
       function pintarZona() {
         zona.innerHTML = '';
         if (d.nivel === 'NP') {
           zona.appendChild(el('div', { style: 'background:#e8f1fd;color:#2b5fc7;padding:9px 12px;border-radius:6px;margin-bottom:12px;font-size:1rem', text: 'Nivel de Producción' }));
-          var g = el('div', { class: 'jp-mgrid' });
+          var g = el('div', { class: 'jp-mgrid grid-2' });
           g.appendChild(mf('Zanja (Z) · N° de zanja:', txt(d, 'numZanja', 'Ej. 47')));
           g.appendChild(el('div'));
           g.appendChild(mf('Entre calles (C) · N° Calle 1:', txt(d, 'calleZanja1', 'Ej. 41')));
@@ -1519,7 +1243,7 @@
           zona.appendChild(g);
         } else if (d.nivel === 'UCL') {
           zona.appendChild(el('div', { style: 'background:#e8f1fd;color:#2b5fc7;padding:9px 12px;border-radius:6px;margin-bottom:12px;font-size:1rem', text: 'Nivel UCL' }));
-          var g2 = el('div', { class: 'jp-mgrid' });
+          var g2 = el('div', { class: 'jp-mgrid grid-2' });
           g2.appendChild(mf('Calle UCL (C UCL) · N° de calle:', txt(d, 'calleUcl', 'Ej. 12')));
           zona.appendChild(g2);
         }
@@ -1533,7 +1257,7 @@
       m.appendChild(el('div', { style: 'margin-top:12px' }, [zona]));
 
       m.appendChild(el('h4', { text: '2. Personal Responsable' }));
-      var g2b = el('div', { class: 'jp-mgrid' });
+      var g2b = el('div', { class: 'jp-mgrid grid-2' });
       var enc = txt(d, 'encSeg', ''); enc.classList.add('gris');
       g2b.appendChild(mf('Encargado Seguimiento JeJ (Tú):', enc));
       var sj = txt(d, 'supJej', 'Seleccione o escriba...', '', null);
@@ -1580,12 +1304,12 @@
 
   /* ---------- Paso 1: Datos generales y turno ---------- */
   function vistaDatos(host, p) {
-    var h = p.header, card = el('div', { class: 'jp-card' });
+    var h = p.header, card = el('div', { class: 'jp-card card-wide' });
     card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 1: Datos Generales y Turno' }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Ingrese los datos básicos del seguimiento' }));
 
     card.appendChild(el('label', { class: 'jp-lbl', text: 'Fecha:' }));
-    var f = el('input', { type: 'date', class: 'jp-in gris', value: h.fecha || '' });
+    var f = el('input', { type: 'date', class: 'jp-in btn-primary', value: h.fecha || '' });
     f.addEventListener('input', function () { h.fecha = f.value; etiquetaPlanilla(p); J.store.touch(); });
     card.appendChild(f);
 
@@ -1594,13 +1318,13 @@
 
     card.appendChild(el('div', { class: 'jp-sec' }, [
       el('span', { text: '2. Datos de Postura y Personal' }),
-      el('button', { type: 'button', class: 'jp-b cel chico', text: '⚙️ Ingreso / Editar Datos', onclick: function () { abrirAsistente('postura'); } })
+      el('button', { type: 'button', class: 'btn-primary', text: '⚙️ Ingreso / Editar Datos', onclick: function () { abrirAsistente('postura'); } })
     ]));
     function negrita(t, v) { var s = el('div'); s.appendChild(el('b', { text: t + ': ' })); s.appendChild(document.createTextNode(v)); return s; }
     var linea1 = el('div'); linea1.appendChild(el('b', { text: 'Mina: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.mina) + ' | '));
     linea1.appendChild(el('b', { text: 'Nivel: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.nivel) + ' | '));
     linea1.appendChild(el('b', { text: 'Bloque: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.bloque)));
-    card.appendChild(el('div', { class: 'jp-resumen-box' }, [
+    card.appendChild(el('div', { class: 'jp-resumen-box resumen-box' }, [
       linea1, el('hr'),
       negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
       negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', '))), el('hr'),
@@ -1610,16 +1334,16 @@
       negrita('Fase', sinAsignar(h.fase))
     ]));
 
-    card.appendChild(el('div', { class: 'jp-fila2' }, [
-      el('a', { href: '../index.html', class: 'jp-b gris', text: 'Volver al Menú' }),
-      el('button', { type: 'button', class: 'jp-b azul', text: 'Ir a Gestión de ID ➜', onclick: function () { ir('id'); } })
+    card.appendChild(el('div', { class: 'jp-fila2 grid-2' }, [
+      el('a', { href: '../index.html', class: 'btn-primary', text: 'Volver al Menú' }),
+      el('button', { type: 'button', class: 'btn-primary', text: 'Ir a Gestión de ID ➜', onclick: function () { ir('id'); } })
     ]));
     host.appendChild(card);
   }
 
   /* ---------- Paso 2: Gestión de ID de trabajo ---------- */
   function vistaId(host, p) {
-    var card = el('div', { class: 'jp-card' });
+    var card = el('div', { class: 'jp-card card-wide' });
     card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 2: Gestión de ID de Trabajo' }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Cree un nuevo ID o seleccione uno ya existente' }));
 
@@ -1634,9 +1358,9 @@
       p.trabajoActual = n; ui.nuevaParada = paradasDe(p, n).length === 0; ui.busca = ''; J.store.touch(); ir('resumen');
     }
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); crear(); } });
-    card.appendChild(el('div', { class: 'jp-panel' }, [
+    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
       el('div', { class: 'jp-panel-t', text: '➕ CREAR NUEVO ID DE TRABAJO:' }), inp, err,
-      el('button', { type: 'button', class: 'jp-b verde', style: 'margin-top:10px', text: 'Crear e Ir a Paradas', onclick: crear })
+      el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:10px', text: 'Crear e Ir a Paradas', onclick: crear })
     ]));
 
     
@@ -1648,11 +1372,11 @@
       s.appendChild(o);
     });
     var err2 = el('div', { class: 'jp-q-error' });
-    var usar = el('button', { type: 'button', class: 'jp-b cel', text: 'Usar Seleccionado ➜', onclick: function () {
+    var usar = el('button', { type: 'button', class: 'btn-primary', text: 'Usar Seleccionado ➜', onclick: function () {
       if (!s.value) { err2.textContent = 'Selecciona un ID de trabajo.'; return; }
       p.trabajoActual = s.value; ui.nuevaParada = false; ui.busca = ''; J.store.touch(); ir('resumen');
     } });
-    var borrar = el('button', { type: 'button', class: 'jp-b rojo', text: '🗑️ Eliminar', onclick: function () {
+    var borrar = el('button', { type: 'button', class: 'btn-primary', text: '🗑️ Eliminar', onclick: function () {
       if (!s.value) { err2.textContent = 'Selecciona un ID de trabajo.'; return; }
       var t = s.value, n = tirosDe(p, t).length;
       if (!confirm('¿Eliminar el ID de trabajo "' + t + '"' + (n ? ' y sus ' + n + ' tiro(s)' : '') + '? No se puede deshacer.')) return;
@@ -1661,11 +1385,11 @@
       if (p.trabajoActual === t) p.trabajoActual = p.trabajos[0] || '';
       J.store.touch(); render();
     } });
-    card.appendChild(el('div', { class: 'jp-panel' }, [
+    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
       el('div', { class: 'jp-panel-t', text: '📁 SELECCIONAR ID DE TRABAJO EXISTENTE:' }), s, err2,
-      el('div', { class: 'jp-fila2', style: 'margin-top:10px' }, [usar, borrar])
+      el('div', { class: 'jp-fila2 grid-2', style: 'margin-top:10px' }, [usar, borrar])
     ]));
-    card.appendChild(el('button', { type: 'button', class: 'jp-b gris chico', style: 'margin-top:16px', text: '⬅ Volver al Paso 1', onclick: function () { ir('datos'); } }));
+    card.appendChild(el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:16px', text: '⬅ Volver al Paso 1', onclick: function () { ir('datos'); } }));
     host.appendChild(card);
     setTimeout(function () { try { if (!p.trabajos.length) inp.focus(); } catch (e) { /* sin foco */ } }, 0);
   }
@@ -1679,8 +1403,8 @@
     return el('div', { class: 'jp-descarga' }, [
       el('label', { class: 'jp-lbl', style: 'margin-top:4px', text: 'Abatimiento de los diagramas de disparo, medido desde la:' }), s,
       el('div', { class: 'jp-pila', style: 'margin-top:12px' }, [
-        el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(P()); } }),
-        el('button', { type: 'button', class: 'jp-b azul', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(P()); } })
+        el('button', { type: 'button', class: 'btn-primary', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(P()); } }),
+        el('button', { type: 'button', class: 'btn-primary', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(P()); } })
       ]),
       el('small', { text: 'Los datos se guardan automáticamente en este dispositivo.' })
     ]);
@@ -1688,7 +1412,7 @@
 
   /* ---------- Resumen de paradas del trabajo ---------- */
   function vistaResumen(host, p) {
-    var t = p.trabajoActual, card = el('div', { class: 'jp-card' });
+    var t = p.trabajoActual, card = el('div', { class: 'jp-card card-wide' });
     card.appendChild(el('h2', { class: 'jp-card-t', text: 'Resumen de Paradas - Trabajo: ' + t }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Revise sus registros guardados' }));
     if (ui.aviso) card.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
@@ -1708,8 +1432,8 @@
           el('div', null, [el('div', { class: 'jp-parada-t', text: '📍 Parada: ' + (par || '—') }),
             el('div', { class: 'jp-parada-s', text: rows.length + (rows.length === 1 ? ' tiro registrado' : ' tiros registrados') + (m ? ' · ' + J.fmt(m, 1) + ' m perforados' : '') })]),
           el('div', { class: 'jp-parada-b' }, [
-            el('button', { type: 'button', class: 'jp-b editar chico', text: '✏️ Editar', onclick: function () { ui.parada = par; ir('parada'); } }),
-            el('button', { type: 'button', class: 'jp-b rojo chico', title: 'Eliminar parada', text: '🗑️', onclick: function () {
+            el('button', { type: 'button', class: 'btn-primary', text: '✏️ Editar', onclick: function () { ui.parada = par; ir('parada'); } }),
+            el('button', { type: 'button', class: 'btn-primary', title: 'Eliminar parada', text: '🗑️', onclick: function () {
               if (!confirm('¿Eliminar la parada "' + par + '" con sus ' + rows.length + ' tiro(s)?')) return;
               p.filas = p.filas.filter(function (r) { return !(r.trabajo === t && String(r.parada) === par); });
               J.store.touch(); render();
@@ -1720,7 +1444,7 @@
     }
     busca.addEventListener('input', function () { ui.busca = busca.value; pintarLista(); });
     pintarLista();
-    card.appendChild(el('div', { class: 'jp-panel' }, [caja]));
+    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [caja]));
 
     /* agregar parada */
     if (ui.nuevaParada) {
@@ -1734,22 +1458,22 @@
         nuevoTiro(p);
       };
       np.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); crearParada(); } });
-      card.appendChild(el('div', { class: 'jp-panel' }, [
+      card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
         el('div', { class: 'jp-panel-t', text: '📍 NUEVA PARADA:' }), np, e1,
-        el('div', { class: 'jp-fila2', style: 'margin-top:10px' }, [
-          el('button', { type: 'button', class: 'jp-b verde', text: 'Crear y registrar tiro', onclick: crearParada }),
-          el('button', { type: 'button', class: 'jp-b gris', text: 'Cancelar', onclick: function () { ui.nuevaParada = false; render(); } })
+        el('div', { class: 'jp-fila2 grid-2', style: 'margin-top:10px' }, [
+          el('button', { type: 'button', class: 'btn-primary', text: 'Crear y registrar tiro', onclick: crearParada }),
+          el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: function () { ui.nuevaParada = false; render(); } })
         ])
       ]));
       setTimeout(function () { try { np.focus(); np.select(); } catch (e) { /* sin foco */ } }, 0);
     } else {
       card.appendChild(el('div', { class: 'jp-pila', style: 'margin-top:12px' }, [
-        el('div', { class: 'jp-fila2', style: 'margin-top:0' }, [
-          el('button', { type: 'button', class: 'jp-b cel', text: '+ Registrar otra parada', onclick: function () { ui.nuevaParada = true; ui.aviso = ''; render(); } }),
-          el('button', { type: 'button', class: 'jp-b nar', text: '📝 Agregar Observación', onclick: modalObs })
+        el('div', { class: 'jp-fila2 grid-2', style: 'margin-top:0' }, [
+          el('button', { type: 'button', class: 'btn-primary', text: '+ Registrar otra parada', onclick: function () { ui.nuevaParada = true; ui.aviso = ''; render(); } }),
+          el('button', { type: 'button', class: 'btn-primary', text: '📝 Agregar Observación', onclick: modalObs })
         ]),
-        el('button', { type: 'button', class: 'jp-b teal', text: 'Continuar: completar datos y descargar ➜', disabled: paradasDe(p, t).length ? null : 'disabled', onclick: function () { irACierre(p); } }),
-        el('button', { type: 'button', class: 'jp-b gris chico', style: 'display:block;width:100%', text: '⬅ Volver a Gestión de ID de Trabajo', onclick: function () { ir('id'); } })
+        el('button', { type: 'button', class: 'btn-primary', text: 'Continuar: completar datos y descargar ➜', disabled: paradasDe(p, t).length ? null : 'disabled', onclick: function () { irACierre(p); } }),
+        el('button', { type: 'button', class: 'btn-primary', style: 'display:block;width:100%', text: '⬅ Volver a Gestión de ID de Trabajo', onclick: function () { ir('id'); } })
       ]));
     }
     host.appendChild(card);
@@ -1823,7 +1547,7 @@
     var t = ui.tiro, row = t.row, cs = camposTiro(row);
     if (t.i > cs.length - 1) t.i = cs.length - 1;
     var c = cs[t.i], prev = filaAnterior(p, row);
-    var q = el('div', { class: 'jp-q', style: 'border-left-color:#' + c.bg });
+    var q = el('div', { class: 'jp-q wizard-card', style: 'border-left-color:#' + c.bg });
 
     var salto = el('select', { 'aria-label': 'Ir a otro dato' });
     cs.forEach(function (x, i) { var o = el('option', { value: String(i), text: (i + 1) + '. ' + x.label }); if (i === t.i) o.selected = true; salto.appendChild(o); });
@@ -1866,14 +1590,14 @@
         onclick: function () { row[c.k] = pv; J.store.touch(); render(); } })]));
     }
 
-    var acc = el('div', { class: 'jp-q-acciones' }, [
-      el('button', { type: 'button', class: 'jp-btn', text: '← Anterior', disabled: t.i === 0 ? 'disabled' : null, onclick: retroceder }),
-      el('button', { type: 'button', class: 'jp-btn', text: c.k === 'problema' ? 'Sin problemas' : 'Omitir', onclick: function () {
+    var acc = el('div', { class: 'jp-q-acciones grid-2' }, [
+      el('button', { type: 'button', class: 'btn-primary', text: '← Anterior', disabled: t.i === 0 ? 'disabled' : null, onclick: retroceder }),
+      el('button', { type: 'button', class: 'btn-primary', text: c.k === 'problema' ? 'Sin problemas' : 'Omitir', onclick: function () {
         row[c.k] = ''; if (c.k === 'problema') row.alturaBarra = ''; J.store.touch(); avanzar(p);
       } }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-primary', text: t.i >= cs.length - 1 ? '✔ Guardar tiro' : 'Siguiente →', onclick: function () { avanzar(p); } }),
+      el('button', { type: 'button', class: 'btn-primary', text: t.i >= cs.length - 1 ? '✔ Guardar tiro' : 'Siguiente →', onclick: function () { avanzar(p); } }),
       el('span', { class: 'jp-sep' }),
-      el('button', { type: 'button', class: 'jp-btn jp-btn-danger', text: t.nuevo ? 'Cancelar tiro' : 'Cerrar', onclick: function () { if (t.nuevo) { if (confirm('¿Cancelar este tiro? Se descartan los datos ingresados.')) cancelarTiro(p); } else { terminarTiro(p); } } })
+      el('button', { type: 'button', class: 'btn-primary', text: t.nuevo ? 'Cancelar tiro' : 'Cerrar', onclick: function () { if (t.nuevo) { if (confirm('¿Cancelar este tiro? Se descartan los datos ingresados.')) cancelarTiro(p); } else { terminarTiro(p); } } })
     ]);
     q.appendChild(acc);
 
@@ -1890,7 +1614,7 @@
 
   function vistaParada(host, p) {
     if (ui.tiro) { preguntaTiro(host, p); return; }
-    var t = p.trabajoActual, par = ui.parada, filas = tirosDe(p, t, par), card = el('div', { class: 'jp-card ancha' });
+    var t = p.trabajoActual, par = ui.parada, filas = tirosDe(p, t, par), card = el('div', { class: 'jp-card card-wide' });
     card.appendChild(el('h2', { class: 'jp-card-t', text: '📍 Parada: ' + par }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Trabajo: ' + t + ' · Cada tiro se registra dato por dato. Enter o «Siguiente» avanza; en las listas basta con tocar la opción.' }));
     if (ui.aviso) card.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
@@ -1923,8 +1647,8 @@
         el('thead', null, [el('tr', null, ['Tiro', 'Diseño [m]', 'Perforado [m]', 'Cumpl.', 'Abat.', 'Estado', 'Problema', ''].map(function (x) { return el('th', { text: x }); }))]),
         tb, tf])]));
     }
-    card.appendChild(el('button', { type: 'button', class: 'jp-b verde', text: '＋ Agregar tiro', onclick: function () { nuevoTiro(p); } }));
-    card.appendChild(el('button', { type: 'button', class: 'jp-b gris', style: 'margin-top:10px', text: '← Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } }));
+    card.appendChild(el('button', { type: 'button', class: 'btn-primary', text: '＋ Agregar tiro', onclick: function () { nuevoTiro(p); } }));
+    card.appendChild(el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:10px', text: '← Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } }));
     host.appendChild(card);
   }
 
@@ -1942,7 +1666,7 @@
     if (!plantillaCompleta(p)) abrirAsistente('plantilla'); else { render(); window.scrollTo(0, 0); }
   }
   function vistaFinal(host, p) {
-    var R = J.resumen(p), card = el('div', { class: 'jp-card' });
+    var R = J.resumen(p), card = el('div', { class: 'jp-card card-wide' });
     card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 3: Datos Faltantes y Descarga' }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Complete los datos de la plantilla y descargue su registro.' }));
     card.appendChild(el('div', { class: 'jp-kpis' }, [
@@ -1952,12 +1676,12 @@
       [J.fmtHM(R.tPerf), 'tiempo en perforación'], [J.fmtHM(R.tPerdidas), 'pérdida operacional total']
     ].map(function (k) { return el('div', { class: 'jp-kpi' }, [el('b', { text: String(k[0]) }), el('span', { text: k[1] })]); })));
     var ok = plantillaCompleta(p);
-    card.appendChild(el('div', { class: 'jp-panel' }, [
+    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
       el('div', { class: 'jp-panel-t', text: ok ? '✅ DATOS DE PLANTILLA COMPLETOS' : '⚠️ FALTAN DATOS DE PLANTILLA' }),
-      el('button', { type: 'button', class: 'jp-b teal', style: 'margin-top:8px', text: (ok ? '✏️ Editar' : '📋 Rellenar') + ' Datos de Plantilla (Horarios/Operación)', onclick: function () { abrirAsistente('plantilla'); } })
+      el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:8px', text: (ok ? '✏️ Editar' : '📋 Rellenar') + ' Datos de Plantilla (Horarios/Operación)', onclick: function () { abrirAsistente('plantilla'); } })
     ]));
     card.appendChild(bloqueDescarga(p));
-    card.appendChild(el('button', { type: 'button', class: 'jp-b gris', style: 'margin-top:14px', text: '⬅ Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } }));
+    card.appendChild(el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:14px', text: '⬅ Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } }));
     host.appendChild(card);
   }
 
@@ -1993,3 +1717,9 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
