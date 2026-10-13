@@ -241,12 +241,7 @@
     <!-- CONTENIDO ESPECÍFICO DE LA PÁGINA -->
     <main class="jp-page">
         <div class="jp-titulo-pagina">
-            <div>
-                <h1>Seguimiento a la Perforación</h1>
-                <p class="jp-sub">J.E.J. Ingeniería · Contrato N° 4600026097 · Servicio QA/QC Operaciones de Perforación y Tronadura</p>
-            </div>
-            <a class="jp-menu-link" href="../index.html">Menú principal</a>
-        </div>
+         
 
         <div id="toolbar"></div>
 
@@ -254,9 +249,17 @@
     </main>
 
     <!-- Librería para generar el Excel (.xlsx) -->
+    <!-- Estructura base del modal: su contenido específico se completa desde JavaScript. -->
+    <template id="plantillaModalJej">
+      <div class="jp-ov" data-modal-overlay>
+        <section class="jp-modal" role="dialog" aria-modal="true" data-modal-content></section>
+      </div>
+    </template>
+    <script src="../pages/usuarios.html"></script>
     <script src="../js/vendor/exceljs.min.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
+    <script src="../js/onedrive-integration.js"></script>
 
     <script>
 /* ===================== NÚCLEO DE DATOS (listas, columnas, cálculos, almacenamiento) ===================== */
@@ -1244,7 +1247,8 @@
 
   /* ---------- Ventana modal ---------- */
   function abrirModal(titulo, armar, onGuardar, textoGuardar) {
-    var ov = el('div', { class: 'jp-ov' }), m = el('div', { class: 'jp-modal', role: 'dialog', 'aria-modal': 'true' });
+    var fragmento = document.getElementById('plantillaModalJej').content.cloneNode(true);
+    var ov = fragmento.querySelector('[data-modal-overlay]'), m = fragmento.querySelector('[data-modal-content]');
     function cerrar() { ov.remove(); }
     m.appendChild(el('h3', { text: titulo }));
     armar(m);

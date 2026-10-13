@@ -75,14 +75,6 @@
 <body class="pagina-fondo">
 <div class="rs">
 
-  <div class="rs-head">
-    <div>
-      <h1>Seguimiento a la Reducción Secundaria</h1>
-      <p>J.E.J. Ingeniería · Contrato N° 4600026097 · Servicio QA/QC Operaciones de Perforación y Tronadura</p>
-    </div>
-    <a href="../index.html" class="b sm out" style="text-decoration:none;background:#e2e8f0;border:none">Menú principal</a>
-  </div>
-
   <!-- PASO 1 -->
   <section class="card" id="v1">
     <h3>Paso 1: Datos Generales y Turno</h3>
@@ -146,6 +138,103 @@
   <!-- PASO 5: asistente dato por dato (datos de planilla y personal / horarios e indicadores) -->
   <section class="card wz hid" id="v5"></section>
 
+  <!-- MODAL PERSONAL / DATOS DE PLANILLA: estructura equivalente al modal de ANFO/Emulsión -->
+  <div class="modal-overlay ov" id="mDatos" role="presentation">
+    <div class="modal-content modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalDatos">
+      <h3 id="tituloModalDatos" style="margin-top:0;border-bottom:2px solid #e2e8f0;padding-bottom:8px">⚙️ Ingreso / Editar Datos</h3>
+
+      <div class="section-title">1. Ubicación y Datos de Planilla</div>
+      <div class="grid-2">
+        <div class="form-group-field">
+          <label for="mdSector">Sector:</label>
+          <input id="mdSector" type="text" placeholder="Ej. Esmeralda">
+        </div>
+        <div class="form-group-field">
+          <label for="mdGrupo">Grupo:</label>
+          <input id="mdGrupo" type="number" min="0" step="1" placeholder="Ej. 1">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group-field">
+          <label for="mdMina">Mina:</label>
+          <select id="mdMina" onchange="actualizarIdTronaduraAuto()">
+            <option value="andesita">Andesita</option><option value="Diablo Regimiento">Diablo Regimiento</option>
+            <option value="Diamante">Diamante</option><option value="Esmeralda">Esmeralda</option>
+            <option value="NNM">NNM</option><option value="Pacífico Superior">Pacífico Superior</option>
+            <option value="Pilar Norte">Pilar Norte</option><option value="Reservas Norte">Reservas Norte</option><option value="TT8">TT8</option>
+          </select>
+        </div>
+        <div class="form-group-field">
+          <label for="mdNivel">Nivel:</label>
+          <select id="mdNivel" onchange="cambiarNivelModal(); actualizarIdTronaduraAuto()">
+            <option value="NP">NP (Nivel de Producción)</option><option value="UCL">UCL (Nivel UCL)</option><option value="Panel2">Panel 2</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group-field">
+          <label for="mdBloque">Bloque:</label>
+          <select id="mdBloque"><option value="B-2">B-2</option><option value="B-6">B-6</option><option value="Ext Fw">Ext Fw</option><option value="DhZ">DhZ</option></select>
+        </div>
+        <div class="form-group-field">
+          <label for="mdIdTronadura">ID de Tronadura (automático):</label>
+          <input id="mdIdTronadura" type="text" readonly disabled style="background:#f1f5f9;font-weight:bold;color:#475569" placeholder="Se actualiza automáticamente">
+        </div>
+      </div>
+      <div class="form-group-field">
+        <label for="mdFase">Fase (transversal):</label>
+        <input id="mdFase" type="text" placeholder="Ej. Fase 1" oninput="actualizarIdTronaduraAuto()">
+      </div>
+      <div id="mdSeccionNP">
+        <div class="section-title">Nivel de Producción</div>
+        <div class="grid-2">
+          <div class="form-group-field"><label for="mdNumZanja">Núm. Zanja (Producción):</label><input id="mdNumZanja" type="text" placeholder="Ej. 47" oninput="actualizarIdTronaduraAuto()"></div>
+          <div class="form-group-field"><label for="mdCalleZanja">Calle Zanja (Producción):</label><input id="mdCalleZanja" type="text" placeholder="Ej. C41-43" oninput="actualizarIdTronaduraAuto()"></div>
+        </div>
+      </div>
+      <div id="mdSeccionUCL" style="display:none">
+        <div class="section-title">Nivel UCL</div>
+        <div class="grid-2">
+          <div class="form-group-field"><label for="mdCalleUcl">Calle UCL:</label><input id="mdCalleUcl" type="text" placeholder="Ej. C41" oninput="actualizarIdTronaduraAuto()"></div>
+          <div class="form-group-field"><label for="mdParadas">Paradas Inicio / Fin:</label><input id="mdParadas" type="text" placeholder="Ej. P1 a P5"></div>
+        </div>
+      </div>
+      <div id="mdSeccionPanel2" style="display:none">
+        <div class="section-title">Panel 2</div>
+        <div class="form-group-field"><label for="mdDetallePanel2">Detalle Panel 2:</label><input id="mdDetallePanel2" type="text" placeholder="Ingrese detalles de Panel 2" oninput="actualizarIdTronaduraAuto()"></div>
+      </div>
+
+      <div class="section-title">2. Personal Responsable</div>
+      <div class="form-group-field">
+        <label for="mdEncJEJ">Encargado Seguimiento JeJ (Tú):</label>
+        <input id="mdEncJEJ" type="text" readonly style="background:#f1f5f9;font-weight:bold">
+      </div>
+      <div class="form-group-field">
+        <label for="mdSupervisorJeJ">Supervisor JeJ:</label>
+        <input id="mdSupervisorJeJ" type="text" list="listaSupJeJ" placeholder="Seleccione o escriba">
+        <datalist id="listaSupJeJ"></datalist>
+      </div>
+      <div class="form-group-field">
+        <label>Supervisor(es) DET:</label>
+        <div id="mdSupervisoresDET" style="display:flex;flex-direction:column;gap:8px"></div>
+        <datalist id="listaSupDET"></datalist>
+        <button type="button" class="btn-primary" style="margin-top:5px;width:fit-content;font-size:12px;background:#e2e8f0;color:#0f172a" onclick="agregarCampoPersonalModal('supervisorDet')">+ Agregar otro Supervisor DET</button>
+      </div>
+      <div class="form-group-field">
+        <label>Responsable(s) Carguío DET:</label>
+        <div id="mdEncDET" style="display:flex;flex-direction:column;gap:8px"></div>
+        <datalist id="listaEncDET"></datalist>
+        <button type="button" class="btn-primary" style="margin-top:5px;width:fit-content;font-size:12px;background:#e2e8f0;color:#0f172a" onclick="agregarEncargadoModal()">+ Agregar otro Responsable DET</button>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button type="button" onclick="cerrarDatosModal()" class="btn-primary" style="background-color:#64748b">Cancelar</button>
+        <button type="button" onclick="guardarDatosModal()" class="btn-primary" style="background-color:#16a34a">Guardar y Aplicar</button>
+      </div>
+    </div>
+  </div>
+
 <!-- MODAL OBS -->
 <div class="ov" id="mObs"><div class="modal">
   <h3>Observaciones</h3>
@@ -160,11 +249,12 @@
 
 </div><!-- /.rs -->
 
-<script src="../js/components.js"></script>
-<script src="../js/informe-base.js"></script>
-<script src="../js/informe-reduccion.js"></script>
-<script src="../js/app.js"></script>
-<script>
+  <script src="../js/onedrive-integration.js"></script>
+  <script src="../js/components.js"></script>
+  <script src="../js/informe-base.js"></script>
+  <script src="../js/informe-reduccion.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
   cargarBarMenu(true);
 
   /* ============ Datos / listas (de tu Excel) ============ */
@@ -200,7 +290,7 @@
   /* ============ Estado ============ */
   const uid=()=>Math.random().toString(36).slice(2,9);
   const hoy=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-  const nuevaPl=()=>({id:uid(),fecha:hoy(),turno:'A',sector:'Esmeralda',grupo:'1',encJEJ:'',encDET:[''],calles:[],calleAct:null});
+  const nuevaPl=()=>({id:uid(),fecha:hoy(),turno:'A',sector:'Esmeralda',grupo:'1',mina:'Esmeralda',nivel:'NP',bloque:'Ext Fw',idTronadura:'',fase:'',numZanja:'',calleZanja:'',calleUcl:'',paradas:'',detallePanel2:'',encJEJ:'',supervisorJeJ:'',supervisorDet:[''],encDET:[''],calles:[],calleAct:null});
   let S; try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}
   if(!S||!S.pl||!S.pl.length){S={pl:[nuevaPl()],act:null};S.act=S.pl[0].id}
   const P=()=>S.pl.find(p=>p.id===S.act)||S.pl[0];
@@ -225,7 +315,7 @@
   /* ============ Barra de planillas ============ */
   function renderTb(){} // la barra de planillas se retiró (igual que en Perforación)
   function cambiarPl(id){S.act=id;save();V=1;render()}
-  function nuevaPlanilla(){const p=nuevaPl();const a=P();p.sector=a.sector;p.grupo=a.grupo;p.encJEJ=a.encJEJ;p.encDET=[...a.encDET];S.pl.push(p);S.act=p.id;save();V=1;render();toast('Nueva planilla creada')}
+  function nuevaPlanilla(){const p=nuevaPl();const a=P();Object.assign(p,a,{id:p.id,fecha:p.fecha,calles:[],calleAct:null});S.pl.push(p);S.act=p.id;save();V=1;render();toast('Nueva planilla creada')}
   function elimPlanilla(){
     if(!confirm('¿Eliminar la planilla seleccionada y todas sus calles?'))return;
     S.pl=S.pl.filter(p=>p.id!==S.act);
@@ -238,10 +328,18 @@
     ['v1','v2','v3','v4','v5'].forEach((id,i)=>$(id).classList.toggle('hid',V!==i+1));
     if(V===1){
       const p=P();$('fFecha').value=p.fecha;$('fTurno').value=p.turno;
+      if(completarPersonalPlanilla(p))save();
       $('infoDatos').innerHTML=`<b>Sector:</b> ${esc(p.sector||'-')} | <b>Grupo:</b> ${esc(p.grupo||'-')}<br>
+        <b>Mina:</b> ${esc(p.mina||'-')} | <b>Nivel:</b> ${esc(p.nivel||'-')} | <b>Bloque:</b> ${esc(p.bloque||'-')}<br>
+        <b>ID de Tronadura:</b> ${esc(p.idTronadura||'-')} | <b>Fase:</b> ${esc(p.fase||'-')}<br>
+        ${p.nivel==='NP'?`<b>Núm. Zanja:</b> ${esc(p.numZanja||'-')} | <b>Calle Zanja:</b> ${esc(p.calleZanja||'-')}<br>`:''}
+        ${p.nivel==='UCL'?`<b>Calle UCL:</b> ${esc(p.calleUcl||'-')} | <b>Paradas Inicio / Fin:</b> ${esc(p.paradas||'-')}<br>`:''}
+        ${p.nivel==='Panel2'?`<b>Detalle Panel 2:</b> ${esc(p.detallePanel2||'-')}<br>`:''}
         <b>Calle:</b> ${esc(p.calleAct||'Sin asignar')}<hr>
-        <b>Encargado JeJ:</b> ${esc(p.encJEJ||'-')}<br>
-        <b>Encargado(s) RS DET:</b> ${esc(p.encDET.filter(Boolean).join(', ')||'-')}`;
+        <b>Encargado Seguimiento JeJ:</b> ${esc(localStorage.getItem('jej_usuario_activo')||p.encJEJ||'-')}<br>
+        <b>Supervisor JeJ:</b> ${esc(p.supervisorJeJ||'-')}<br>
+        <b>Supervisor(es) DET:</b> ${esc((p.supervisorDet||[]).filter(Boolean).join(', ')||'-')}<br>
+        <b>Responsable(s) Carguío DET:</b> ${esc((p.encDET||[]).filter(Boolean).join(', ')||'-')}`;
     }
     if(V===2){
       const p=P();
@@ -257,19 +355,7 @@
   let G=null;
   const UB='🏔️ Ubicación', PE='👷 Personal Responsable', HO='⏱️ Horarios de la Calle', IN='📊 Indicadores por Calle';
   const infoInd=d=>{const t=C().colpas.length;return `1. Puntos total que necesitan RS: <b>${t}</b><br>5. Puntos quemados total en calle: <b>${Math.max(0,t-(num(d.i2)+num(d.i3)+num(d.i4)))}</b>`};
-  function gDef(tipo){
-    if(tipo==='datos'){
-      const p=P();
-      return {tit:'Configuración de Planilla y Personal',
-        pasos:[
-          {k:'sector',l:'SECTOR',t:'text',ph:'Ej. Esmeralda',g:UB,c:'#0ea5e9'},
-          {k:'grupo',l:'GRUPO',t:'num',step:1,g:UB,c:'#0ea5e9'},
-          {k:'encJEJ',l:'ENCARGADO SEGUIMIENTO JEJ (TÚ)',t:'text',g:PE,c:'#4ade80'},
-          {k:'encDET',l:'ENCARGADO(S) OPERACIÓN RS DET',t:'multi',add:'Agregar otro Encargado DET',g:PE,c:'#4ade80'}
-        ],
-        d:{sector:p.sector||'',grupo:p.grupo||'',encJEJ:p.encJEJ||'',encDET:p.encDET.length?[...p.encDET]:['']},
-        aplicar(d){p.sector=String(d.sector).trim();p.grupo=d.grupo;p.encJEJ=String(d.encJEJ).trim();p.encDET=d.encDET.map(x=>x.trim()).filter(Boolean)}};
-    }
+  function gDef(){
     const c=C();
     return {tit:'Completar Datos de Planilla (Horarios e Indicadores)',
       pasos:[
@@ -284,7 +370,121 @@
       d:{hCarguio:c.h.carguio||'',hSolicitud:c.h.solicitud||'',hAislacion:c.h.aislacion||'',hQuemada:c.h.quemada||'',i2:c.i2||0,i3:c.i3||0,i4:c.i4||0},
       aplicar(d){c.h={carguio:d.hCarguio,solicitud:d.hSolicitud,aislacion:d.hAislacion,quemada:d.hQuemada};c.i2=num(d.i2);c.i3=num(d.i3);c.i4=num(d.i4)}};
   }
-  function abrirG(tipo){G={...gDef(tipo),s:0,volver:V};V=5;render();window.scrollTo(0,0)}
+  function abrirG(tipo){
+    if(tipo==='datos'){
+      abrirDatosModal();
+      return;
+    }
+    G={...gDef(),s:0,volver:V,tipo};
+    V=5;render();
+    window.scrollTo(0,0);
+  }
+  function abrirDatosModal(){
+    const p=P();
+    $('mdSector').value=p.sector||'';
+    $('mdGrupo').value=p.grupo??'';
+    ['mdMina','mdNivel','mdBloque','mdFase','mdNumZanja','mdCalleZanja','mdCalleUcl','mdParadas','mdDetallePanel2'].forEach((id,i)=>{
+      const clave=['mina','nivel','bloque','fase','numZanja','calleZanja','calleUcl','paradas','detallePanel2'][i];
+      $(id).value=p[clave]??({mina:'Esmeralda',nivel:'NP',bloque:'Ext Fw'}[clave]||'');
+    });
+    cargarDatalistPersonalRS('listaSupJeJ','supervisorJeJ',p.turno);
+    cargarDatalistPersonalRS('listaSupDET','supervisorDet',p.turno);
+    cargarDatalistPersonalRS('listaEncDET','responsableDet',p.turno);
+    completarPersonalPlanilla(p);
+    $('mdEncJEJ').value=localStorage.getItem('jej_usuario_activo')||p.encJEJ||'';
+    $('mdSupervisorJeJ').value=p.supervisorJeJ||'';
+    pintarPersonalModal('mdSupervisoresDET','supervisorDet',p.supervisorDet&&p.supervisorDet.length?p.supervisorDet:['']);
+    pintarEncargadosModal(p.encDET&&p.encDET.length?p.encDET:['']);
+    cambiarNivelModal();actualizarIdTronaduraAuto();
+    $('mDatos').classList.add('on');
+  }
+  function cambiarNivelModal(){
+    const nivel=$('mdNivel').value;
+    $('mdSeccionNP').style.display=nivel==='NP'?'block':'none';
+    $('mdSeccionUCL').style.display=nivel==='UCL'?'block':'none';
+    $('mdSeccionPanel2').style.display=nivel==='Panel2'?'block':'none';
+  }
+  function actualizarIdTronaduraAuto(){
+    const nivel=$('mdNivel')?.value||'NP';
+    const faseRaw=$('mdFase')?.value.trim()||'';
+    const fase=faseRaw?(faseRaw.toLowerCase().startsWith('fase')?faseRaw:'Fase '+faseRaw):'';
+    const zanja=$('mdNumZanja')?.value.trim()||'';
+    const zanjaFmt=zanja?(zanja.toUpperCase().startsWith('Z')?zanja:'Z'+zanja):'';
+    let id='';
+    if(nivel==='NP')id=[zanjaFmt,$('mdCalleZanja')?.value.trim()||'',fase].filter(Boolean).join(' ');
+    if(nivel==='UCL')id=[$('mdCalleUcl')?.value.trim()||'','UCL',fase].filter(Boolean).join(' ');
+    if(nivel==='Panel2')id=[$('mdDetallePanel2')?.value.trim()||'',fase].filter(Boolean).join(' ');
+    $('mdIdTronadura').value=id;
+  }
+  function cargarDatalistPersonalRS(idLista,rol,turno){
+    const nombres=nombresPersonalRS(rol,turno);
+    const lista=$(idLista);lista.replaceChildren();
+    [...new Set(nombres)].forEach(nombre=>{const opcion=document.createElement('option');opcion.value=nombre;lista.appendChild(opcion)});
+  }
+  function nombresPersonalRS(rol,turno){
+    let personalMap={};
+    try{personalMap=JSON.parse(localStorage.getItem('jej_personal_map')||'{}')}catch(error){console.error('No se pudo leer el personal guardado',error)}
+    const registros=Array.isArray(personalMap[rol])?personalMap[rol]:[];
+    return [...new Set(registros.map(item=>typeof item==='string'?{nombre:item,turno:'Ambos'}:item)
+      .filter(item=>item&&item.nombre&&(!turno||turno==='Especial'||!item.turno||item.turno==='Ambos'||item.turno===turno))
+      .map(item=>String(item.nombre).trim()).filter(Boolean))];
+  }
+  function completarPersonalPlanilla(p){
+    let cambio=false;
+    const usuarioActivo=localStorage.getItem('jej_usuario_activo');
+    if(usuarioActivo&&p.encJEJ!==usuarioActivo){p.encJEJ=usuarioActivo;cambio=true;}
+    const supervisorJeJ=nombresPersonalRS('supervisorJeJ',p.turno);
+    const supervisoresDET=nombresPersonalRS('supervisorDet',p.turno);
+    const responsablesDET=nombresPersonalRS('responsableDet',p.turno);
+    if(!p.supervisorJeJ&&supervisorJeJ.length){p.supervisorJeJ=supervisorJeJ[0];cambio=true;}
+    if((!Array.isArray(p.supervisorDet)||!p.supervisorDet.some(Boolean))&&supervisoresDET.length){p.supervisorDet=supervisoresDET;cambio=true;}
+    if((!Array.isArray(p.encDET)||!p.encDET.some(Boolean))&&responsablesDET.length){p.encDET=responsablesDET;cambio=true;}
+    return cambio;
+  }
+  function pintarEncargadosModal(valores){
+    $('mdEncDET').innerHTML=valores.map((valor,i)=>`<div style="display:flex;gap:8px;align-items:center">
+      <input class="md-enc-det" type="text" list="listaEncDET" value="${esc(valor)}" placeholder="Nombre del encargado DET" style="flex:1;min-width:0">
+      ${valores.length>1?`<button type="button" class="btn-delete" title="Quitar encargado" aria-label="Quitar encargado" onclick="quitarEncargadoModal(${i})">×</button>`:''}
+    </div>`).join('');
+  }
+  function pintarPersonalModal(contenedor,clase,valores){
+    const lista=clase==='supervisorDet'?'listaSupDET':'listaEncDET';
+    $(contenedor).innerHTML=valores.map((valor,i)=>`<div style="display:flex;gap:8px;align-items:center">
+      <input class="${clase==='supervisorDet'?'md-supervisor-det':'md-enc-det'}" type="text" list="${lista}" value="${esc(valor)}" placeholder="${clase==='supervisorDet'?'Nombre del Supervisor DET':'Nombre del responsable DET'}" style="flex:1;min-width:0">
+      ${valores.length>1?`<button type="button" class="btn-delete" title="Quitar" aria-label="Quitar" onclick="quitarPersonalModal('${contenedor}','${clase}',${i})">×</button>`:''}
+    </div>`).join('');
+  }
+  function valoresPersonalModal(contenedor,clase){return [...document.querySelectorAll(`#${contenedor} .${clase==='supervisorDet'?'md-supervisor-det':'md-enc-det'}`)].map(input=>input.value)}
+  function agregarCampoPersonalModal(clase){
+    const id=clase==='supervisorDet'?'mdSupervisoresDET':'mdEncDET';
+    const valores=valoresPersonalModal(id,clase);valores.push('');pintarPersonalModal(id,clase,valores);
+    const inputs=document.querySelectorAll(`#${id} input`);inputs[inputs.length-1].focus();
+  }
+  function quitarPersonalModal(id,clase,indice){const valores=valoresPersonalModal(id,clase);valores.splice(indice,1);pintarPersonalModal(id,clase,valores.length?valores:[''])}
+  function valoresEncargadosModal(){return [...document.querySelectorAll('#mdEncDET .md-enc-det')].map(input=>input.value)}
+  function agregarEncargadoModal(){
+    const valores=valoresEncargadosModal();valores.push('');pintarEncargadosModal(valores);
+    const inputs=document.querySelectorAll('#mdEncDET .md-enc-det');inputs[inputs.length-1].focus();
+  }
+  function quitarEncargadoModal(indice){
+    const valores=valoresEncargadosModal();valores.splice(indice,1);
+    pintarEncargadosModal(valores.length?valores:['']);
+  }
+  function cerrarDatosModal(){$('mDatos').classList.remove('on')}
+  function guardarDatosModal(){
+    const p=P();
+    p.sector=$('mdSector').value.trim();
+    p.grupo=$('mdGrupo').value;
+    p.mina=$('mdMina').value;p.nivel=$('mdNivel').value;p.bloque=$('mdBloque').value;
+    p.idTronadura=$('mdIdTronadura').value;p.fase=$('mdFase').value.trim();
+    p.numZanja=$('mdNumZanja').value.trim();p.calleZanja=$('mdCalleZanja').value.trim();
+    p.calleUcl=$('mdCalleUcl').value.trim();p.paradas=$('mdParadas').value.trim();p.detallePanel2=$('mdDetallePanel2').value.trim();
+    p.encJEJ=$('mdEncJEJ').value.trim();
+    p.supervisorJeJ=$('mdSupervisorJeJ').value.trim();
+    p.supervisorDet=valoresPersonalModal('mdSupervisoresDET','supervisorDet').map(nombre=>nombre.trim()).filter(Boolean);
+    p.encDET=valoresEncargadosModal().map(nombre=>nombre.trim()).filter(Boolean);
+    save();cerrarDatosModal();render();toast('Datos guardados');
+  }
   function gCapt(){
     const s=G.pasos[G.s];
     if(s.t==='multi')G.d[s.k]=[...document.querySelectorAll('.gm')].map(i=>i.value);
@@ -305,8 +505,9 @@
       inp=`<input id="wi" class="big" value="${esc(v)}" placeholder="${esc(s.ph||'')}" onkeydown="if(event.key==='Enter')gSig()">`;
     }
     const llenos=ps.filter(x=>x!==s&&(Array.isArray(d[x.k])?d[x.k].some(Boolean):String(d[x.k]??'')!==''&&!(x.t==='num'&&num(d[x.k])===0&&!d[x.k])));
-    $('v5').style.borderLeftColor=s.c;
-    $('v5').innerHTML=`
+    const host=$('v5');
+    host.style.borderLeftColor=s.c;
+    host.innerHTML=`
       <div class="wz-top"><b>${esc(s.g)}</b><span>Dato <b style="color:#2563eb">${G.s+1}</b> de ${n}</span>
         <select onchange="gSaltar(this.value)">${ps.map((x,i)=>`<option value="${i}" ${i===G.s?'selected':''}>${i+1}. ${esc(x.l)}</option>`).join('')}</select></div>
       <div class="bar"><i style="width:${((G.s+1)/n)*100}%"></i></div>
@@ -321,7 +522,7 @@
         <button class="b sm out" style="color:#dc2626;border-color:#fca5a5" onclick="gCancelar()">Cancelar</button>
       </div>
       ${llenos.length?`<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px 6px;margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0">${llenos.map(x=>`<span style="font-size:.72rem;background:#f1f5f9;border-radius:4px;padding:2px 6px;color:#334155">${esc(x.l.toLowerCase())}: ${esc(Array.isArray(d[x.k])?d[x.k].filter(Boolean).join(', '):d[x.k])}</span>`).join('')}</div>`:''}`;
-    const el=document.querySelector('#v5 input');if(el){el.focus();el.select&&el.select()}
+    const el=host.querySelector('input');if(el){el.focus();el.select&&el.select()}
   }
   function gInfoUp(){gCapt();const s=G.pasos[G.s],t=$('gInfo');if(t&&s.info)t.innerHTML=s.info(G.d)}
   function gAhora(){const el=$('wi');el.value=horaAhora();G.d[G.pasos[G.s].k]=el.value}
