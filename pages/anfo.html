@@ -306,94 +306,6 @@
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Configuración de Postura y Personal</h3>
 
-    <!-- 1. UBICACIÓN Y POSTURA -->
-            <div class="section-title">1. Ubicación y Postura</div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Mina:</label>
-                    <select id="modalMina" onchange="actualizarIdTronaduraAuto()">
-                        <option value="andesita">Andesita</option>
-                        <option value="Diablo Regimiento">Diablo Regimiento</option>
-                        <option value="Diamante">Diamante</option>
-                        <option value="Esmeralda" selected>Esmeralda</option>
-                        <option value="NNM">NNM</option>
-                        <option value="Pacífico Superior">Pacífico Superior</option>
-                        <option value="Pilar Norte">Pilar Norte</option>
-                        <option value="Reservas Norte">Reservas Norte</option>
-                        <option value="TT8">TT8</option>
-                    </select>
-                </div>
-                <div class="form-group-field">
-                    <label>Nivel:</label>
-                    <select id="modalNivel" onchange="cambiarNivelModal(); actualizarIdTronaduraAuto();">
-                        <option value="NP" selected>NP (Nivel de Producción)</option>
-                        <option value="UCL">UCL (Nivel UCL)</option>
-                        <option value="Panel2">Panel 2</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Bloque:</label>
-                    <select id="modalBloque" onchange="ejecutarAutosave()">
-                        <option value="B-2">B-2</option>
-                        <option value="B-6">B-6</option>
-                        <option value="Ext Fw" selected>Ext Fw</option> 
-                        <option value="DhZ">DhZ</option>
-                    </select>
-                </div>
-                <div class="form-group-field">
-                    <label>ID de Tronadura (Automático):</label>
-                    <input type="text" id="modalIdTronadura" readonly disabled style="background-color: #f1f5f9; font-weight: bold; color: #475569;" placeholder="Se actualiza automáticamente...">
-                </div>
-            </div>
-
-            <!-- Fase transversal compartida -->
-            <div class="form-group-field">
-                <label>Fase (Transversal):</label>
-                <input type="text" id="faseZanja" placeholder="Ej. Fase 1" oninput="actualizarIdTronaduraAuto()">
-            </div>
-
-            <!-- SECCIÓN CONDICIONAL: NIVEL DE PRODUCCIÓN (NP) -->
-            <div id="seccionNP" style="display: block;">
-                <div class="section-title" style="color: #2563eb; background: #eff6ff; padding: 4px 8px; border-radius: 4px;">Nivel de Producción</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Núm. Zanja (Producción):</label>
-                        <input type="text" id="numZanja" placeholder="Ej. 47" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Calle Zanja (Producción):</label>
-                        <input type="text" id="calleZanja" placeholder="Ej. C41-43" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN CONDICIONAL: NIVEL UCL -->
-            <div id="seccionUCL" style="display: none;">
-                <div class="section-title" style="color: #16a34a; background: #f0fdf4; padding: 4px 8px; border-radius: 4px;">Nivel UCL</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Calle UCL:</label>
-                        <input type="text" id="calleUcl" placeholder="Ej. C41" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Paradas Inicio / Fin:</label>
-                        <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5">
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN CONDICIONAL: PANEL 2 -->
-            <div id="seccionPanel2" style="display: none;">
-                <div class="section-title" style="color: #d97706; background: #fffbeb; padding: 4px 8px; border-radius: 4px;">Panel 2</div>
-                <div class="form-group-field">
-                    <label>Detalle Panel 2:</label>
-                    <input type="text" id="detallePanel2" placeholder="Ingrese detalles de Panel 2..." oninput="actualizarIdTronaduraAuto()">
-                </div>
-            </div>
-
             <!-- 2. PERSONAL RESPONSABLE -->
             <div class="section-title">2. Personal Responsable</div>
             <div class="form-group-field">
@@ -444,41 +356,82 @@
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Completar Datos de Plantilla (Horarios y Operación)</h3>
 
-            <!-- ID de Tronadura (Bloqueado / Solo lectura en este modal para evitar alteraciones manuales) -->
-            <div class="form-group-field">
-                <label>ID de Tronadura (Automático / No modificable):</label>
-                <input type="text" id="modalPlantillaIdTronadura" readonly disabled style="background-color: #f1f5f9; font-weight: bold; color: #475569;" placeholder="Se actualiza según mina, nivel y fase...">
-            </div>
-
-            <!-- Fase transversal (Compartida para ambos niveles) -->
-            <div class="form-group-field">
-                <label>Fase (Transversal):</label>
-                <input type="text" id="faseZanja" placeholder="Ej. Fase 2" oninput="actualizarIdTronaduraAuto(); sincronizarIdTronaduraModal();">
-            </div>
-
-            <!-- SECCIÓN: NIVEL DE PRODUCCIÓN -->
-            <div class="section-title" style="color: #2563eb; background: #eff6ff; padding: 4px 8px; border-radius: 4px;">Nivel de Producción</div>
+            <!-- 1. UBICACIÓN Y POSTURA: completar los datos de identificación de la plantilla -->
+            <div class="section-title">1. Ubicación y Postura</div>
             <div class="grid-2">
                 <div class="form-group-field">
-                    <label>Núm. Zanja (Producción):</label>
-                    <input type="text" id="numZanja" placeholder="Ej. Z-01" oninput="actualizarIdTronaduraAuto(); sincronizarIdTronaduraModal();">
+                    <label for="modalMina">Mina:</label>
+                    <select id="modalMina" onchange="actualizarIdTronaduraAuto()">
+                        <option value="andesita">Andesita</option>
+                        <option value="Diablo Regimiento">Diablo Regimiento</option>
+                        <option value="Diamante">Diamante</option>
+                        <option value="Esmeralda" selected>Esmeralda</option>
+                        <option value="NNM">NNM</option>
+                        <option value="Pacífico Superior">Pacífico Superior</option>
+                        <option value="Pilar Norte">Pilar Norte</option>
+                        <option value="Reservas Norte">Reservas Norte</option>
+                        <option value="TT8">TT8</option>
+                    </select>
                 </div>
                 <div class="form-group-field">
-                    <label>Calle Zanja (Producción):</label>
-                    <input type="text" id="calleZanja" placeholder="Ej. 59">
+                    <label for="modalNivel">Nivel:</label>
+                    <select id="modalNivel" onchange="cambiarNivelModal(); actualizarIdTronaduraAuto();">
+                        <option value="NP" selected>NP (Nivel de Producción)</option>
+                        <option value="UCL">UCL (Nivel UCL)</option>
+                        <option value="Panel2">Panel 2</option>
+                    </select>
                 </div>
             </div>
-
-            <!-- SECCIÓN: NIVEL UCL -->
-            <div class="section-title" style="color: #16a34a; background: #f0fdf4; padding: 4px 8px; border-radius: 4px;">Nivel UCL</div>
             <div class="grid-2">
                 <div class="form-group-field">
-                    <label>Calle UCL:</label>
-                    <input type="text" id="calleUcl" placeholder="Ej. UCL-01">
+                    <label for="modalBloque">Bloque:</label>
+                    <select id="modalBloque" onchange="ejecutarAutosave()">
+                        <option value="B-2">B-2</option>
+                        <option value="B-6">B-6</option>
+                        <option value="Ext Fw" selected>Ext Fw</option>
+                        <option value="DhZ">DhZ</option>
+                    </select>
                 </div>
                 <div class="form-group-field">
-                    <label>Paradas Inicio / Fin:</label>
-                    <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5">
+                    <label for="modalIdTronadura">ID de Tronadura (Automático):</label>
+                    <input type="text" id="modalIdTronadura" readonly disabled style="background-color: #f1f5f9; font-weight: bold; color: #475569;" placeholder="Se actualiza automáticamente...">
+                </div>
+            </div>
+            <div class="form-group-field">
+                <label for="faseZanja">Fase (Transversal):</label>
+                <input type="text" id="faseZanja" placeholder="Ej. Fase 1" oninput="actualizarIdTronaduraAuto()">
+            </div>
+            <div id="seccionNP" style="display: block;">
+                <div class="section-title" style="color: #2563eb; background: #eff6ff; padding: 4px 8px; border-radius: 4px;">Nivel de Producción</div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label for="numZanja">Núm. Zanja (Producción):</label>
+                        <input type="text" id="numZanja" placeholder="Ej. 47" oninput="actualizarIdTronaduraAuto()">
+                    </div>
+                    <div class="form-group-field">
+                        <label for="calleZanja">Calle Zanja (Producción):</label>
+                        <input type="text" id="calleZanja" placeholder="Ej. C41-43" oninput="actualizarIdTronaduraAuto()">
+                    </div>
+                </div>
+            </div>
+            <div id="seccionUCL" style="display: none;">
+                <div class="section-title" style="color: #16a34a; background: #f0fdf4; padding: 4px 8px; border-radius: 4px;">Nivel UCL</div>
+                <div class="grid-2">
+                    <div class="form-group-field">
+                        <label for="calleUcl">Calle UCL:</label>
+                        <input type="text" id="calleUcl" placeholder="Ej. C41" oninput="actualizarIdTronaduraAuto()">
+                    </div>
+                    <div class="form-group-field">
+                        <label for="paradasInicioFin">Paradas Inicio / Fin:</label>
+                        <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5" oninput="ejecutarAutosave()">
+                    </div>
+                </div>
+            </div>
+            <div id="seccionPanel2" style="display: none;">
+                <div class="section-title" style="color: #d97706; background: #fffbeb; padding: 4px 8px; border-radius: 4px;">Panel 2</div>
+                <div class="form-group-field">
+                    <label for="detallePanel2">Detalle Panel 2:</label>
+                    <input type="text" id="detallePanel2" placeholder="Ingrese detalles de Panel 2..." oninput="actualizarIdTronaduraAuto()">
                 </div>
             </div>
 
@@ -606,6 +559,7 @@
     <script src="../js/onedrive-integration.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
+    <script src="../js/usuarios.js"></script>
     <script src="../js/carguio-wizard.js"></script>
     <script src="../js/informe-base.js"></script>
     <script src="../js/informe-carguio.js"></script>
@@ -860,7 +814,10 @@
             guardarHistoricoTrabajos(); // Guardar en histórico siempre
             
            const borrador = {
-               
+                mina: document.getElementById("modalMina") ? document.getElementById("modalMina").value : "",
+                nivel: document.getElementById("modalNivel") ? document.getElementById("modalNivel").value : "",
+                bloque: document.getElementById("modalBloque") ? document.getElementById("modalBloque").value : "",
+                idTronadura: document.getElementById("modalIdTronadura") ? document.getElementById("modalIdTronadura").value : "",
                 hLlegadaJeJ: document.getElementById("hLlegadaJeJ") ? document.getElementById("hLlegadaJeJ").value : "",
                 hSalidaJeJ: document.getElementById("hSalidaJeJ") ? document.getElementById("hSalidaJeJ").value : "",
                 hLlegadaPyT: document.getElementById("hLlegadaPyT") ? document.getElementById("hLlegadaPyT").value : "",
@@ -876,6 +833,7 @@
                 faseZanja: document.getElementById("faseZanja") ? document.getElementById("faseZanja").value : "",
                 calleUcl: document.getElementById("calleUcl") ? document.getElementById("calleUcl").value : "",
                 paradasInicioFin: document.getElementById("paradasInicioFin") ? document.getElementById("paradasInicioFin").value : "",
+                detallePanel2: document.getElementById("detallePanel2") ? document.getElementById("detallePanel2").value : "",
                 ubicacionGeofono: document.getElementById("ubicacionGeofono") ? document.getElementById("ubicacionGeofono").value : "",
                 distanciaGeofono: document.getElementById("distanciaGeofono") ? document.getElementById("distanciaGeofono").value : "",
                 alturaGeofono: document.getElementById("alturaGeofono") ? document.getElementById("alturaGeofono").value : "",
@@ -904,7 +862,12 @@
                 if (b.mina) document.getElementById("modalMina").value = b.mina;
                 if (b.nivel) document.getElementById("modalNivel").value = b.nivel;
                 if (b.bloque) document.getElementById("modalBloque").value = b.bloque;
-                if (b.idTronadura) document.getElementById("modalIdTronadura").value = b.idTronadura;
+                ["numZanja", "calleZanja", "faseZanja", "calleUcl", "paradasInicioFin", "detallePanel2"].forEach(id => {
+                    const campo = document.getElementById(id);
+                    if (campo && b[id] !== undefined) campo.value = b[id];
+                });
+                cambiarNivelModal();
+                actualizarIdTronaduraAuto();
                 if (b.supJeJ) document.getElementById("modalSupJeJ").value = b.supJeJ;
                 if (b.obsPerdidaCarguio) document.getElementById("obsPerdidaCarguio").value = b.obsPerdidaCarguio;
                 if (b.tiempoPerdidaCarguio) document.getElementById("tiempoPerdidaCarguio").value = b.tiempoPerdidaCarguio;
@@ -1288,12 +1251,11 @@
         }
 
         function abrirModalPlantillaFinal() {
-            window.JEJCarguioWizard.abrirPlantilla({
-                rootId: "modalPlantillaFinal",
-                context: "Datos de plantilla · ANFO",
-                onFinish: guardarModalPlantillaFinal,
-                onCancel: cerrarModalPlantillaFinal
-            });
+            const modalPlantilla = document.getElementById("modalPlantillaFinal");
+            if (!modalPlantilla) return;
+            modalPlantilla.style.display = "flex";
+            cambiarNivelModal();
+            actualizarIdTronaduraAuto();
         }
 
         function cerrarModalPlantillaFinal() {

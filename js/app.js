@@ -110,17 +110,24 @@ function navegarA(pagina) {
     }
 }
 // Cargar listas guardadas de personal
-        let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
-        
-        if (personalMap.supervisorJeJ) {
-            const listSupJeJ = document.getElementById("listaSupJeJ");
-            personalMap.supervisorJeJ.forEach(n => listSupJeJ.innerHTML += `<option value="${n}">`);
+        let personalMap = {};
+        try { personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}"); } catch (e) { /* mapa vacío */ }
+        if (!personalMap || typeof personalMap !== "object" || Array.isArray(personalMap)) personalMap = {};
+
+        function poblarListaPersonal(idLista, rol) {
+            const datalist = document.getElementById(idLista);
+            if (!datalist) return;
+            const registros = Array.isArray(personalMap[rol]) ? personalMap[rol] : [];
+            datalist.replaceChildren();
+            registros.forEach(item => {
+                const nombre = typeof item === "string" ? item : item && item.nombre;
+                if (!nombre) return;
+                const opcion = document.createElement("option");
+                opcion.value = nombre;
+                datalist.appendChild(opcion);
+            });
         }
-        if (personalMap.supervisorDet) {
-            const listSupDet = document.getElementById("listaSupDet");
-            personalMap.supervisorDet.forEach(n => listSupDet.innerHTML += `<option value="${n}">`);
-        }
-        if (personalMap.responsableDet) {
-            const listRespDet = document.getElementById("listaRespDet");
-            personalMap.responsableDet.forEach(n => listRespDet.innerHTML += `<option value="${n}">`);
-        }
+
+        poblarListaPersonal("listaSupJeJ", "supervisorJeJ");
+        poblarListaPersonal("listaSupDet", "supervisorDet");
+        poblarListaPersonal("listaRespDet", "responsableDet");

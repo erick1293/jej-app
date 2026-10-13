@@ -27,7 +27,7 @@
         <section class="jp-modal modal-content" role="dialog" aria-modal="true" data-modal-content></section>
       </div>
     </template>
-    <script src="../pages/usuarios.html"></script>
+    <script src="../js/usuarios.js"></script>
     <script src="../js/vendor/exceljs.min.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
@@ -943,6 +943,10 @@
   function datalist(k, multi) {
     var set = {};
     J.store.list().forEach(function (p) { (multi ? partes(p.header[k]) : [p.header[k]]).forEach(function (x) { if (x) set[x] = 1; }); });
+    var rolPersonal = { supJej: 'supervisorJeJ', supDet: 'supervisorDet' }[k];
+    if (rolPersonal && window.JEJUsuarios) {
+      window.JEJUsuarios.nombres(rolPersonal, J.store.current().header.turno).forEach(function (nombre) { set[nombre] = 1; });
+    }
     var d = el('datalist', { id: 'dl-' + k + (++dlN) });
     Object.keys(set).forEach(function (v) { d.appendChild(el('option', { value: v })); });
     return d;
@@ -1216,6 +1220,11 @@
   function modalPostura() {
     var p = P(), h = p.header, d = {};
     ['mina', 'nivel', 'bloque', 'fase', 'encSeg', 'supJej', 'supDet', 'perforistaDet', 'numZanja', 'calleZanja1', 'calleZanja2', 'calleUcl'].forEach(function (k) { d[k] = h[k] || ''; });
+    if (window.JEJUsuarios) {
+      if (!d.encSeg) d.encSeg = localStorage.getItem('jej_usuario_activo') || '';
+      if (!d.supJej) d.supJej = window.JEJUsuarios.nombres('supervisorJeJ', h.turno)[0] || '';
+      if (!d.supDet) d.supDet = window.JEJUsuarios.nombres('supervisorDet', h.turno)[0] || '';
+    }
     function selectTxt(k, valores, ph, on) {
       var s = el('select', { class: 'jp-in' }), vs = valores.slice();
       if (d[k] && vs.indexOf(d[k]) < 0) vs.push(d[k]);
