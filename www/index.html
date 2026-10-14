@@ -1,0 +1,74 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App JEJ - Gestión Offline</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="con-hero">
+
+    <!-- BANNER DE BIENVENIDA -->
+    <section class="hero" id="hero">
+        <div class="hero-text">
+          <span class="b">Innovación tecnológica</span>
+             <span class="l">para crear valor</span>
+            <span class="b">y un futuro sostenible</span>
+        </div>
+        <svg class="hero-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 40 C 240 100, 560 118, 900 84 C 1140 58, 1300 30, 1440 52 L1440 120 L0 120 Z" fill="#e6ebf1"/>
+            <path d="M0 62 C 260 112, 600 112, 940 76 C 1180 52, 1310 36, 1440 60 L1440 120 L0 120 Z" fill="#f4f6f8"/>
+        </svg>
+    </section>
+
+    <!-- CONTENIDO PRINCIPAL CENTRADO -->
+    <main class="container-center">
+
+        <!-- SECCIÓN 1: VISTA DE LOGIN -->
+        <section id="seccionLogin" class="card login-card">
+            <h2>Identificación de Usuario</h2>
+            <p class="subtitle">Ingrese o seleccione su usuario responsable (sin clave)</p>
+            
+            <div class="form-group">
+                <label for="usuarioInput">Usuario Responsable:</label>
+                <input type="text" id="usuarioInput" list="listaUsuarios" placeholder="Escriba su nombre..." autocomplete="off">
+                <datalist id="listaUsuarios">
+                </datalist>
+            </div>
+
+            <button class="btn-primary" onclick="ingresarApp()">Ingresar</button>
+        </section>
+
+        <section id="seccionMenu" class="card login-card" style="display: none;">
+            <div class="user-info-header">
+                <p>Usuario Activo: <strong id="usuarioLogueado">Cargando...</strong></p>
+            </div>
+
+            <h2>Selección de Proceso</h2>
+            <p class="subtitle">Seleccione el tipo de seguimiento que desea realizar</p>
+
+            <div class="form-group">
+                <label for="opcionesSelect">Seleccione de archivo:</label>
+               <select id="opcionesSelect" onchange="navegarA(this.value)">
+    <option value="" disabled selected>-- Seleccione una opción --</option>
+    <option value="anfo.html">Seguimiento al carguio con anfo</option>
+    <option value="emulsion.html">Seguimiento al carguio con Emulsion</option>
+    <option value="reduccion.html">Seguimiento a la reduccion secundaria</option>
+    <option value="perforacion.html">Seguimiento al carguio con perforacion</option>
+    <option value="usuarios.html">⚙️ Gestionar Personal (DET / JeJ)</option>
+    <option value="proximamente.html">Proximamente.</option>
+</select>
+            </div>
+        </section>
+
+    </main>
+
+  <script src="./js/components.js"></script>
+<script src="./js/app.js"></script>
+
+<script>
+    if (typeof cargarBarMenu === 'function') {
+        cargarBarMenu(false);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Personal - App JEJ</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+   
+    </style>
+</head>
+<body class="pagina-fondo">
+
+    <main class="card-wide">
+        <h2>Gestión de Personal DET / JeJ</h2>
+        <p class="subtitle">Registra y administra los supervisores y encargados por turno para autocompletar formularios</p>
+
+        <form id="formPersonal" onsubmit="guardarPersonal(event)">
+            <div class="form-group-field">
+                <label for="tipoPersonal">Rol del Personal:</label>
+                <select id="tipoPersonal" required>
+                    <option value="" disabled selected>-- Seleccione Rol --</option>
+                    <option value="supervisorJeJ">Supervisor JeJ (Ingeniero Líder P&T)</option>
+                    <option value="supervisorDet">Supervisor DET / Jefe de Turno DET</option>
+                    <option value="responsableDet">Responsable Carguío DET / Encargado DET</option>
+                </select>
+            </div>
+
+            <div class="form-group-field">
+                <label for="turnoPersonal">Asociar a Turno:</label>
+                <select id="turnoPersonal" required>
+                    <option value="" disabled selected>-- Seleccione Turno --</option>
+                    <option value="A">Turno A</option>
+                    <option value="B">Turno B</option>
+                    <option value="Ambos">Ambos Turnos</option>
+                </select>
+            </div>
+
+            <div class="form-group-field">
+                <label for="nombrePersonal">Nombre Completo:</label>
+                <input type="text" id="nombrePersonal" placeholder="" required autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; background-color: #16a34a;">+ Agregar / Actualizar Personal</button>
+        </form>
+
+        <div class="listado-personal">
+            <h3>Personal Registrado en Turnos</h3>
+            <div id="contenedorLista">Cargando datos...</div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="../index.html" class="btn-primary" style="background-color: #64748b; text-decoration: none; display: inline-block; padding: 10px 20px;">Volver al Menú Principal</a>
+        </div>
+    </main>
+<script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        if (typeof cargarBarMenu === "function") {
+            cargarBarMenu(true);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            precargarPersonalPorDefecto();
+            mostrarListadoPersonal();
+            cargarSupervisoresJeJEnModal();
+        });
+
+        // Carga automática inicial y aseguramiento de llaves obligatorias
+        function precargarPersonalPorDefecto() {
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            
+            // Si el objeto está totalmente vacío, inicializamos todo
+            if (Object.keys(personalMap).length === 0) {
+                personalMap = {
+                    "supervisorJeJ": [
+                        { nombre: "Hector Flores", turno: "A" },
+                        { nombre: "Hector Flores", turno: "B" }
+                    ],
+                    "supervisorDet": [
+                        { nombre: "Carlos Castro", turno: "A" },
+                        { nombre: "Nicolas Valdovino", turno: "A" },
+                        { nombre: "Carlos Castro", turno: "B" },
+                        { nombre: "Nicolas Valdovino", turno: "B" }
+                    ],
+                    "responsableDet": [
+                        { nombre: "Andres Bugeño", turno: "A" },
+                        { nombre: "Sergio Guerrero", turno: "A" },
+                        { nombre: "Milton", turno: "B" },
+                        { nombre: "Patricio Vera", turno: "B" }
+                    ]
+                };
+            } else {
+                // Si ya existe el mapa pero le falta la clave de supervisorJeJ, la inyectamos por defecto
+                if (!personalMap["supervisorJeJ"]) {
+                    personalMap["supervisorJeJ"] = [
+                        { nombre: "Hector Flores", turno: "A" },
+                        { nombre: "Hector Flores", turno: "B" }
+                    ];
+                }
+            }
+            
+            localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
+        }
+
+        function guardarPersonal(e) {
+            e.preventDefault();
+            const rol = document.getElementById("tipoPersonal").value;
+            const turno = document.getElementById("turnoPersonal").value;
+            const nombre = document.getElementById("nombrePersonal").value.trim();
+
+            if (!rol || !turno || !nombre) return;
+
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            if (!personalMap[rol]) personalMap[rol] = [];
+
+            const existe = personalMap[rol].some(p => p.nombre.toLowerCase() === nombre.toLowerCase() && p.turno === turno);
+
+            if (!existe) {
+                personalMap[rol].push({ nombre, turno });
+                localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
+                alert("Personal registrado con éxito.");
+                document.getElementById("nombrePersonal").value = "";
+                mostrarListadoPersonal();
+                cargarSupervisoresJeJEnModal();
+            } else {
+                alert("Este nombre ya se encuentra asignado a este rol y turno.");
+            }
+        }
+
+        function eliminarPersonal(rol, nombre, turno) {
+            if (confirm(`¿Desea eliminar a "${nombre}" del turno ${turno}?`)) {
+                let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+                if (personalMap[rol]) {
+                    personalMap[rol] = personalMap[rol].filter(p => !(p.nombre === nombre && p.turno === turno));
+                    if (personalMap[rol].length === 0) delete personalMap[rol];
+                    localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
+                    mostrarListadoPersonal();
+                    cargarSupervisoresJeJEnModal();
+                }
+            }
+        }
+
+        function obtenerEtiquetaRol(rolKey) {
+            const etiquetas = {
+                "supervisorJeJ": "Supervisor JeJ",
+                "supervisorDet": "Supervisor DET",
+                "responsableDet": "Responsable DET"
+            };
+            return etiquetas[rolKey] || rolKey;
+        }
+
+        function cargarSupervisoresJeJEnModal() {
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            let listaJeJ = personalMap["supervisorJeJ"] || []; 
+            
+            const datalist = document.getElementById("listaSupJeJ");
+            if (datalist) {
+                datalist.innerHTML = "";
+                listaJeJ.forEach(item => {
+                    datalist.innerHTML += `<option value="${item.nombre}">Turno: ${item.turno}</option>`;
+                });
+            }
+        }
+
+        function mostrarListadoPersonal() {
+            const contenedor = document.getElementById("contenedorLista");
+            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            
+            contenedor.innerHTML = "";
+            let hayRegistros = false;
+
+            for (let rol in personalMap) {
+                personalMap[rol].forEach(item => {
+                    hayRegistros = true;
+                    const turnoLabel = item.turno === "Ambos" ? "Turno A y B" : `Turno ${item.turno}`;
+                    contenedor.innerHTML += `
+                        <div class="item-pers">
+                            <div>
+                                <span class="badge-rol">${obtenerEtiquetaRol(rol)}</span>
+                                <strong>${item.nombre}</strong>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="badge-turno">${turnoLabel}</span>
+                                <button type="button" class="btn-delete" onclick="eliminarPersonal('${rol}', '${item.nombre}', '${item.turno}')">Quitar</button>
+                            </div>
+                        </div>`;
+                });
+            }
+
+            if (!hayRegistros) {
+                contenedor.innerHTML = "<p style='color: #64748b; font-size: 13px;'>No hay personal asignado a ningún turno.</p>";
+            }
+        }
+
+        
+    </script>
+</body>
+</html>

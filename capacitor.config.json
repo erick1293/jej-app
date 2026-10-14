@@ -1,5 +1,5 @@
 {
   "appId": "com.erick.miapp",
   "appName": "MiApp",
-  "webDir": "."
+  "webDir": "www"
 }

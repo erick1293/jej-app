@@ -1,0 +1,202 @@
+
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    clientId: 'REEMPLAZAR_POR_APPLICATION_CLIENT_ID',
+    authority: 'https://login.microsoftonline.com/consumers',
+    redirectUri: window.location.origin + window.location.pathname,
+    loginHint: '', // Opcional: indica una cuenta Microsoft concreta si quieres omitir la selección.
+    rootFolder: 'Archivos-subidos',
+    scopes: ['Files.ReadWrite'],
+    buttonId: 'btn-subir-onedrive',
+    fileInputId: 'onedrive-archivos-anfo'
+  };
+
+  const SECTION_ALIASES = {
+    anfo: 'anfo',
+    emulsion: 'emulsion',
+    emulsión: 'emulsion',
+    perforacion: 'perforacion',
+    perforación: 'perforacion',
+    reduccion: 'reduccion',
+    reducción: 'reduccion',
+    reducion: 'reduccion'
+  };
+
+  let msalClient;
+
+  function currentSection() {
+    const fromBody = document.body && document.body.dataset.section;
+    const fromMeta = document.querySelector('meta[name="app-section"]')?.content;
+    const fromPath = window.location.pathname.split('/').pop().replace(/\.html?$/i, '');
+    const key = String(fromBody || fromMeta || fromPath || '').trim().toLowerCase();
+    return SECTION_ALIASES[key] || null;
+  }
+
+  function getMsalClient() {
+    if (!window.msal || !window.msal.PublicClientApplication) {
+      throw new Error('No se encontró MSAL. Carga msal-browser antes de onedrive-integration.js.');
+    }
+    if (CONFIG.clientId === 'REEMPLAZAR_POR_APPLICATION_CLIENT_ID') {
+      throw new Error('Configura CONFIG.clientId con el Application (client) ID de Microsoft Entra.');
+    }
+    if (!msalClient) {
+      msalClient = new window.msal.PublicClientApplication({
+        auth: {
+          clientId: CONFIG.clientId,
+          authority: CONFIG.authority,
+          redirectUri: CONFIG.redirectUri
+        },
+        cache: { cacheLocation: 'sessionStorage' }
+      });
+    }
+    return msalClient;
+  }
+
+  async function getAccessToken() {
+    const client = getMsalClient();
+    await client.initialize();
+    const redirect = await client.handleRedirectPromise();
+    let account = redirect?.account || client.getActiveAccount() || client.getAllAccounts()[0];
+
+    if (!account) {
+      const loginRequest = { scopes: CONFIG.scopes };
+      if (CONFIG.loginHint) loginRequest.loginHint = CONFIG.loginHint;
+      const login = await client.loginPopup(loginRequest);
+      account = login.account;
+      client.setActiveAccount(account);
+    }
+
+    try {
+      const result = await client.acquireTokenSilent({ account, scopes: CONFIG.scopes });
+      return result.accessToken;
+    } catch (error) {
+      if (error instanceof window.msal.InteractionRequiredAuthError) {
+        const result = await client.acquireTokenPopup({ account, scopes: CONFIG.scopes });
+        return result.accessToken;
+      }
+      throw error;
+    }
+  }
+
+  async function graphRequest(path, token, options) {
+    const response = await fetch('https://graph.microsoft.com/v1.0' + path, {
+      ...options,
+      headers: {
+        Authorization: 'Bearer ' + token,
+        ...(options && options.headers)
+      }
+    });
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error('Microsoft Graph respondió ' + response.status + ': ' + detail);
+    }
+    return response.status === 204 ? null : response.json();
+  }
+
+  async function ensureFolder(parentPath, folderName, token) {
+    const safeName = encodeURIComponent(folderName);
+    const lookupPath = parentPath
+      ? '/me/drive/root:/' + parentPath + '/' + safeName
+      : '/me/drive/root:/' + safeName;
+    const lookup = await fetch('https://graph.microsoft.com/v1.0' + lookupPath, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+
+    if (lookup.ok) return lookup.json();
+    if (lookup.status !== 404) {
+      throw new Error('No se pudo consultar la carpeta "' + folderName + '" (HTTP ' + lookup.status + ').');
+    }
+
+    const createPath = parentPath
+      ? '/me/drive/root:/' + parentPath + ':/children'
+      : '/me/drive/root/children';
+    return graphRequest(createPath, token, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: folderName,
+        folder: {},
+        '@microsoft.graph.conflictBehavior': 'fail'
+      })
+    });
+  }
+
+  function folderForFile(file) {
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (extension === 'xlsx') return 'anfo-excel';
+    if (['html', 'htm', 'pdf'].includes(extension)) return 'anfo-informes';
+    throw new Error('Tipo de archivo no admitido: ' + file.name + '. Selecciona Excel (.xlsx), informe (.html/.htm) o PDF.');
+  }
+
+  function uniqueFileName(file) {
+    const dot = file.name.lastIndexOf('.');
+    const base = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const extension = dot > 0 ? file.name.slice(dot) : '';
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    return base + '-' + stamp + extension;
+  }
+
+  async function subirArchivoOneDrive(file, token) {
+    const section = currentSection();
+    if (section !== 'anfo') throw new Error('Este botón está configurado para cargar archivos de ANFO.');
+    const folderName = folderForFile(file);
+    const uploadedName = uniqueFileName(file);
+    const folderPath = CONFIG.rootFolder + '/' + folderName;
+    const uploadPath = '/me/drive/root:/' + folderPath + '/' + encodeURIComponent(uploadedName) + ':/content';
+
+    return graphRequest(uploadPath, token, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file
+    });
+  }
+
+  function initCharts() {
+    // Los gráficos deben recibir los datos reales de cada pantalla. Este archivo
+    // no crea gráficos con cifras de ejemplo para evitar mostrar datos ficticios.
+    if (typeof window.initCharts === 'function' && window.initCharts !== initCharts) {
+      window.initCharts();
+    }
+  }
+
+  function initOneDriveButton() {
+    const button = document.getElementById(CONFIG.buttonId);
+    const fileInput = document.getElementById(CONFIG.fileInputId);
+    if (!button || !fileInput) return;
+
+    button.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) return;
+      const originalHtml = button.innerHTML;
+      try {
+        button.disabled = true;
+        button.textContent = 'Iniciando sesión y subiendo… ☁️';
+        const token = await getAccessToken();
+        await ensureFolder('', CONFIG.rootFolder, token);
+        await ensureFolder(CONFIG.rootFolder, 'anfo-informes', token);
+        await ensureFolder(CONFIG.rootFolder, 'anfo-excel', token);
+        const uploaded = [];
+        for (const file of files) uploaded.push(await subirArchivoOneDrive(file, token));
+        window.alert('Archivos guardados en OneDrive:\n' + uploaded.map((item) => item.name).join('\n'));
+      } catch (error) {
+        console.error('Error al subir el respaldo a OneDrive:', error);
+        window.alert('No se pudo subir el respaldo. ' + error.message);
+      } finally {
+        button.disabled = false;
+        button.innerHTML = originalHtml;
+        fileInput.value = '';
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    initOneDriveButton();
+  });
+
+  // Expone la operación por si la interfaz necesita invocarla desde otro botón.
+  window.subirArchivoOneDrive = subirArchivoOneDrive;
+})();
