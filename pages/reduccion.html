@@ -112,11 +112,12 @@
       <button class="btn-primary" onclick="abrirObs()">📝 Agregar Observación</button>
     </div>
     <button class="btn-primary" onclick="abrirAsistentePlanilla('planilla')">📋 Rellenar Datos Faltantes de Planilla (Horarios/Indicadores)</button>
-    <div class="descarga">
-      <div class="pila">
-        <button class="btn-primary" onclick="descargarExcel()">⬇ Descargar Excel</button>
-        <button class="btn-primary" onclick="informe()">⬇ Descargar Informe Técnico</button>
+    <div class="descarga" style="margin-top:14px">
+      <div class="pila" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:10px">
+        <button type="button" class="btn-primary" onclick="descargarExcel()" style="flex:1 1 calc(50% - 10px);min-width:0;background-color:#2563eb">⬇ Descargar Excel</button>
+        <button type="button" class="btn-primary" onclick="informe()" style="flex:1 1 calc(50% - 10px);min-width:0;background-color:#2563eb">⬇ Descargar Informe Técnico</button>
       </div>
+      <small>Los datos se guardan automáticamente en este dispositivo.</small>
     </div>
   </section>
 
