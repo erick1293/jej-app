@@ -292,7 +292,7 @@ select:focus {
 
 /* BOTÓN DE INGRESAR */
 .btn-primary {
-    width: 25%;
+    
     background-color: #2563eb;
     color: white;
     border: none;
