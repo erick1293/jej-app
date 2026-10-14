@@ -5,7 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguimiento a la Perforación - App JEJ</title>
     <link rel="stylesheet" href="../css/styles.css">
-    
+    <style>
+        /* Acciones de cada parada: mantener Editar y Eliminar en la misma fila. */
+        .jp-parada { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .jp-parada > div:first-child { flex:1 1 auto; min-width:0; }
+        .jp-parada-b { display:flex; flex:0 0 auto; flex-direction:row; align-items:center; gap:8px; margin-left:auto; }
+        .jp-parada-b .btn-primary { display:inline-flex; align-items:center; justify-content:center; width:auto !important; min-width:42px; }
+        .jp-parada-b .btn-primary:last-child { color:#991b1b; background:#fee2e2; border:1px solid #fecaca; }
+        @media (max-width:480px) {
+            .jp-parada { gap:8px; }
+            .jp-parada-b { gap:6px; }
+            .jp-parada-b .btn-primary { padding:8px 10px; }
+        }
+
+        /* Alinear cada pérdida en una fila: observación, tiempo y botón quitar. */
+        .jp-q-perd .jp-perd-head,
+        .jp-q-perd .jp-perd-fila {
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) minmax(105px, 130px) 32px;
+            align-items:center;
+            gap:8px;
+        }
+        .jp-q-perd .jp-perd-fila > input { width:100%; min-width:0; }
+        .jp-q-perd .jp-perd-fila > .jp-x {
+            display:flex;
+            width:32px;
+            height:32px;
+            min-height:32px;
+            margin:0;
+            padding:0;
+            align-items:center;
+            justify-content:center;
+            justify-self:center;
+        }
+        @media (max-width:480px) {
+            .jp-q-perd .jp-perd-head,
+            .jp-q-perd .jp-perd-fila {
+                grid-template-columns:minmax(0, 1fr) minmax(78px, 96px) 30px;
+                gap:6px;
+            }
+            .jp-q-perd .jp-perd-fila > .jp-x { width:30px; height:30px; min-height:30px; }
+        }
+    </style>
 
 </head>
 <body class="pagina-fondo">
