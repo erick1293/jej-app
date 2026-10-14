@@ -1,17 +1,4 @@
-/*
- * OneDrive backup integration for ANFO, Emulsión, Perforación and Reducción.
- *
- * Requirements:
- * 1) Load MSAL Browser before this file, for example:
- *    <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
- * 2) Register a Single-page application in Microsoft Entra ID and replace
- *    clientId below with its Application (client) ID. A Gmail address is not
- *    an application ID; the example account is only used as a login hint.
- * 3) Add the exact site origin as a Redirect URI in that app registration.
- * 4) For customized app data, define window.APP_DATA_PROVIDER = () => ({ ... }).
- *
- * Upload destination: OneDrive/ArchivosSubidoapp/{anfo,emulsion,perforacion,reduccion}/
- */
+
 (function () {
   'use strict';
 
@@ -19,10 +6,11 @@
     clientId: 'REEMPLAZAR_POR_APPLICATION_CLIENT_ID',
     authority: 'https://login.microsoftonline.com/consumers',
     redirectUri: window.location.origin + window.location.pathname,
-    loginHint: 'onedrive.test14234141.@gmail.com', // Ejemplo solicitado; cambiar por la cuenta real.
-    rootFolder: 'ArchivosSubidoapp',
+    loginHint: '', // Opcional: indica una cuenta Microsoft concreta si quieres omitir la selección.
+    rootFolder: 'Archivos-subidos',
     scopes: ['Files.ReadWrite'],
-    buttonId: 'btn-subir-onedrive'
+    buttonId: 'btn-subir-onedrive',
+    fileInputId: 'onedrive-archivos-anfo'
   };
 
   const SECTION_ALIASES = {
@@ -73,10 +61,9 @@
     let account = redirect?.account || client.getActiveAccount() || client.getAllAccounts()[0];
 
     if (!account) {
-      const login = await client.loginPopup({
-        scopes: CONFIG.scopes,
-        loginHint: CONFIG.loginHint
-      });
+      const loginRequest = { scopes: CONFIG.scopes };
+      if (CONFIG.loginHint) loginRequest.loginHint = CONFIG.loginHint;
+      const login = await client.loginPopup(loginRequest);
       account = login.account;
       client.setActiveAccount(account);
     }
@@ -136,60 +123,33 @@
     });
   }
 
-  function snapshotPageData(section) {
-    const supplied = typeof window.APP_DATA_PROVIDER === 'function'
-      ? window.APP_DATA_PROVIDER()
-      : null;
-    const formData = {};
-    document.querySelectorAll('input, select, textarea').forEach((field) => {
-      if (!field.name && !field.id) return;
-      if (field.type === 'password' || field.type === 'file' || field.type === 'button' || field.type === 'submit') return;
-      if ((field.type === 'checkbox' || field.type === 'radio') && !field.checked) return;
-      const key = field.name || field.id;
-      const value = field.type === 'checkbox' ? true : field.value;
-      if (Object.prototype.hasOwnProperty.call(formData, key)) {
-        formData[key] = Array.isArray(formData[key]) ? [...formData[key], value] : [formData[key], value];
-      } else {
-        formData[key] = value;
-      }
-    });
-
-    const localData = {};
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i);
-      try { localData[key] = JSON.parse(localStorage.getItem(key)); }
-      catch (_) { localData[key] = localStorage.getItem(key); }
-    }
-
-    return {
-      app: 'jejapp',
-      section,
-      exportedAt: new Date().toISOString(),
-      page: window.location.href,
-      data: supplied ?? { formData, localStorage: localData }
-    };
+  function folderForFile(file) {
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (extension === 'xlsx') return 'anfo-excel';
+    if (['html', 'htm', 'pdf'].includes(extension)) return 'anfo-informes';
+    throw new Error('Tipo de archivo no admitido: ' + file.name + '. Selecciona Excel (.xlsx), informe (.html/.htm) o PDF.');
   }
 
-  async function subirArchivoOneDrive() {
-    const section = currentSection();
-    if (!section) {
-      throw new Error('No pude determinar la sección. Usa data-section="anfo|emulsion|perforacion|reduccion" en <body>.');
-    }
-
-    const token = await getAccessToken();
-    await ensureFolder('', CONFIG.rootFolder, token);
-    await ensureFolder(CONFIG.rootFolder, section, token);
-
+  function uniqueFileName(file) {
+    const dot = file.name.lastIndexOf('.');
+    const base = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const extension = dot > 0 ? file.name.slice(dot) : '';
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const fileName = section + '-respaldo-' + stamp + '.json';
-    const folderPath = CONFIG.rootFolder + '/' + section;
-    const content = JSON.stringify(snapshotPageData(section), null, 2);
-    const uploadPath = '/me/drive/root:/' + folderPath + '/' + encodeURIComponent(fileName) + ':/content';
+    return base + '-' + stamp + extension;
+  }
+
+  async function subirArchivoOneDrive(file, token) {
+    const section = currentSection();
+    if (section !== 'anfo') throw new Error('Este botón está configurado para cargar archivos de ANFO.');
+    const folderName = folderForFile(file);
+    const uploadedName = uniqueFileName(file);
+    const folderPath = CONFIG.rootFolder + '/' + folderName;
+    const uploadPath = '/me/drive/root:/' + folderPath + '/' + encodeURIComponent(uploadedName) + ':/content';
 
     return graphRequest(uploadPath, token, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body: content
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file
     });
   }
 
@@ -203,21 +163,31 @@
 
   function initOneDriveButton() {
     const button = document.getElementById(CONFIG.buttonId);
-    if (!button) return;
+    const fileInput = document.getElementById(CONFIG.fileInputId);
+    if (!button || !fileInput) return;
 
-    button.addEventListener('click', async () => {
+    button.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) return;
       const originalHtml = button.innerHTML;
       try {
         button.disabled = true;
-        button.textContent = 'Subiendo respaldo… ☁️';
-        const uploaded = await subirArchivoOneDrive();
-        window.alert('Respaldo guardado en OneDrive: ' + uploaded.name);
+        button.textContent = 'Iniciando sesión y subiendo… ☁️';
+        const token = await getAccessToken();
+        await ensureFolder('', CONFIG.rootFolder, token);
+        await ensureFolder(CONFIG.rootFolder, 'anfo-informes', token);
+        await ensureFolder(CONFIG.rootFolder, 'anfo-excel', token);
+        const uploaded = [];
+        for (const file of files) uploaded.push(await subirArchivoOneDrive(file, token));
+        window.alert('Archivos guardados en OneDrive:\n' + uploaded.map((item) => item.name).join('\n'));
       } catch (error) {
         console.error('Error al subir el respaldo a OneDrive:', error);
         window.alert('No se pudo subir el respaldo. ' + error.message);
       } finally {
         button.disabled = false;
         button.innerHTML = originalHtml;
+        fileInput.value = '';
       }
     });
   }

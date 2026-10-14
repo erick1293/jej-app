@@ -334,8 +334,6 @@
                                 .map(i => i.value).filter(Boolean).join(", ") || "Sin asignar";
 
             document.getElementById("resumenUnificado").innerHTML = `
-                <strong>Mina:</strong> ${mina} | <strong>Nivel:</strong> ${nivel} | <strong>Bloque:</strong> ${bloque}<br>
-                <strong>ID Tronadura:</strong> ${tronadura}<br>
                 <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 8px 0;">
                 <strong>Encargado JeJ:</strong> ${localStorage.getItem("jej_usuario_activo") || 'N/A'}<br>
                 <strong>Supervisor JeJ:</strong> ${supJeJ}<br>

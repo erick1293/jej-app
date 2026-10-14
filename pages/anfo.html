@@ -10,7 +10,7 @@
      
     </style>
 </head>
-<body class="pagina-fondo">
+<body class="pagina-fondo" data-section="anfo">
 
     <main class="card-wide">
         
@@ -285,15 +285,16 @@
 
             <!-- BOTÓN EXTRA Y BOTÓN DE GUARDAR ACTUALIZADO -->
             <div style="margin-top: 10px;">
-                <button type="button" onclick="abrirModalPlantillaFinal()" class="btn-primary" style="background-color: #0d9488; font-size: 14px; padding: 10px;">📋 Rellenar Datos Faltantes de Plantilla (Tiempos/Presiones)</button>
+                <button type="button" onclick="abrirModalPlantillaFinal()" class="btn-primary" style="background-color: #0d9488; font-size: 14px; padding: 10px;     width: 100%;">📋 Rellenar Datos Faltantes de Plantilla (Tiempos/Presiones)</button>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
               <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="guardarFormularioAnfoYExportarExcel()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold;">⬇ Descargar Excel</button>
-                 <button type="button" onclick="generarInformeTecnicoHTML()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold;">⬇ Descargar Informe Técnico</button>
-               
-               
+                <button type="button" onclick="guardarFormularioAnfoYExportarExcel()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold;">Descargar Excel</button>
+                 <button type="button" onclick="generarInformeTecnicoHTML()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold;">Descargar Informe Técnico</button>
+                <button type="button" id="btn-subir-onedrive" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold;">☁️ Subir archivos a OneDrive</button>
                 </div> 
+
+                <input type="file" id="onedrive-archivos-anfo" accept=".xlsx,.html,.htm,.pdf" multiple hidden>
 
             </div>
         </div>
@@ -556,6 +557,7 @@
     </div>
 
     
+    <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js" integrity="sha384-PARf28kmic36Ve+O3DnUerRXFtOQ7ZDqRDGpLcbljly5/N39T2OV3kt3QsWOKeAX" crossorigin="anonymous"></script>
     <script src="../js/onedrive-integration.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
@@ -946,9 +948,6 @@
                                 .map(i => i.value).filter(Boolean).join(", ") || "Sin asignar";
 
             document.getElementById("resumenUnificado").innerHTML = `
-                <strong>Mina:</strong> ${mina} | <strong>Nivel:</strong> ${nivel} | <strong>Bloque:</strong> ${bloque}<br>
-                <strong>ID Tronadura:</strong> ${tronadura}<br>
-                <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 8px 0;">
                 <strong>Encargado JeJ:</strong> ${localStorage.getItem("jej_usuario_activo") || 'N/A'}<br>
                 <strong>Supervisor JeJ:</strong> ${supJeJ}<br>
                 <strong>Supervisor(es) DET:</strong> ${supsDet}<br>
@@ -1250,13 +1249,14 @@
             window.location.href = "../index.html";
         }
 
-        function abrirModalPlantillaFinal() {
-            const modalPlantilla = document.getElementById("modalPlantillaFinal");
-            if (!modalPlantilla) return;
-            modalPlantilla.style.display = "flex";
-            cambiarNivelModal();
-            actualizarIdTronaduraAuto();
-        }
+   function abrirModalPlantillaFinal() {
+    window.JEJCarguioWizard.abrirPlantilla({
+        rootId: "modalPlantillaFinal",
+        context: "Datos de plantilla · ANFO",
+        onFinish: guardarModalPlantillaFinal,
+        onCancel: cerrarModalPlantillaFinal
+    });
+}
 
         function cerrarModalPlantillaFinal() {
             document.getElementById("modalPlantillaFinal").style.display = "none";
