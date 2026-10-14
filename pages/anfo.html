@@ -1077,6 +1077,8 @@
 
             window.JEJCarguioWizard.mostrarTiro({
                 containerId: "paso5",
+                appearance: "perforacion",
+                cancelText: "Cancelar tiro",
                 context: `Trabajo ${idTrabajoActual} · Parada ${idParadaActual} · Tiro ${numeroTiro} de ${totalTirosParadaActual}`,
                 finishText: numeroTiro === totalTirosParadaActual ? "Finalizar parada ✓" : "Siguiente tiro →",
                 onNext: siguienteTiroWizard,
@@ -1255,6 +1257,7 @@
     window.JEJCarguioWizard.abrirPlantilla({
         rootId: "modalPlantillaFinal",
         context: "Datos de plantilla · ANFO",
+        selectButtons: true,
         onFinish: guardarModalPlantillaFinal,
         onCancel: cerrarModalPlantillaFinal
     });

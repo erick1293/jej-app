@@ -63,7 +63,33 @@
             '.cw-button.cw-cancel{margin-left:auto;border-color:#fecaca;color:#b91c1c}',
             '.cw-actions .cw-prev{grid-column:1}.cw-actions .cw-skip{grid-column:2}.cw-actions .cw-next{grid-column:3}.cw-actions .cw-cancel{grid-column:4}',
             '@media(max-width:420px){.cw-overlay{padding:8px}.cw-card{padding:15px 12px 12px}.cw-actions{grid-template-columns:auto auto minmax(66px,1fr);gap:6px}.cw-actions .cw-cancel{grid-column:1/-1;justify-self:end;margin-top:4px}.cw-button{padding:8px 7px;font-size:11px}}',
-            '@media(min-width:700px){.cw-card{padding:20px 18px 16px}.cw-label{font-size:17px}}'
+            '@media(min-width:700px){.cw-card{padding:20px 18px 16px}.cw-label{font-size:17px}}',
+            '.cw-overlay.cw-perforacion{background:rgba(3,10,32,.82)}',
+            '.cw-card.cw-perforacion{--cw-accent:#0ea5e9;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"context context" "count jump" "progress progress" "section section" "label label" "field field" "actions actions";gap:0;width:min(100%,560px);padding:20px;border-radius:18px}',
+            '.cw-card.cw-perforacion .cw-top{display:contents}',
+            '.cw-card.cw-perforacion .cw-context{grid-area:context;font-size:13px;letter-spacing:.08em;text-transform:uppercase}',
+            '.cw-card.cw-perforacion .cw-jump{grid-area:jump;height:40px;padding:6px 10px;font-size:14px}',
+            '.cw-card.cw-perforacion .cw-count{grid-area:count;align-self:center;margin:0;color:#526b94;font-size:13px;text-transform:uppercase;letter-spacing:.04em}',
+            '.cw-card.cw-perforacion .cw-progress{grid-area:progress;margin:10px 0 16px;background:#cbd8eb}',
+            '.cw-card.cw-perforacion .cw-section{grid-area:section}',
+            '.cw-card.cw-perforacion .cw-label{grid-area:label;margin:0 0 8px;font-size:18px}',
+            '.cw-card.cw-perforacion .cw-field{grid-area:field}',
+            '.cw-card.cw-perforacion .cw-field input,.cw-card.cw-perforacion .cw-field select,.cw-card.cw-perforacion .cw-field textarea{min-height:58px;border-radius:12px;font-size:18px}',
+            '.cw-card.cw-choice-mode .cw-options{display:flex;flex-wrap:wrap;gap:8px}',
+            '.cw-card.cw-choice-mode .cw-choice{min-height:40px;padding:8px 13px;border:1px solid #c7d7f0;border-radius:999px;background:#e8f0fc;color:#31538c;font:inherit;font-size:13px;font-weight:700;cursor:pointer}',
+            '.cw-card.cw-choice-mode .cw-choice:hover,.cw-card.cw-choice-mode .cw-choice:focus-visible{background:#dceaff;border-color:#8cb7ef;outline:none}',
+            '.cw-card.cw-choice-mode .cw-choice.selected{background:linear-gradient(180deg,#3b65b6,#24488f);border-color:#24488f;color:#fff;box-shadow:0 3px 8px rgba(31,68,140,.2)}',
+            '.cw-card.cw-perforacion .cw-options{display:flex;flex-wrap:wrap;gap:8px}',
+            '.cw-card.cw-perforacion .cw-choice{min-height:42px;padding:9px 14px;border:1px solid #c7d7f0;border-radius:999px;background:#e8f0fc;color:#31538c;font:inherit;font-size:13px;font-weight:700;cursor:pointer}',
+            '.cw-card.cw-perforacion .cw-choice:hover,.cw-card.cw-perforacion .cw-choice:focus-visible{background:#dceaff;border-color:#8cb7ef;outline:none}',
+            '.cw-card.cw-perforacion .cw-choice.selected{background:linear-gradient(180deg,#3b65b6,#24488f);border-color:#24488f;color:#fff;box-shadow:0 3px 8px rgba(31,68,140,.2)}',
+            '.cw-card.cw-perforacion .cw-actions{grid-area:actions;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:14px}',
+            '.cw-card.cw-perforacion .cw-button{min-height:46px;font-size:14px}',
+            '.cw-card.cw-perforacion .cw-actions .cw-next{grid-column:1/-1;grid-row:1}',
+            '.cw-card.cw-perforacion .cw-actions .cw-prev{grid-column:1;grid-row:2}',
+            '.cw-card.cw-perforacion .cw-actions .cw-skip{grid-column:2;grid-row:2}',
+            '.cw-card.cw-perforacion .cw-actions .cw-cancel{grid-column:1/-1;grid-row:3;justify-self:stretch;margin:0}',
+            '@media(max-width:420px){.cw-card.cw-perforacion{padding:16px 13px 13px}.cw-card.cw-perforacion .cw-jump{font-size:12px}.cw-card.cw-perforacion .cw-label{font-size:16px}.cw-card.cw-perforacion .cw-button{font-size:12px;padding:8px 7px}}'
         ].join('');
         document.head.appendChild(style);
     }
@@ -89,7 +115,31 @@
         session.section.hidden = !step.section;
         session.progress.style.width = ((session.index + 1) / session.steps.length * 100) + '%';
         session.jump.value = String(session.index);
-        session.field.replaceChildren(step.control);
+        if ((session.appearance === 'perforacion' || session.selectButtons) && step.control.tagName === 'SELECT') {
+            var opciones = document.createElement('div');
+            opciones.className = 'cw-options';
+            Array.from(step.control.options).forEach(function (option) {
+                if (option.disabled || option.value === '') return;
+                var boton = document.createElement('button');
+                boton.type = 'button';
+                boton.className = 'cw-choice' + (option.selected ? ' selected' : '');
+                boton.textContent = option.textContent.trim();
+                boton.setAttribute('aria-pressed', option.selected ? 'true' : 'false');
+                boton.addEventListener('click', function () {
+                    step.control.value = option.value;
+                    emitirCambio(step.control);
+                    Array.from(opciones.children).forEach(function (otro) {
+                        var seleccionado = otro === boton;
+                        otro.classList.toggle('selected', seleccionado);
+                        otro.setAttribute('aria-pressed', seleccionado ? 'true' : 'false');
+                    });
+                });
+                opciones.appendChild(boton);
+            });
+            session.field.replaceChildren(opciones);
+        } else {
+            session.field.replaceChildren(step.control);
+        }
         session.currentControl = step.control;
         session.previous.disabled = session.index === 0 && !session.onPrevious;
         session.next.textContent = session.index === session.steps.length - 1 ? session.finishText : 'Siguiente →';
@@ -105,13 +155,13 @@
 
         agregarEstilos();
         var overlay = document.createElement('div');
-        overlay.className = 'cw-overlay';
+        overlay.className = 'cw-overlay' + (options.appearance === 'perforacion' ? ' cw-perforacion' : '');
         overlay.setAttribute('role', 'presentation');
         var stash = document.createElement('div');
         stash.hidden = true;
         steps.forEach(function (step) { stash.appendChild(step.control); });
         var card = document.createElement('section');
-        card.className = 'cw-card ' + (options.kind === 'tiro' ? 'cw-tiro' : '');
+        card.className = 'cw-card ' + (options.kind === 'tiro' ? 'cw-tiro' : '') + (options.appearance === 'perforacion' ? ' cw-perforacion' : '') + (options.selectButtons ? ' cw-choice-mode' : '');
         card.setAttribute('role', 'dialog');
         card.setAttribute('aria-modal', 'true');
         var top = document.createElement('div');
@@ -175,6 +225,8 @@
             field: field,
             progress: progressBar,
             jump: jump,
+            appearance: options.appearance,
+            selectButtons: options.selectButtons,
             previous: previous,
             skip: skip,
             next: next,
@@ -228,8 +280,9 @@
         var session = crearAsistente(container, {
             kind: 'tiro',
             context: options.context,
-            cancelText: 'Cancelar captura',
+        cancelText: options.cancelText || 'Cancelar captura',
             finishText: options.finishText || 'Finalizar ✓',
+        appearance: options.appearance,
             onPrevious: options.onPrevious,
             isFinished: function () { return container.style.display !== 'block'; },
             onFinish: function () {
@@ -258,6 +311,7 @@
         session = crearAsistente(container, {
             kind: 'plantilla',
             context: options.context || (title ? title.textContent.trim() : 'Datos de plantilla'),
+            selectButtons: options.selectButtons === true,
             cancelText: 'Cancelar',
             finishText: 'Guardar ✓',
             onEmpty: function () { options.onFinish(); },

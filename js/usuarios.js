@@ -16,7 +16,7 @@
         responsableDet: [
             { nombre: 'Andres Bugeño', turno: 'A' },
             { nombre: 'Sergio Guerrero', turno: 'A' },
-            { nombre: 'Milton', turno: 'B' },
+            { nombre: 'Milton ', turno: 'B' },
             { nombre: 'Patricio Vera', turno: 'B' }
         ]
     };

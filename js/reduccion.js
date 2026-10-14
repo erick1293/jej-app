@@ -233,7 +233,7 @@
         <div style="text-align:center"><button class="dash" onclick="agregarElementoAsistentePlanilla()">+ ${esc(s.add)}</button></div></div>`;
     }else if(s.t==='select'){
       const opts=s.options.map(x=>typeof x==='string'?{v:x,t:x}:x);
-      inp=`<select id="wi" class="big" onkeydown="if(event.key==='Enter')avanzarAsistentePlanilla()">${opts.map(x=>`<option value="${esc(x.v)}" ${String(v)===String(x.v)?'selected':''}>${esc(x.t)}</option>`).join('')}</select>`;
+      inp=`<div class="jp-opts rs-opciones">${opts.map(x=>`<button type="button" class="jp-opt rs-opcion${String(v)===String(x.v)?' sel':''}" data-valor="${esc(x.v)}" aria-pressed="${String(v)===String(x.v)?'true':'false'}">${esc(x.t)}</button>`).join('')}</div>`;
     }else if(s.t==='time'){
       inp=`<input id="wi" class="big" type="time" value="${esc(v)}" onkeydown="if(event.key==='Enter')avanzarAsistentePlanilla()">
         <div style="text-align:center"><button class="dash" style="margin-top:10px" onclick="establecerHoraActualAsistente()">Ahora</button></div>`;
@@ -246,8 +246,7 @@
     const host=$('v5');
     host.style.borderLeftColor=s.c;
     host.innerHTML=`
-      <div class="wz-top"><b>${esc(s.g)}</b><span>Dato <b style="color:#2563eb">${G.s+1}</b> de ${n}</span>
-        <select onchange="cambiarPasoAsistentePlanilla(this.value)">${ps.map((x,i)=>`<option value="${i}" ${i===G.s?'selected':''}>${i+1}. ${esc(x.l)}</option>`).join('')}</select></div>
+      <div class="wz-top"><b>${esc(s.g)}</b><span>Dato <b style="color:#2563eb">${G.s+1}</b> de ${n}</span></div>
       <div class="bar"><i style="width:${((G.s+1)/n)*100}%"></i></div>
       <h2>${esc(s.l)}</h2>${inp}
       ${s.info?`<div class="gi" id="gInfo">${s.info(d)}</div>`:''}
@@ -260,6 +259,11 @@
         <button class="btn-primary" style="color:#dc2626;border-color:#fca5a5" onclick="cancelarAsistentePlanilla()">Cancelar</button>
       </div>
       ${llenos.length?`<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px 6px;margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0">${llenos.map(x=>`<span style="font-size:.72rem;background:#f1f5f9;border-radius:4px;padding:2px 6px;color:#334155">${esc(x.l.toLowerCase())}: ${esc(Array.isArray(d[x.k])?d[x.k].filter(Boolean).join(', '):d[x.k])}</span>`).join('')}</div>`:''}`;
+    host.querySelectorAll('.rs-opcion').forEach(boton=>boton.addEventListener('click',()=>{
+      const paso=G.pasos[G.s];
+      G.d[paso.k]=boton.dataset.valor;
+      renderizarAsistentePlanilla();
+    }));
     const el=host.querySelector('input');if(el){el.focus();el.select&&el.select()}
   }
   function actualizarInformacionAsistentePlanilla(){capturarDatosAsistentePlanilla();const s=G.pasos[G.s],t=$('gInfo');if(t&&s.info)t.innerHTML=s.info(G.d)}

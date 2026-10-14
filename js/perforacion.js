@@ -154,7 +154,7 @@
     HEADER_KEYS.forEach(function (k) { p.header[k] = ''; });
     var hoy = new Date();
     p.header.fecha = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth() + 1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
-    p.header.mina = 'Esmeralda'; p.header.nivel = 'NP'; p.header.bloque = 'Ext Fw'; p.header.encSeg = 'Luis Salinas';
+    p.header.mina = 'Esmeralda'; p.header.nivel = 'NP'; p.header.bloque = 'Ext Fw';
     for (var k = 0; k < 10; k++) p.obs.push('');
     return p;
   }
@@ -909,11 +909,33 @@
     return s;
   }
   function partes(v) { return String(v || '').split(/\s*\/\s*/).filter(function (x) { return x.trim(); }); }
+  function nombresUsuarios(rol, turno) {
+    if (!window.JEJUsuarios || typeof window.JEJUsuarios.nombres !== 'function') return [];
+    return window.JEJUsuarios.nombres(rol, turno);
+  }
+  function aplicarPersonalPorDefecto(h) {
+    var cambio = false;
+    var usuarioActivo = '';
+    try { usuarioActivo = (localStorage.getItem('jej_usuario_activo') || '').trim(); } catch (e) { /* almacenamiento no disponible */ }
+    // Este campo siempre identifica a la persona con sesión activa.
+    if (usuarioActivo && h.encSeg !== usuarioActivo) { h.encSeg = usuarioActivo; cambio = true; }
+    var supJej = nombresUsuarios('supervisorJeJ', h.turno);
+    var supDet = nombresUsuarios('supervisorDet', h.turno);
+    var perforistas = nombresUsuarios('responsableDet', h.turno);
+    if (!h.supJej && supJej.length) { h.supJej = supJej[0]; cambio = true; }
+    if (!partes(h.supDet).length && supDet.length) { h.supDet = supDet.join(' / '); cambio = true; }
+    if (!partes(h.perforistaDet).length && perforistas.length) { h.perforistaDet = perforistas.join(' / '); cambio = true; }
+    return cambio;
+  }
   var dlN = 0;
   function datalist(k, multi) {
     var set = {};
     J.store.list().forEach(function (p) { (multi ? partes(p.header[k]) : [p.header[k]]).forEach(function (x) { if (x) set[x] = 1; }); });
-    var rolPersonal = { supJej: 'supervisorJeJ', supDet: 'supervisorDet' }[k];
+var rolPersonal = {
+  supJej: 'supervisorJeJ',
+  supDet: 'supervisorDet',
+  perforistaDet: 'responsableDet'
+}[k];
     if (rolPersonal && window.JEJUsuarios) {
       window.JEJUsuarios.nombres(rolPersonal, J.store.current().header.turno).forEach(function (nombre) { set[nombre] = 1; });
     }
@@ -943,16 +965,25 @@
   }
 
   /* ---------- Ventana modal ---------- */
-  function abrirModal(titulo, armar, onGuardar, textoGuardar) {
+  function abrirModal(titulo, armar, onGuardar, textoGuardar, estiloPersonal) {
     var fragmento = document.getElementById('plantillaModalJej').content.cloneNode(true);
     var ov = fragmento.querySelector('[data-modal-overlay]'), m = fragmento.querySelector('[data-modal-content]');
     function cerrar() { ov.remove(); }
-    m.appendChild(el('h3', { text: titulo }));
+    var encabezado = el('h3', { text: titulo });
+    if (estiloPersonal) encabezado.setAttribute('style', 'margin-top:0;border-bottom:2px solid #e2e8f0;padding-bottom:8px');
+    m.appendChild(encabezado);
     armar(m);
-    m.appendChild(el('div', { class: 'jp-modal-acc' }, [
-      el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: cerrar }),
-      el('button', { type: 'button', class: 'btn-primary', text: textoGuardar || 'Guardar y Aplicar', onclick: function () { if (onGuardar() !== false) cerrar(); } })
-    ]));
+    var acciones = el('div', { class: 'jp-modal-acc' + (estiloPersonal ? ' modal-personal-acciones' : '') });
+    if (estiloPersonal) acciones.setAttribute('style', 'display:flex;justify-content:flex-end;gap:10px;margin-top:20px');
+    var cancelar = el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: cerrar });
+    var guardar = el('button', { type: 'button', class: 'btn-primary', text: textoGuardar || 'Guardar y Aplicar', onclick: function () { if (onGuardar() !== false) cerrar(); } });
+    if (estiloPersonal) {
+      cancelar.setAttribute('style', 'background-color:#64748b;width:auto');
+      guardar.setAttribute('style', 'background-color:#16a34a;width:auto');
+    }
+    acciones.appendChild(cancelar);
+    acciones.appendChild(guardar);
+    m.appendChild(acciones);
     ov.appendChild(m);
     ov.style.display = "flex";
     document.body.appendChild(ov);
@@ -1192,29 +1223,26 @@
   /* ---------- Modal: Configuración de Postura y Personal ---------- */
   function modalPostura() {
     var p = P(), h = p.header, d = {};
+    if (aplicarPersonalPorDefecto(h)) J.store.touch();
     ['encSeg', 'supJej', 'supDet', 'perforistaDet'].forEach(function (k) { d[k] = h[k] || ''; });
-    if (window.JEJUsuarios) {
-      if (!d.encSeg) d.encSeg = localStorage.getItem('jej_usuario_activo') || '';
-      if (!d.supJej) d.supJej = window.JEJUsuarios.nombres('supervisorJeJ', h.turno)[0] || '';
-      if (!d.supDet) d.supDet = window.JEJUsuarios.nombres('supervisorDet', h.turno)[0] || '';
-    }
     abrirModal('Configuración de Postura y Personal', function (m) {
-      m.appendChild(el('h4', { text: '2. Personal Responsable' }));
-      var g2b = el('div', { class: 'jp-mgrid grid-2' });
+      m.appendChild(el('div', { class: 'section-title', text: '2. Personal Responsable' }));
       var enc = txt(d, 'encSeg', ''); enc.classList.add('gris');
-      g2b.appendChild(mf('Encargado Seguimiento JeJ (Tú):', enc));
+      enc.setAttribute('readonly', 'readonly');
+      enc.style.backgroundColor = '#f1f5f9';
+      enc.style.fontWeight = 'bold';
+      m.appendChild(mf('Encargado Seguimiento JeJ (Tú):', enc));
       var sj = txt(d, 'supJej', 'Seleccione o escriba...', '', null);
       var dlSj = datalist('supJej', false); sj.setAttribute('list', dlSj.id);
-      g2b.appendChild(mf('Supervisor JeJ:', sj)); g2b.appendChild(dlSj);
-      m.appendChild(g2b);
-      var box = el('div', { style: 'margin-top:12px' });
+      m.appendChild(mf('Supervisor JeJ:', sj)); m.appendChild(dlSj);
+      var box = el('div');
       multiInput(box, 'Supervisor(es) DET:', 'supDet', d, 'Agregar otro Supervisor DET');
       multiInput(box, 'Perforista(s) DET:', 'perforistaDet', d, 'Agregar otro Perforista DET');
       m.appendChild(box);
     }, function () {
       Object.keys(d).forEach(function (k) { h[k] = typeof d[k] === 'string' ? d[k].trim() : d[k]; });
       J.store.touch(); refrescarToolbar(); render();
-    });
+    }, 'Guardar y Aplicar', true);
   }
 
   /* ---------- Modal: observaciones en terreno ---------- */
@@ -1246,6 +1274,7 @@
   /* ---------- Paso 1: Datos generales y turno ---------- */
   function vistaDatos(host, p) {
     var h = p.header, card = el('div', { class: 'jp-card card-wide' });
+    if (aplicarPersonalPorDefecto(h)) J.store.touch();
     card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 1: Datos Generales y Turno' }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Ingrese los datos básicos del seguimiento' }));
 
@@ -1256,25 +1285,19 @@
     box.appendChild(f);
 
     box.appendChild(el('label', { class: 'jp-lbl', text: 'Turno:' }));
-    box.appendChild(sel(h, 'turno', 'turno', '-- Seleccione Turno --', function () { etiquetaPlanilla(p); J.store.touch(); }));
+    box.appendChild(sel(h, 'turno', 'turno', '-- Seleccione Turno --', function () { aplicarPersonalPorDefecto(h); etiquetaPlanilla(p); J.store.touch(); render(); }));
 
     box.appendChild(el('div', { class: 'jp-sec' }, [
       el('span', { text: '2. Datos de Postura y Personal' }),
       el('button', { type: 'button', class: 'btn-primary', text: '⚙️ Ingreso / Editar Datos', onclick: function () { abrirAsistente('postura'); } })
     ]));
+    
+    
     function negrita(t, v) { var s = el('div'); s.appendChild(el('b', { text: t + ': ' })); s.appendChild(document.createTextNode(v)); return s; }
-    var linea1 = el('div'); linea1.appendChild(el('b', { text: 'Mina: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.mina) + ' | '));
-    linea1.appendChild(el('b', { text: 'Nivel: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.nivel) + ' | '));
-    linea1.appendChild(el('b', { text: 'Bloque: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.bloque)));
-    box.appendChild(el('div', { class: 'jp-resumen-box resumen-box' }, [
-      linea1, el('hr'),
-      negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
-      negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', '))), el('hr'),
-      h.nivel === 'UCL'
-        ? negrita('Calle UCL (C UCL)', sinAsignar(h.calleUcl))
-        : negrita('Zanja (Z)', sinAsignar(h.numZanja) + ((h.calleZanja1 || h.calleZanja2) ? ' · entre calles (C) ' + sinAsignar(h.calleZanja1) + ' y ' + sinAsignar(h.calleZanja2) : '')),
-      negrita('Fase', sinAsignar(h.fase))
-    ]));
+    var linea1 = el('div'); 
+    box.appendChild(el('div', { class: 'jp-resumen-box resumen-box' }, 
+      [negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
+      negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', '))),]));
 
     card.appendChild(box);
     card.appendChild(el('div', { class: 'jp-fila2 grid-2' }, [

@@ -334,7 +334,7 @@
                                 .map(i => i.value).filter(Boolean).join(", ") || "Sin asignar";
 
             document.getElementById("resumenUnificado").innerHTML = `
-                <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 8px 0;">
+               
                 <strong>Encargado JeJ:</strong> ${localStorage.getItem("jej_usuario_activo") || 'N/A'}<br>
                 <strong>Supervisor JeJ:</strong> ${supJeJ}<br>
                 <strong>Supervisor(es) DET:</strong> ${supsDet}<br>
@@ -460,6 +460,8 @@
 
             window.JEJCarguioWizard.mostrarTiro({
                 containerId: "paso5",
+                appearance: "perforacion",
+                cancelText: "Cancelar tiro",
                 context: `Trabajo ${idTrabajoActual} · Parada ${idParadaActual} · Tiro ${numeroTiro} de ${totalTirosParadaActual}`,
                 finishText: numeroTiro === totalTirosParadaActual ? "Finalizar parada ✓" : "Siguiente tiro →",
                 onNext: siguienteTiroEmulsion,
@@ -621,6 +623,7 @@
             window.JEJCarguioWizard.abrirPlantilla({
                 rootId: "modalPlantillaFinal",
                 context: "Datos de plantilla · Emulsión",
+                selectButtons: true,
                 onFinish: guardarModalPlantillaFinal,
                 onCancel: cerrarModalPlantillaFinal
             });
