@@ -137,3 +137,47 @@ document.addEventListener("click", function (e) {
     const box = document.getElementById("searchResults");
     if (box && !(e.target.closest && e.target.closest(".hdr-search"))) box.classList.remove("show");
 });
+
+
+/* ---------- Roles de color de botones (solo presentación, diseño v2) ----------
+   Asigna una clase de rol según el texto del botón, para que todas las páginas
+   usen la misma paleta: secundario / confirmar / acción / atención / eliminar.
+   No cambia eventos ni IDs. Ignora botones con color definido en línea. */
+(function () {
+    var REGLAS = [
+        ['btn-del',  /^(eliminar|cancelar tiro|quitar)/],
+        ['btn-sec',  /^(volver|anterior|cancelar|cerrar|omitir|sin problemas)/],
+        ['btn-ok',   /^(guardar|crear|capturar tiro)/],
+        ['btn-warn', /^(ver resumen)/],
+        ['btn-dl',   /^(descargar)/],
+        ['btn-act',  /^(usar|ingreso|editar|rellenar|agregar|registrar|continuar)/]
+    ];
+    function rolDe(btn) {
+        var t = (btn.textContent || '').trim().toLowerCase().replace(/^[^a-z0-9áéíóúñ]+/, '');
+        for (var i = 0; i < REGLAS.length; i++) if (REGLAS[i][1].test(t)) return REGLAS[i][0];
+        return '';
+    }
+    function aplicar(raiz) {
+        var lista = (raiz || document).querySelectorAll('.btn-primary:not([data-rol])');
+        for (var i = 0; i < lista.length; i++) {
+            var b = lista[i];
+            if (b.tagName === 'INPUT' || b.tagName === 'SELECT') continue;
+            var st = b.getAttribute('style') || '';
+            b.setAttribute('data-rol', '1');
+            if (/background/i.test(st)) continue;
+            var r = rolDe(b);
+            if (r) b.classList.add(r);
+        }
+    }
+    var pendiente = false;
+    function programar() {
+        if (pendiente) return;
+        pendiente = true;
+        requestAnimationFrame(function () { pendiente = false; aplicar(document); });
+    }
+    function iniciar() {
+        aplicar(document);
+        if (window.MutationObserver) new MutationObserver(programar).observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
+})();

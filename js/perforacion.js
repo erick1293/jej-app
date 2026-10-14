@@ -1249,15 +1249,16 @@
     card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 1: Datos Generales y Turno' }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Ingrese los datos básicos del seguimiento' }));
 
-    card.appendChild(el('label', { class: 'jp-lbl', text: 'Fecha:' }));
+    var box = el('div', { class: 'jej-card' }); /* tarjeta plateada del diseño v2 */
+    box.appendChild(el('label', { class: 'jp-lbl', text: 'Fecha:' }));
     var f = el('input', { type: 'date', class: 'jp-in btn-primary', value: h.fecha || '' });
     f.addEventListener('input', function () { h.fecha = f.value; etiquetaPlanilla(p); J.store.touch(); });
-    card.appendChild(f);
+    box.appendChild(f);
 
-    card.appendChild(el('label', { class: 'jp-lbl', text: 'Turno:' }));
-    card.appendChild(sel(h, 'turno', 'turno', '-- Seleccione Turno --', function () { etiquetaPlanilla(p); J.store.touch(); }));
+    box.appendChild(el('label', { class: 'jp-lbl', text: 'Turno:' }));
+    box.appendChild(sel(h, 'turno', 'turno', '-- Seleccione Turno --', function () { etiquetaPlanilla(p); J.store.touch(); }));
 
-    card.appendChild(el('div', { class: 'jp-sec' }, [
+    box.appendChild(el('div', { class: 'jp-sec' }, [
       el('span', { text: '2. Datos de Postura y Personal' }),
       el('button', { type: 'button', class: 'btn-primary', text: '⚙️ Ingreso / Editar Datos', onclick: function () { abrirAsistente('postura'); } })
     ]));
@@ -1265,7 +1266,7 @@
     var linea1 = el('div'); linea1.appendChild(el('b', { text: 'Mina: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.mina) + ' | '));
     linea1.appendChild(el('b', { text: 'Nivel: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.nivel) + ' | '));
     linea1.appendChild(el('b', { text: 'Bloque: ' })); linea1.appendChild(document.createTextNode(sinAsignar(h.bloque)));
-    card.appendChild(el('div', { class: 'jp-resumen-box resumen-box' }, [
+    box.appendChild(el('div', { class: 'jp-resumen-box resumen-box' }, [
       linea1, el('hr'),
       negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
       negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', '))), el('hr'),
@@ -1275,6 +1276,7 @@
       negrita('Fase', sinAsignar(h.fase))
     ]));
 
+    card.appendChild(box);
     card.appendChild(el('div', { class: 'jp-fila2 grid-2' }, [
       el('a', { href: '../index.html', class: 'btn-primary', text: 'Volver al Menú' }),
       el('button', { type: 'button', class: 'btn-primary', text: 'Ir a Gestión de ID ➜', onclick: function () { ir('id'); } })

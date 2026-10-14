@@ -15,12 +15,14 @@
   <section class="card wizard-card" id="v1">
     <h3>Paso 1: Datos Generales y Turno</h3>
     <p class="sub">Ingrese los datos básicos del seguimiento</p>
+    <div class="jej-card">
     <label class="l" style="margin-top:0">Fecha:</label>
     <input type="date" id="fFecha" onchange="P().fecha=this.value;save();renderTb()">
     <label class="l">Turno:</label>
     <select id="fTurno" onchange="P().turno=this.value;save();renderTb()"><option>A</option><option>B</option></select>
     <div class="section-title"><span>2. Datos de Planilla y Personal</span><button class="btn-primary" style="width:auto" onclick="abrirAsistentePlanilla('datos')">⚙️ Ingreso / Editar Datos</button></div>
     <div class="resumen-box info" id="infoDatos"></div>
+    </div><!-- /.jej-card -->
     <div class="grid-2">
       <a href="../index.html" class="btn-primary" style="text-decoration:none;text-align:center ;width:auto">Volver al Menú</a>
       <button class="btn-primary" onclick="ir(2)" style="width:auto">Ir a Gestión de Calle ➜</button>
