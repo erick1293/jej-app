@@ -80,13 +80,7 @@
     if(V===1){
       const p=P();$('fFecha').value=p.fecha;$('fTurno').value=p.turno;
       if(completarPersonalPlanilla(p))save();
-      $('infoDatos').innerHTML=`<b>Sector:</b> ${esc(p.sector||'-')} | <b>Grupo:</b> ${esc(p.grupo||'-')}<br>
-        <b>Mina:</b> ${esc(p.mina||'-')} | <b>Nivel:</b> ${esc(p.nivel||'-')} | <b>Bloque:</b> ${esc(p.bloque||'-')}<br>
-        <b>ID de Tronadura:</b> ${esc(p.idTronadura||'-')} | <b>Fase:</b> ${esc(p.fase||'-')}<br>
-        ${p.nivel==='NP'?`<b>Núm. Zanja:</b> ${esc(p.numZanja||'-')} | <b>Calle Zanja:</b> ${esc(p.calleZanja||'-')}<br>`:''}
-        ${p.nivel==='UCL'?`<b>Calle UCL:</b> ${esc(p.calleUcl||'-')} | <b>Paradas Inicio / Fin:</b> ${esc(p.paradas||'-')}<br>`:''}
-        ${p.nivel==='Panel2'?`<b>Detalle Panel 2:</b> ${esc(p.detallePanel2||'-')}<br>`:''}
-        <b>Calle:</b> ${esc(p.calleAct||'Sin asignar')}<hr>
+      $('infoDatos').innerHTML=` 
         <b>Encargado Seguimiento JeJ:</b> ${esc(localStorage.getItem('jej_usuario_activo')||p.encJEJ||'-')}<br>
         <b>Supervisor JeJ:</b> ${esc(p.supervisorJeJ||'-')}<br>
         <b>Supervisor(es) DET:</b> ${esc((p.supervisorDet||[]).filter(Boolean).join(', ')||'-')}<br>
