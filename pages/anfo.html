@@ -1053,36 +1053,6 @@
             renderizarTarjetasParadasAnfo();
         }
 
-        // CANDIDATA A BORRADO MANUAL: el botón actual usa crearParadaYAbrirModalTiros() desde este HTML (bloque de flujo ANFO integrado).
-        // Esta ruta antigua se conserva aquí por ahora; el flujo activo muestra el modal de cantidad actualizado.
-        function irAPaso4DesdeCrearParada() {
-            const idParadaInput = document.getElementById("idParadaInput").value.trim();
-            if (!idParadaInput) {
-                alert("Ingrese un nombre o código para la Parada.");
-                return;
-            }
-
-            idParadaActual = idParadaInput;
-            document.getElementById("idParadaInput").value = "";
-            document.body.classList.remove("anfo-stop-mode");
-
-            const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
-            if (trabajo) {
-                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
-                if (paradaExistente) {
-                    document.getElementById("cantTirosInput").value = paradaExistente.tiros.length;
-                } else {
-                    document.getElementById("cantTirosInput").value = 3;
-                }
-            }
-
-            document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
-            document.body.classList.remove("anfo-resumen-final-mode");
-            ocultarTodosPasos();
-            document.getElementById("cantTirosInput").value = Number(document.getElementById("cantTirosInput").value) || 3;
-            abrirModalCantidadTiros();
-        }
-
         function seleccionarParadaExistente() {
             const select = document.getElementById("selectParadaExistente");
             const seleccionado = select.value;
@@ -1569,48 +1539,7 @@
             tirosTemporales[indiceTiroActual - 1] = datosTiro;
         }
 
-        function siguienteTiroWizard() {
-            guardarDatosTiroActual();
-
-            if (indiceTiroActual < totalTirosParadaActual) {
-                indiceTiroActual++;
-                cargarFormularioTiroWizard(indiceTiroActual);
-            } else {
-                let trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
-                if (trabajo) {
-                    let paradaIndex = trabajo.paradas.findIndex(p => p.idParada === idParadaActual);
-                    if (paradaIndex >= 0) {
-                        trabajo.paradas[paradaIndex].tiros = [...tirosTemporales];
-                        trabajo.paradas[paradaIndex].cantidadTiros = totalTirosParadaActual;
-                    } else {
-                        trabajo.paradas.push({
-                            idParada: idParadaActual,
-                            cantidadTiros: totalTirosParadaActual,
-                            tiros: [...tirosTemporales]
-                        });
-                    }
-                }
-
-                ejecutarAutosave();
-                
-                mostrarGestionParadas();
-                ocultarTodosPasos();
-                document.getElementById("paso3").style.display = "block";
-                cargarSelectParadas();
-            }
-        }
-
-        function anteriorTiroWizard() {
-            guardarDatosTiroActual();
-            if (indiceTiroActual > 1) {
-                indiceTiroActual--;
-                cargarFormularioTiroWizard(indiceTiroActual);
-            } else {
-                ocultarTodosPasos();
-                document.getElementById("paso4").style.display = "block";
-            }
-        }
-
+        // La navegación siguiente/anterior del wizard está definida por el flujo integrado al final del archivo.
       function mostrarResumenParadasFinal() {
             ocultarTodosPasos();
             document.getElementById("paso6").style.display = "block";
@@ -1702,8 +1631,7 @@
             window.location.href = "../index.html";
         }
 
-        // CANDIDATAS A BORRADO MANUAL: estas primeras versiones de abrir/cerrar/guardarModalPlantillaFinal
-        // están sustituidas por las funciones de compatibilidad al final de este archivo.
+        // Modal de plantilla: estas funciones globales conectan los botones al asistente compartido.
    function abrirModalPlantillaFinal() {
     window.JEJCarguioWizard.abrirPlantilla({
         rootId: "datosPlantillaAdicionales",
@@ -1950,26 +1878,6 @@
     alert("Hubo un error al procesar la plantilla. Asegúrate de que plantillaAnfo.xlsx esté accesible.");
 }
 
-// Compatibilidad de botones existentes: conservar el modal actualizado del asistente (JEJCarguioWizard).
-function abrirModalPlantillaFinal() {
-    window.JEJCarguioWizard.abrirPlantilla({
-        rootId: "datosPlantillaAdicionales",
-        context: "Datos de plantilla · ANFO",
-        selectButtons: true,
-        onFinish: guardarModalPlantillaFinal,
-        onCancel: cerrarModalPlantillaFinal
-    });
-}
-
-function cerrarModalPlantillaFinal() {
-    document.getElementById("modalPlantillaFinal").style.display = "none";
-}
-
-function guardarModalPlantillaFinal() {
-    ejecutarAutosave();
-    cerrarModalPlantillaFinal();
-    alert("Datos de la plantilla guardados correctamente.");
-}
        }
 
 function cambiarNivelModal() {
@@ -2054,12 +1962,6 @@ function actualizarIdTronaduraAuto() {
             const modal = document.getElementById("modalCantidadTiros");
             modal.classList.add("visible");
             modal.setAttribute("aria-hidden", "false");
-        }
-
-        function cerrarModalCantidadTiros() {
-            const modal = document.getElementById("modalCantidadTiros");
-            modal.classList.remove("visible");
-            modal.setAttribute("aria-hidden", "true");
         }
 
         function ajustarCantidadTiros(delta) {
