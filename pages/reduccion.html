@@ -1,203 +1,517 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seguimiento a la Reducción Secundaria - App JEJ</title>
-<link rel="stylesheet" href="../css/styles.css">
-<style>
-  /* Ajustes locales de Reducción; no modifican la hoja global. */
-  #busca { display:block; width:100%; box-sizing:border-box; margin-bottom:14px; }
-  #lista > .item {
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:12px; margin-bottom:10px; background:#fff;
-    border:1px solid #d6e0f0; border-left:4px solid #3159a5; border-radius:12px;
-    box-shadow:0 8px 18px rgba(13,42,100,.12);
-  }
-  #lista > .item > div:first-child { flex:1; min-width:0; }
-  #lista .acts { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
-  #lista .acts .btn-primary { width:auto; min-width:42px; padding:8px 12px; }
-  #lista .acts .btn-primary:first-child { background-color:#0284c7; }
-  #lista .acts .btn-primary:last-child { color:#991b1b; background:#fee2e2; border:1px solid #fecaca; }
-  @media (max-width:520px) {
-    #lista > .item { align-items:stretch; flex-direction:column; }
-    #lista .acts { display:grid; grid-template-columns:1fr auto; }
-  }
-  /* Asistente de plantilla de Reducción: tarjeta y controles del mismo sistema visual. */
-  #v5 {
-    box-sizing:border-box; width:100%; max-width:760px; margin:18px auto; padding:clamp(16px,3vw,24px);
-    color:#20365f; background:linear-gradient(180deg,#fff 0%,#f1f5fb 100%);
-    border:1px solid #d3deef; border-left:4px solid #24b8e8; border-radius:18px;
-    box-shadow:0 18px 42px rgba(3,17,49,.2),0 2px 7px rgba(17,44,93,.08);
-  }
-  #v5 .wz-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; color:#25477f; font-size:.88rem; }
-  #v5 .wz-top > span { flex:none; white-space:nowrap; }
-  #v5 .bar { width:100%; height:6px; margin:10px 0 16px; overflow:hidden; background:#dce6f4; border-radius:999px; }
-  #v5 .bar > i { display:block; height:100%; background:linear-gradient(90deg,#24b8e8,#4b8cf0); border-radius:inherit; }
-  #v5 > h2 { margin:0 0 12px; color:#142b57; font-size:1.25rem; }
-  #v5 .big { display:block; width:100%; min-height:48px; box-sizing:border-box; padding:10px 12px; }
-  #v5 .jp-opts { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 14px; }
-  #v5 .jp-opt { width:auto; min-height:42px; padding:9px 14px; }
-  #v5 .nav { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:18px; }
-  #v5 .nav .btn-primary { flex:1 1 130px; width:auto; min-width:0; }
-  #v5 .nav .sp { display:none; }
-  @media (max-width:520px) {
-    #v5 { margin:12px auto; padding:16px; }
-    #v5 .wz-top { align-items:flex-start; flex-direction:column; gap:4px; }
-    #v5 .nav .btn-primary { flex-basis:calc(50% - 8px); }
-  }
-</style>
-
-</head>
-<body class="pagina-fondo">
-<main class="card-wide">
-
-  <!-- PASO 1 -->
-  <section class="card wizard-card" id="v1">
-    <h2 style="color:#fff">Paso 1: Datos Generales y Turno</h2>
-    <p class="sub">Ingrese los datos básicos del seguimiento</p>
-    <div class="jej-card">
-      <div class="form-group-field">
-        <label for="fFecha">Fecha:</label>
-        <input type="date" id="fFecha" onchange="P().fecha=this.value;save();renderTb()">
-      </div>
-      <div class="form-group-field">
-        <label for="fTurno">Turno:</label>
-        <select id="fTurno" onchange="P().turno=this.value;save();renderTb()"><option value="A">Turno A</option><option value="B">Turno B</option></select>
-      </div>
-      <div class="section-title"><span>2. Datos de Planilla y Personal</span><button type="button" class="btn-primary" style="width:auto;background-color:#0284c7" onclick="abrirAsistentePlanilla('datos')">⚙️ Ingreso / Editar Datos</button></div>
-      <div class="resumen-box info" id="infoDatos"></div>
-    </div>
-    <div class="grid-2" style="margin-top:25px">
-      <a href="../index.html" class="btn-primary" style="background-color:#64748b;text-decoration:none;text-align:center;width:45%">Volver al Menú</a>
-      <button type="button" class="btn-primary" onclick="ir(2)" style="background-color:#2563eb;width:50%">Siguiente ➜</button>
-    </div>
-  </section>
-
-  <!-- PASO 2 -->
-  <section class="card wizard-card" hidden id="v2">
-    <h3>Paso 2: Gestión de Calle</h3>
-    <p class="sub">Cree una nueva calle o seleccione una ya existente (una planilla por calle quemada)</p>
-    <div class="wizard-card" style="margin-bottom:15px">
-      <div class="form-group-field">
-        <label for="nCalle">➕ CREAR NUEVA CALLE:</label>
-        <input type="text" id="nCalle" placeholder="Ej. 43" autocomplete="off" style="width:100%;margin-bottom:8px;box-sizing:border-box">
-        <button type="button" class="btn-primary" onclick="crearCalle()" style="width:100%;background-color:#16a34a">Crear e Ir a Colpas</button>
-      </div>
-    </div>
-    <div class="wizard-card">
-      <div class="form-group-field">
-        <label for="selCalle">📂 SELECCIONAR CALLE EXISTENTE:</label>
-        <select id="selCalle" style="width:100%;margin-bottom:10px;box-sizing:border-box"></select>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button type="button" class="btn-primary" onclick="usarCalle()" style="background-color:#0284c7;flex:1">Usar Seleccionado ➜</button>
-        <button type="button" class="btn-primary" onclick="elimCalle()" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;flex:1">🗑️ Eliminar</button>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-start;margin-top:25px">
-      <button type="button" class="btn-primary" onclick="ir(1)" style="background-color:#64748b;width:45%">⬅ Volver al Paso 1</button>
-    </div>
-  </section>
-
-  <!-- PASO 3 -->
-  <section class="card wizard-card" hidden id="v3">
-    <h3 id="t3"></h3>
-    <p class="sub">Revise sus registros guardados</p>
-    <input type="search" id="busca" placeholder="🔍  Buscar ID o punto..." oninput="renderLista()">
-    <div class="box wizard-card" id="lista"></div>
-    <button class="btn-primary" onclick="nuevaColpa()" style="margin-bottom:10px">+ Agregar colpa</button>
-    <div class="grid-2" style="margin-bottom:10px">
-      <button class="btn-primary" onclick="ir(2)">+ Registrar Otra Calle</button>
-      <button class="btn-primary" onclick="abrirObs()">📝 Agregar Observación</button>
-    </div>
-    <button class="btn-primary" onclick="abrirAsistentePlanilla('planilla')">📋 Rellenar Datos Faltantes de Planilla (Horarios/Indicadores)</button>
-    <div class="descarga" style="margin-top:14px">
-      <div class="pila" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:10px">
-        <button type="button" class="btn-primary" onclick="descargarExcel()" style="flex:1 1 calc(50% - 10px);min-width:0;background-color:#2563eb">⬇ Descargar Excel</button>
-        <button type="button" class="btn-primary" onclick="informe()" style="flex:1 1 calc(50% - 10px);min-width:0;background-color:#2563eb">⬇ Descargar Informe Técnico</button>
-      </div>
-      <small>Los datos se guardan automáticamente en este dispositivo.</small>
-    </div>
-  </section>
-
-  <!-- PASO 4 -->
-  <section class="card wizard-card wz" hidden id="v4"></section>
-
-  <!-- PASO 5: asistente dato por dato (datos de planilla y personal / horarios e indicadores) -->
-  <section class="card wizard-card wz" hidden id="v5"></section>
-
-  <!-- MODAL PERSONAL / DATOS DE PLANILLA: estructura equivalente al modal de ANFO/Emulsión -->
-  <div class="modal-overlay ov" id="mDatos" role="presentation">
-    <div class="modal-content modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalDatos">
-      <h3 id="tituloModalDatos">⚙️ Ingreso / Editar Datos</h3>
-
-      <div class="section-title">1. Datos de Planilla</div>
-      <div class="grid-2">
-        <div class="form-group-field">
-          <label for="mdSector">Sector:</label>
-          <input id="mdSector" type="text" placeholder="Ej. Esmeralda">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seguimiento a la Reducción Secundaria - App JEJ</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+      /* Ajustes locales de Reducción; no modifican la hoja global. */
+      #busca {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 14px;
+      }
+      #lista > .item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #fff;
+        border: 1px solid #d6e0f0;
+        border-left: 4px solid #3159a5;
+        border-radius: 12px;
+        box-shadow: 0 8px 18px rgba(13, 42, 100, 0.12);
+      }
+      #lista > .item > div:first-child {
+        flex: 1;
+        min-width: 0;
+      }
+      #lista .acts {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      #lista .acts .btn-primary {
+        width: auto;
+        min-width: 42px;
+        padding: 8px 12px;
+      }
+      #lista .acts .btn-primary:first-child {
+        background-color: #0284c7;
+      }
+      #lista .acts .btn-primary:last-child {
+        color: #991b1b;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+      }
+      @media (max-width: 520px) {
+        #lista > .item {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        #lista .acts {
+          display: grid;
+          grid-template-columns: 1fr auto;
+        }
+      }
+      /* Asistente de plantilla de Reducción: tarjeta y controles del mismo sistema visual. */
+      #v5 {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 760px;
+        margin: 18px auto;
+        padding: clamp(16px, 3vw, 24px);
+        color: #20365f;
+        background: linear-gradient(180deg, #fff 0%, #f1f5fb 100%);
+        border: 1px solid #d3deef;
+        border-left: 4px solid #24b8e8;
+        border-radius: 18px;
+        box-shadow:
+          0 18px 42px rgba(3, 17, 49, 0.2),
+          0 2px 7px rgba(17, 44, 93, 0.08);
+      }
+      #v5 .wz-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        color: #25477f;
+        font-size: 0.88rem;
+      }
+      #v5 .wz-top > span {
+        flex: none;
+        white-space: nowrap;
+      }
+      #v5 .bar {
+        width: 100%;
+        height: 6px;
+        margin: 10px 0 16px;
+        overflow: hidden;
+        background: #dce6f4;
+        border-radius: 999px;
+      }
+      #v5 .bar > i {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #24b8e8, #4b8cf0);
+        border-radius: inherit;
+      }
+      #v5 > h2 {
+        margin: 0 0 12px;
+        color: #142b57;
+        font-size: 1.25rem;
+      }
+      #v5 .big {
+        display: block;
+        width: 100%;
+        min-height: 48px;
+        box-sizing: border-box;
+        padding: 10px 12px;
+      }
+      #v5 .jp-opts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 10px 0 14px;
+      }
+      #v5 .jp-opt {
+        width: auto;
+        min-height: 42px;
+        padding: 9px 14px;
+      }
+      #v5 .nav {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-top: 18px;
+      }
+      #v5 .nav .btn-primary {
+        flex: 1 1 130px;
+        width: auto;
+        min-width: 0;
+      }
+      #v5 .nav .sp {
+        display: none;
+      }
+      @media (max-width: 520px) {
+        #v5 {
+          margin: 12px auto;
+          padding: 16px;
+        }
+        #v5 .wz-top {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 4px;
+        }
+        #v5 .nav .btn-primary {
+          flex-basis: calc(50% - 8px);
+        }
+      }
+    </style>
+  </head>
+  <body class="pagina-fondo">
+    <main class="card-wide">
+      <!-- PASO 1 -->
+      <section class="card wizard-card" id="v1">
+        <h2 style="color: #fff">Paso 1: Datos Generales y Turno</h2>
+        <p class="sub">Ingrese los datos básicos del seguimiento</p>
+        <div class="jej-card">
+          <div class="form-group-field">
+            <label for="fFecha">Fecha:</label>
+            <input
+              type="date"
+              id="fFecha"
+              onchange="
+                P().fecha = this.value;
+                save();
+                renderTb();
+              "
+            />
+          </div>
+          <div class="form-group-field">
+            <label for="fTurno">Turno:</label>
+            <select
+              id="fTurno"
+              onchange="
+                P().turno = this.value;
+                save();
+                renderTb();
+              "
+            >
+              <option value="A">Turno A</option>
+              <option value="B">Turno B</option>
+            </select>
+          </div>
+          <div class="section-title">
+            <span>2. Datos de Planilla y Personal</span
+            ><button
+              type="button"
+              class="btn-primary"
+              style="width: auto; background-color: #0284c7"
+              onclick="abrirAsistentePlanilla('datos')"
+            >
+              ⚙️ Ingreso / Editar Datos
+            </button>
+          </div>
+          <div class="resumen-box info" id="infoDatos"></div>
         </div>
-        <div class="form-group-field">
-          <label for="mdGrupo">Grupo:</label>
-          <input id="mdGrupo" type="number" min="0" step="1" placeholder="Ej. 1">
+        <div class="grid-2" style="margin-top: 25px">
+          <a
+            href="../index.html"
+            class="btn-primary"
+            style="
+              background-color: #64748b;
+              text-decoration: none;
+              text-align: center;
+              width: 45%;
+            "
+            >Volver al Menú</a
+          >
+          <button
+            type="button"
+            class="btn-primary"
+            onclick="ir(2)"
+            style="background-color: #2563eb; width: 50%"
+          >
+            Siguiente ➜
+          </button>
+        </div>
+      </section>
+
+      <!-- PASO 2 -->
+      <section class="card wizard-card" hidden id="v2">
+        <h3>Paso 2: Gestión de Calle</h3>
+        <p class="sub">
+          Cree una nueva calle o seleccione una ya existente (una planilla por
+          calle quemada)
+        </p>
+        <div class="wizard-card" style="margin-bottom: 15px">
+          <div class="form-group-field">
+            <label for="nCalle">➕ CREAR NUEVA CALLE:</label>
+            <input
+              type="text"
+              id="nCalle"
+              placeholder="Ej. 43"
+              autocomplete="off"
+              style="width: 100%; margin-bottom: 8px; box-sizing: border-box"
+            />
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="crearCalle()"
+              style="width: 100%; background-color: #16a34a"
+            >
+              Crear e Ir a Colpas
+            </button>
+          </div>
+        </div>
+        <div class="wizard-card">
+          <div class="form-group-field">
+            <label for="selCalle">📂 SELECCIONAR CALLE EXISTENTE:</label>
+            <select
+              id="selCalle"
+              style="width: 100%; margin-bottom: 10px; box-sizing: border-box"
+            ></select>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="usarCalle()"
+              style="background-color: #0284c7; flex: 1"
+            >
+              Usar Seleccionado ➜
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="elimCalle()"
+              style="
+                background: #fee2e2;
+                color: #991b1b;
+                border: 1px solid #fecaca;
+                flex: 1;
+              "
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+        <div
+          style="display: flex; justify-content: flex-start; margin-top: 25px"
+        >
+          <button
+            type="button"
+            class="btn-primary"
+            onclick="ir(1)"
+            style="background-color: #64748b; width: 45%"
+          >
+            ⬅ Volver al Paso 1
+          </button>
+        </div>
+      </section>
+
+      <!-- PASO 3 -->
+      <section class="card wizard-card" hidden id="v3">
+        <h3 id="t3"></h3>
+        <p class="sub">Revise sus registros guardados</p>
+        <input
+          type="search"
+          id="busca"
+          placeholder="🔍  Buscar ID o punto..."
+          oninput="renderLista()"
+        />
+        <div class="box wizard-card" id="lista"></div>
+        <button
+          class="btn-primary"
+          onclick="nuevaColpa()"
+          style="margin-bottom: 10px"
+        >
+          + Agregar colpa
+        </button>
+        <div class="grid-2" style="margin-bottom: 10px">
+          <button class="btn-primary" onclick="ir(2)">
+            + Registrar Otra Calle
+          </button>
+          <button class="btn-primary" onclick="abrirObs()">
+            📝 Agregar Observación
+          </button>
+        </div>
+        <button
+          class="btn-primary"
+          onclick="abrirAsistentePlanilla('planilla')"
+        >
+          📋 Rellenar Datos Faltantes de Planilla (Horarios/Indicadores)
+        </button>
+        <div class="descarga" style="margin-top: 14px">
+          <div
+            class="pila"
+            style="
+              display: flex;
+              flex-direction: row;
+              flex-wrap: wrap;
+              gap: 10px;
+            "
+          >
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="descargarExcel()"
+              style="
+                flex: 1 1 calc(50% - 10px);
+                min-width: 0;
+                background-color: #2563eb;
+              "
+            >
+              ⬇ Descargar Excel
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="informe()"
+              style="
+                flex: 1 1 calc(50% - 10px);
+                min-width: 0;
+                background-color: #2563eb;
+              "
+            >
+              ⬇ Descargar Informe Técnico
+            </button>
+          </div>
+          <small
+            >Los datos se guardan automáticamente en este dispositivo.</small
+          >
+        </div>
+      </section>
+
+      <!-- PASO 4 -->
+      <section class="card wizard-card wz" hidden id="v4"></section>
+
+      <!-- PASO 5: asistente dato por dato (datos de planilla y personal / horarios e indicadores) -->
+      <section class="card wizard-card wz" hidden id="v5"></section>
+
+      <!-- MODAL PERSONAL / DATOS DE PLANILLA: estructura equivalente al modal de ANFO/Emulsión -->
+      <div class="modal-overlay ov" id="mDatos" role="presentation">
+        <div
+          class="modal-content modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tituloModalDatos"
+        >
+          <h3 id="tituloModalDatos">⚙️ Ingreso / Editar Datos</h3>
+
+          <div class="section-title">1. Datos de Planilla</div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label for="mdSector">Sector:</label>
+              <input id="mdSector" type="text" placeholder="Ej. Esmeralda" />
+            </div>
+            <div class="form-group-field">
+              <label for="mdGrupo">Grupo:</label>
+              <input
+                id="mdGrupo"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Ej. 1"
+              />
+            </div>
+          </div>
+
+          <div class="section-title">2. Personal Responsable</div>
+          <div class="form-group-field">
+            <label for="mdEncJEJ">Encargado Seguimiento JeJ (Tú):</label>
+            <input
+              id="mdEncJEJ"
+              type="text"
+              readonly
+              style="background: #f1f5f9; font-weight: bold"
+            />
+          </div>
+          <div class="form-group-field">
+            <label for="mdSupervisorJeJ">Supervisor JeJ:</label>
+            <input
+              id="mdSupervisorJeJ"
+              type="text"
+              list="listaSupJeJ"
+              placeholder="Seleccione o escriba"
+            />
+            <datalist id="listaSupJeJ"></datalist>
+          </div>
+          <div class="form-group-field">
+            <label>Supervisor(es) DET:</label>
+            <div
+              id="mdSupervisoresDET"
+              style="display: flex; flex-direction: column; gap: 8px"
+            ></div>
+            <datalist id="listaSupDET"></datalist>
+            <button
+              type="button"
+              class="btn-primary"
+              style="margin-top: 5px; width: fit-content"
+              onclick="agregarCampoPersonalModal('supervisorDet')"
+            >
+              + Agregar otro Supervisor DET
+            </button>
+          </div>
+          <div class="form-group-field">
+            <label>Responsable(s) Carguío DET:</label>
+            <div
+              id="mdEncDET"
+              style="display: flex; flex-direction: column; gap: 8px"
+            ></div>
+            <datalist id="listaEncDET"></datalist>
+            <button
+              type="button"
+              class="btn-primary"
+              style="margin-top: 5px; width: fit-content"
+              onclick="agregarEncargadoModal()"
+            >
+              + Agregar otro Responsable DET
+            </button>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              gap: 10px;
+              margin-top: 20px;
+            "
+          >
+            <button
+              type="button"
+              onclick="cerrarDatosModal()"
+              class="btn-primary"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onclick="guardarDatosModal()"
+              class="btn-primary"
+            >
+              Guardar y Aplicar
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="section-title">2. Personal Responsable</div>
-      <div class="form-group-field">
-        <label for="mdEncJEJ">Encargado Seguimiento JeJ (Tú):</label>
-        <input id="mdEncJEJ" type="text" readonly style="background:#f1f5f9;font-weight:bold">
-      </div>
-      <div class="form-group-field">
-        <label for="mdSupervisorJeJ">Supervisor JeJ:</label>
-        <input id="mdSupervisorJeJ" type="text" list="listaSupJeJ" placeholder="Seleccione o escriba">
-        <datalist id="listaSupJeJ"></datalist>
-      </div>
-      <div class="form-group-field">
-        <label>Supervisor(es) DET:</label>
-        <div id="mdSupervisoresDET" style="display:flex;flex-direction:column;gap:8px"></div>
-        <datalist id="listaSupDET"></datalist>
-        <button type="button" class="btn-primary" style="margin-top:5px;width:fit-content" onclick="agregarCampoPersonalModal('supervisorDet')">+ Agregar otro Supervisor DET</button>
-      </div>
-      <div class="form-group-field">
-        <label>Responsable(s) Carguío DET:</label>
-        <div id="mdEncDET" style="display:flex;flex-direction:column;gap:8px"></div>
-        <datalist id="listaEncDET"></datalist>
-        <button type="button" class="btn-primary" style="margin-top:5px;width:fit-content" onclick="agregarEncargadoModal()">+ Agregar otro Responsable DET</button>
+      <!-- MODAL OBS -->
+      <div class="modal-overlay ov" id="mObs">
+        <div class="modal-content modal">
+          <h3>Observaciones</h3>
+          <textarea
+            id="oTxt"
+            rows="6"
+            placeholder="Ej: Personal RS DET realiza carguío con colihue ya que no tienen pegamento"
+          ></textarea>
+          <div class="grid-2" style="margin-top: 16px">
+            <button class="btn-primary" onclick="cerrar('mObs')">
+              Cancelar
+            </button>
+            <button class="btn-primary" onclick="guardarObs()">Guardar</button>
+          </div>
+        </div>
       </div>
 
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
-        <button type="button" onclick="cerrarDatosModal()" class="btn-primary">Cancelar</button>
-        <button type="button" onclick="guardarDatosModal()" class="btn-primary">Guardar y Aplicar</button>
-      </div>
-    </div>
-  </div>
+      <div class="toast" id="toast"></div>
+    </main>
+    <!-- /.rs -->
 
-<!-- MODAL OBS -->
-<div class="modal-overlay ov" id="mObs"><div class="modal-content modal">
-  <h3>Observaciones</h3>
-  <textarea id="oTxt" rows="6" placeholder="Ej: Personal RS DET realiza carguío con colihue ya que no tienen pegamento"></textarea>
-  <div class="grid-2" style="margin-top:16px">
-    <button class="btn-primary" onclick="cerrar('mObs')">Cancelar</button>
-    <button class="btn-primary" onclick="guardarObs()">Guardar</button>
-  </div>
-</div></div>
-
-<div class="toast" id="toast"></div>
-
-</main><!-- /.rs -->
-
-  <script src="../js/onedrive-integration.js"></script>
-  <script src="../js/components.js"></script>
-  <script src="../js/informe-base.js"></script>
-  <script src="../js/informe-reduccion.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/usuarios.js"></script>
-  <script src="../js/reduccion.js"></script>
-</body>
+    <script src="../js/onedrive-integration.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/informe-base.js"></script>
+    <script src="../js/informe-reduccion.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/usuarios.js"></script>
+    <script src="../js/reduccion.js"></script>
+  </body>
 </html>
-
-
-
-
