@@ -330,7 +330,8 @@
                     <div class="anfo-tiro-tabs" role="tablist" aria-label="Datos del tiro">
                         <button type="button" data-tab-tiro="medidas" role="tab" aria-selected="true">Medidas</button>
                         <button type="button" data-tab-tiro="estado" role="tab" aria-selected="false">Estado</button>
-                        <button type="button" data-tab-tiro="cebos" role="tab" aria-selected="false">Cebos</button>
+                        <button type="button" data-tab-tiro="producto" role="tab" aria-selected="false">Producto</button>
+                        <button type="button" data-tab-tiro="columna" role="tab" aria-selected="false">Columna</button>
                     </div>
                     <div id="camposCapturaTiroAnfo" class="anfo-tiro-campos"></div>
                 </section>
@@ -1984,11 +1985,17 @@ function actualizarIdTronaduraAuto() {
     "use strict";
 
     const camposPorPestana = {
-        medidas: ["tiroLongDiseno", "tiroTaco", "tiroLargoMomento", "tiroTacoReal"],
-        estado: ["tiroEstado", "tiroIntentosDestape", "tiroAgua", "tiroPosNeg", "tiroNumPera", "tiroCamaExplosivo"],
-        cebos: ["tiroCeboSup", "tiroAranaSup", "tiroCantCartuchos", "tiroCeboInf", "tiroAranaInf", "tiroCantCartuchosInf", "tiroNumRetenedores", "tiroTipoRetenedor"]
+        medidas: ["tiroLongDiseno", "tiroTaco", "tiroLargoMomento", "tiroTacoReal", "tiroCamaExplosivo"],
+        estado: ["tiroEstado", "tiroIntentosDestape", "tiroAgua", "tiroPosNeg", "tiroNumPera"],
+        producto: ["tiroCeboSup", "tiroAranaSup", "tiroCantCartuchos"],
+        columna: ["tiroCeboInf", "tiroAranaInf", "tiroCantCartuchosInf", "tiroNumRetenedores", "tiroTipoRetenedor"]
     };
-    const pestanas = ["medidas", "estado", "cebos"];
+    const pestanas = ["medidas", "estado", "producto", "columna"];
+    const camposConStepper = new Set([
+        "tiroLongDiseno", "tiroTaco", "tiroLargoMomento", "tiroTacoReal", "tiroIntentosDestape",
+        "tiroNumPera", "tiroCamaExplosivo", "tiroCeboSup", "tiroCantCartuchos", "tiroCeboInf",
+        "tiroCantCartuchosInf", "tiroNumRetenedores"
+    ]);
     let pestanaActiva = "medidas";
 
     function valorNumerico(id, respaldo) {
@@ -2106,6 +2113,9 @@ function actualizarIdTronaduraAuto() {
                 control.removeAttribute("id");
                 control.addEventListener("input", () => sincronizarCampoAnfo(control, controlOrigen));
                 control.addEventListener("change", () => sincronizarCampoAnfo(control, controlOrigen));
+                if (control.tagName === "INPUT" && camposConStepper.has(idOrigen)) {
+                    agregarStepperCapturaTiro(control, controlOrigen, idOrigen);
+                }
             });
             contenedor.appendChild(copia);
         });
@@ -2113,11 +2123,54 @@ function actualizarIdTronaduraAuto() {
         const indice = pestanas.indexOf(pestana);
         const anterior = document.getElementById("anteriorCapturaTiroAnfo");
         const siguiente = document.getElementById("siguienteCapturaTiroAnfo");
-        anterior.textContent = indice > 0 ? `‹ ${indice === 1 ? "Medidas" : "Estado"}` : (indiceTiroActual > 1 ? "‹ Anterior" : "‹ Cantidad");
-        siguiente.textContent = indice < 2 ? `${indice === 0 ? "Estado" : "Cebos"} ›` : "Guardar tiro ✓";
+        anterior.textContent = indice > 0 ? `‹ ${pestanas[indice - 1] === "producto" ? "Producto" : pestanas[indice - 1] === "columna" ? "Columna" : pestanas[indice - 1] === "estado" ? "Estado" : "Medidas"}` : (indiceTiroActual > 1 ? "‹ Anterior" : "‹ Cantidad");
+        const nombresPestanas = { medidas: "Medidas", estado: "Estado", producto: "Producto", columna: "Columna" };
+        siguiente.textContent = indice < pestanas.length - 1 ? `${nombresPestanas[pestanas[indice + 1]]} ›` : "Guardar tiro ✓";
         actualizarDiagramaTiroAnfo();
         actualizarNavegacionTirosAnfo();
     }
+
+    function agregarStepperCapturaTiro(input, origen, idOrigen) {
+        const grupo = input.closest(".anfo-tiro-campo");
+        if (!grupo || grupo.querySelector(".anfo-tiro-stepper")) return;
+        const step = Number(origen.step) > 0 ? Number(origen.step) : 1;
+        const wrapper = document.createElement("div");
+        wrapper.className = "anfo-tiro-stepper";
+        const menos = document.createElement("button");
+        menos.type = "button";
+        menos.className = "anfo-tiro-stepper-btn";
+        menos.textContent = "−";
+        menos.setAttribute("aria-label", `Disminuir ${origen.closest(".form-group-field")?.querySelector("label")?.textContent.trim() || idOrigen}`);
+        const mas = document.createElement("button");
+        mas.type = "button";
+        mas.className = "anfo-tiro-stepper-btn";
+        mas.textContent = "+";
+        mas.setAttribute("aria-label", `Aumentar ${origen.closest(".form-group-field")?.querySelector("label")?.textContent.trim() || idOrigen}`);
+        const inputParent = input.parentNode;
+        inputParent.insertBefore(wrapper, input);
+        wrapper.append(menos, input, mas);
+
+        const actualizarEstado = () => {
+            const value = Number(input.value);
+            const minimo = Number(origen.min || 0);
+            menos.disabled = input.disabled || (Number.isFinite(value) && value <= minimo);
+            mas.disabled = input.disabled || (origen.max !== "" && Number.isFinite(Number(origen.max)) && value >= Number(origen.max));
+        };
+        const ajustar = delta => {
+            if (input.disabled) return;
+            const actual = input.value === "" ? 0 : Number(input.value);
+            const siguiente = Math.max(Number(origen.min || 0), Math.min(origen.max === "" ? Infinity : Number(origen.max), (Number.isFinite(actual) ? actual : 0) + delta * step));
+            input.value = String(Number(siguiente.toFixed(3)));
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            actualizarEstado();
+        };
+        menos.addEventListener("click", () => ajustar(-1));
+        mas.addEventListener("click", () => ajustar(1));
+        input.addEventListener("input", actualizarEstado);
+        actualizarEstado();
+    }
+
     function sincronizarCampoAnfo(copia, origen) {
         origen.value = copia.value;
         origen.dispatchEvent(new Event("input", { bubbles: true }));
@@ -2125,6 +2178,8 @@ function actualizarIdTronaduraAuto() {
         if (origen.id === "tiroEstado") toggleIntentosDestape();
         const intentos = document.querySelector("#camposCapturaTiroAnfo [data-source-id='tiroIntentosDestape']");
         if (intentos) intentos.disabled = document.getElementById("tiroIntentosDestape").disabled;
+        const botonIntentos = intentos?.closest(".anfo-tiro-stepper");
+        if (botonIntentos) botonIntentos.querySelectorAll("button").forEach(boton => { boton.disabled = intentos.disabled; });
         actualizarDiagramaTiroAnfo();
     }
 

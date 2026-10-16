@@ -5,6 +5,89 @@
  * ============================================ */
 
         cargarBarMenu(true);
+        document.body.classList.add("emulsion-step1-mode");
+        const menuEmulsion = document.querySelector("#dropdownMenu ul");
+        if (menuEmulsion && !document.getElementById("menuIngresoDatosEmulsion")) {
+            const item = document.createElement("li");
+            const enlace = document.createElement("a");
+            enlace.id = "menuIngresoDatosEmulsion";
+            enlace.href = "#";
+            enlace.textContent = "⚙️ Ingreso / Editar Datos";
+            enlace.addEventListener("click", evento => {
+                evento.preventDefault();
+                document.getElementById("dropdownMenu").classList.remove("show");
+                abrirModalPersonal();
+            });
+            item.appendChild(enlace);
+            menuEmulsion.insertBefore(item, menuEmulsion.children[1] || null);
+        }
+        function sincronizarBotonesTurnoEmulsion() {
+            const turno = document.getElementById("turnoEmulsion").value;
+            document.querySelectorAll("[data-turno-emulsion]").forEach(boton => {
+                const activo = boton.dataset.turnoEmulsion === turno;
+                boton.classList.toggle("activo", activo);
+                boton.setAttribute("aria-pressed", activo ? "true" : "false");
+            });
+        }
+        document.querySelectorAll("[data-turno-emulsion]").forEach(boton => {
+            boton.addEventListener("click", () => {
+                const selector = document.getElementById("turnoEmulsion");
+                selector.value = boton.dataset.turnoEmulsion;
+                selector.dispatchEvent(new Event("change", { bubbles: true }));
+            });
+        });
+        const camposConfiguracionEmulsion = {
+            cfgEmulsionMina: "modalMina", cfgEmulsionNivel: "modalNivel", cfgEmulsionBloque: "modalBloque",
+            cfgEmulsionNumZanja: "numZanja", cfgEmulsionCalleZanja: "calleZanja", cfgEmulsionCalleUcl: "calleUcl",
+            cfgEmulsionParadas: "paradasInicioFin", cfgEmulsionPanel2: "detallePanel2", cfgEmulsionFase: "faseZanja"
+        };
+
+        function sincronizarBotonesConfiguracionEmulsion() {
+            document.querySelectorAll("[data-emulsion-select]").forEach(boton => {
+                const control = document.getElementById(boton.dataset.emulsionSelect);
+                const activo = Boolean(control && control.value === boton.dataset.value);
+                boton.classList.toggle("selected", activo);
+                boton.setAttribute("aria-pressed", activo ? "true" : "false");
+            });
+        }
+
+        function mostrarSeccionNivelEmulsion() {
+            const nivel = document.getElementById("cfgEmulsionNivel").value;
+            document.querySelectorAll("[data-emulsion-level-fields]").forEach(seccion => {
+                seccion.hidden = seccion.dataset.emulsionLevelFields !== nivel;
+            });
+        }
+
+        function sincronizarCampoConfiguracionEmulsion(idVista) {
+            const idOrigen = camposConfiguracionEmulsion[idVista];
+            const vista = document.getElementById(idVista);
+            const origen = document.getElementById(idOrigen);
+            if (!vista || !origen) return;
+            origen.value = vista.value;
+            origen.dispatchEvent(new Event("input", { bubbles: true }));
+            origen.dispatchEvent(new Event("change", { bubbles: true }));
+            if (idVista === "cfgEmulsionNivel") {
+                cambiarNivelModal();
+                mostrarSeccionNivelEmulsion();
+            }
+            actualizarIdTronaduraAuto();
+            const idGenerado = document.getElementById("modalIdTronadura").value;
+            document.getElementById("cfgEmulsionIdTronadura").value = idGenerado;
+            sincronizarBotonesConfiguracionEmulsion();
+        }
+
+        document.querySelectorAll("[data-emulsion-select]").forEach(boton => {
+            boton.addEventListener("click", () => {
+                const control = document.getElementById(boton.dataset.emulsionSelect);
+                if (!control) return;
+                control.value = boton.dataset.value;
+                sincronizarCampoConfiguracionEmulsion(control.id);
+            });
+        });
+        Object.keys(camposConfiguracionEmulsion).forEach(id => {
+            const control = document.getElementById(id);
+            control.addEventListener(control.tagName === "SELECT" ? "change" : "input", () => sincronizarCampoConfiguracionEmulsion(id));
+        });
         let trabajosGuardados = []; 
         let idTrabajoActual = "";
         let idParadaActual = "";
@@ -25,12 +108,38 @@
             }
 
             document.getElementById("turnoEmulsion").addEventListener("change", () => {
+                sincronizarBotonesTurnoEmulsion();
                 actualizarListasPorTurno();
                 actualizarResumenUnificado();
                 ejecutarAutosave();
             });
 
+            const listaTrabajosEmulsion = document.getElementById("listaTrabajosEmulsion");
+            if (listaTrabajosEmulsion) {
+                listaTrabajosEmulsion.addEventListener("click", evento => {
+                    const botonEliminar = evento.target.closest("[data-eliminar-trabajo-emulsion]");
+                    if (botonEliminar) {
+                        const select = document.getElementById("selectIdExistente");
+                        select.value = botonEliminar.dataset.eliminarTrabajoEmulsion;
+                        eliminarIdSeleccionado();
+                        return;
+                    }
+                    const tarjeta = evento.target.closest("[data-seleccionar-trabajo-emulsion]");
+                    if (tarjeta) seleccionarTrabajoDesdeTarjetaEmulsion(tarjeta.dataset.seleccionarTrabajoEmulsion);
+                });
+            }
+
+            const listaParadasEmulsion = document.getElementById("listaParadasEmulsion");
+            if (listaParadasEmulsion) {
+                listaParadasEmulsion.addEventListener("click", evento => {
+                    const tarjeta = evento.target.closest("[data-seleccionar-parada-emulsion]");
+                    if (tarjeta) seleccionarParadaDesdeTarjetaEmulsion(tarjeta.dataset.seleccionarParadaEmulsion);
+                });
+            }
+
             cargarBorradorAutosave();
+            sincronizarBotonesTurnoEmulsion();
+            actualizarListasPorTurno();
             actualizarResumenUnificado();
             actualizarSelectIdsTrabajo();
         });
@@ -47,6 +156,8 @@
         function irAPaso1() {
             ocultarTodosPasos();
             document.getElementById("paso1").style.display = "block";
+            document.body.classList.remove("emulsion-work-mode", "emulsion-stop-mode");
+            document.body.classList.add("emulsion-step1-mode");
         }
 
         function irAPaso2() {
@@ -55,9 +166,41 @@
                 alert("Por favor seleccione un Turno antes de continuar.");
                 return;
             }
+            abrirConfiguracionEmulsion();
+        }
+
+        function irAGestionTrabajoEmulsion() {
             ocultarTodosPasos();
             document.getElementById("paso2").style.display = "block";
+            document.body.classList.remove("emulsion-step1-mode", "emulsion-stop-mode");
+            document.body.classList.add("emulsion-work-mode");
             actualizarSelectIdsTrabajo();
+            actualizarContextoTrabajoEmulsion();
+        }
+
+        function abrirConfiguracionEmulsion() {
+            Object.entries(camposConfiguracionEmulsion).forEach(([idVista, idOrigen]) => {
+                const vista = document.getElementById(idVista);
+                const origen = document.getElementById(idOrigen);
+                if (vista && origen) vista.value = origen.value;
+            });
+            cambiarNivelModal();
+            mostrarSeccionNivelEmulsion();
+            actualizarIdTronaduraAuto();
+            document.getElementById("cfgEmulsionIdTronadura").value = document.getElementById("modalIdTronadura").value;
+            sincronizarBotonesConfiguracionEmulsion();
+            document.getElementById("modalConfiguracionEmulsion").style.display = "flex";
+        }
+
+        function cerrarConfiguracionEmulsion() {
+            document.getElementById("modalConfiguracionEmulsion").style.display = "none";
+        }
+
+        function guardarConfiguracionEmulsion() {
+            Object.keys(camposConfiguracionEmulsion).forEach(sincronizarCampoConfiguracionEmulsion);
+            ejecutarAutosave();
+            cerrarConfiguracionEmulsion();
+            irAGestionTrabajoEmulsion();
         }
 
         function crearNuevoIdTrabajo() {
@@ -80,6 +223,7 @@
 
             cargarSelectParadas();
             document.getElementById("subtituloPaso3").innerText = `ID Trabajo: ${idTrabajoActual}`;
+            mostrarGestionParadasEmulsion();
             ocultarTodosPasos();
             document.getElementById("paso3").style.display = "block";
         }
@@ -95,8 +239,21 @@
             idTrabajoActual = seleccionado;
             cargarSelectParadas();
             document.getElementById("subtituloPaso3").innerText = `ID Trabajo: ${idTrabajoActual}`;
+            mostrarGestionParadasEmulsion();
             ocultarTodosPasos();
             document.getElementById("paso3").style.display = "block";
+        }
+
+        function usarTrabajoSeleccionadoEmulsion() {
+            const select = document.getElementById("selectIdExistente");
+            const tarjetaActiva = document.querySelector("#listaTrabajosEmulsion [data-seleccionar-trabajo-emulsion][aria-pressed='true']");
+            const idTrabajoSeleccionado = select?.value || tarjetaActiva?.dataset.seleccionarTrabajoEmulsion || "";
+            if (!idTrabajoSeleccionado) {
+                alert("Seleccione un trabajo de la lista para continuar.");
+                return;
+            }
+            if (select) select.value = idTrabajoSeleccionado;
+            seleccionarIdExistente();
         }
 
         function eliminarIdSeleccionado() {
@@ -119,18 +276,32 @@
         function volverAPaso2() {
             ocultarTodosPasos();
             document.getElementById("paso2").style.display = "block";
+            document.body.classList.remove("emulsion-stop-mode");
+            document.body.classList.add("emulsion-work-mode");
+            actualizarSelectIdsTrabajo();
+            actualizarContextoTrabajoEmulsion();
         }
 
         function volverAPaso3() {
+            mostrarGestionParadasEmulsion();
             ocultarTodosPasos();
             document.getElementById("paso3").style.display = "block";
             cargarSelectParadas();
         }
 
+        function mostrarGestionParadasEmulsion() {
+            document.body.classList.remove("emulsion-work-mode");
+            document.body.classList.add("emulsion-stop-mode");
+            const etiqueta = document.getElementById("etiquetaTrabajoParadasEmulsion");
+            if (etiqueta) etiqueta.textContent = idTrabajoActual || "TRABAJO";
+        }
+
         function cargarSelectParadas() {
             const select = document.getElementById("selectParadaExistente");
             if (!select) return;
-            select.innerHTML = '<option value="" disabled selected>-- Seleccione una parada guardada --</option>';
+            const seleccionAnterior = select.value;
+            select.replaceChildren(new Option("-- Seleccione una parada guardada --", "", true, true));
+            select.options[0].disabled = true;
             
             let trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
             if (!trabajo) {
@@ -138,11 +309,61 @@
                 trabajosGuardados.push(trabajo);
             }
 
-            if (trabajo.paradas) {
-                trabajo.paradas.forEach(p => {
-                    select.innerHTML += `<option value="${p.idParada}">${p.idParada} (${p.tiros.length} tiros)</option>`;
-                });
+            const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+            paradas.forEach(parada => {
+                const tiros = Array.isArray(parada.tiros) ? parada.tiros : [];
+                const total = Math.max(tiros.length, Number(parada.cantidadTiros || parada.totalTiros) || 0);
+                select.add(new Option(`${parada.idParada} (${total} tiros)`, parada.idParada));
+            });
+            select.value = paradas.some(parada => parada.idParada === seleccionAnterior) ? seleccionAnterior : "";
+            renderizarTarjetasParadasEmulsion();
+        }
+
+        function renderizarTarjetasParadasEmulsion() {
+            const lista = document.getElementById("listaParadasEmulsion");
+            if (!lista) return;
+            const select = document.getElementById("selectParadaExistente");
+            const seleccionado = select?.value || "";
+            const trabajo = trabajosGuardados.find(item => item.idTrabajo === idTrabajoActual);
+            const paradas = Array.isArray(trabajo?.paradas) ? trabajo.paradas : [];
+            const contador = document.getElementById("conteoParadasEmulsion");
+            if (contador) contador.textContent = String(paradas.length);
+
+            if (!paradas.length) {
+                lista.innerHTML = '<p class="anfo-sin-trabajos">Aún no hay paradas registradas en este trabajo.</p>';
+                return;
             }
+
+            lista.innerHTML = paradas.map(parada => {
+                const id = String(parada.idParada ?? "");
+                const idSeguro = escaparHtmlEmulsion(id);
+                const tiros = Array.isArray(parada.tiros) ? parada.tiros : [];
+                const capturados = tiros.filter(Boolean).length;
+                const total = Math.max(capturados, Number(parada.cantidadTiros || parada.totalTiros) || 0);
+                const completa = total > 0 && capturados >= total;
+                const detalle = total === 0
+                    ? "0 tiros · pendiente"
+                    : completa
+                        ? `${total} ${total === 1 ? "tiro" : "tiros"} · completa`
+                        : `${capturados} de ${total} capturados`;
+                const estado = total === 0
+                    ? '<span class="anfo-parada-estado en-curso">● Pendiente</span>'
+                    : completa
+                        ? '<span class="anfo-parada-estado">● OK</span>'
+                        : '<span class="anfo-parada-estado en-curso">● En curso</span>';
+                return `<button type="button" class="anfo-parada-fila" data-seleccionar-parada-emulsion="${idSeguro}" aria-pressed="${id === seleccionado}">
+                    <span class="anfo-parada-badge">${idSeguro}</span>
+                    <span class="anfo-parada-detalle"><strong>Parada ${idSeguro}</strong><small>${detalle}</small></span>
+                    ${estado}
+                </button>`;
+            }).join("");
+        }
+
+        function seleccionarParadaDesdeTarjetaEmulsion(idParada) {
+            const select = document.getElementById("selectParadaExistente");
+            if (!select) return;
+            select.value = idParada;
+            renderizarTarjetasParadasEmulsion();
         }
 
         function irAPaso4DesdeCrearParada() {
@@ -157,15 +378,19 @@
 
             const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
             if (trabajo) {
-                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
+                const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+                const paradaExistente = paradas.find(p => p.idParada === idParadaActual);
                 if (paradaExistente) {
-                    document.getElementById("cantTirosInput").value = paradaExistente.tiros.length;
+                    const tiros = Array.isArray(paradaExistente.tiros) ? paradaExistente.tiros : [];
+                    const cantidad = Number(paradaExistente.cantidadTiros || paradaExistente.totalTiros) || tiros.length || 3;
+                    document.getElementById("cantTirosInput").value = Math.min(50, Math.max(1, cantidad));
                 } else {
                     document.getElementById("cantTirosInput").value = 3;
                 }
             }
 
             document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
+            document.body.classList.remove("emulsion-stop-mode");
             ocultarTodosPasos();
             document.getElementById("paso4").style.display = "block";
         }
@@ -181,13 +406,17 @@
             idParadaActual = seleccionado;
             const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
             if (trabajo) {
-                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
+                const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+                const paradaExistente = paradas.find(p => p.idParada === idParadaActual);
                 if (paradaExistente) {
-                    document.getElementById("cantTirosInput").value = paradaExistente.tiros.length;
+                    const tiros = Array.isArray(paradaExistente.tiros) ? paradaExistente.tiros : [];
+                    const cantidad = Number(paradaExistente.cantidadTiros || paradaExistente.totalTiros) || tiros.length || 1;
+                    document.getElementById("cantTirosInput").value = Math.min(50, Math.max(1, cantidad));
                 }
             }
 
             document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
+            document.body.classList.remove("emulsion-stop-mode");
             ocultarTodosPasos();
             document.getElementById("paso4").style.display = "block";
         }
@@ -237,16 +466,96 @@
         function actualizarSelectIdsTrabajo() {
             const select = document.getElementById("selectIdExistente");
             if (!select) return;
-            select.innerHTML = '<option value="" disabled selected>-- Seleccione un ID guardado --</option>';
-            trabajosGuardados.forEach(t => {
-                select.innerHTML += `<option value="${t.idTrabajo}">${t.idTrabajo} (${t.paradas.length} paradas)</option>`;
+            const seleccionadoAnterior = select.value;
+            select.replaceChildren(new Option("-- Seleccione un trabajo guardado --", "", true, true));
+            select.options[0].disabled = true;
+            (Array.isArray(trabajosGuardados) ? trabajosGuardados : []).forEach(trabajo => {
+                const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+                const tiros = paradas.reduce((total, parada) => total + (Array.isArray(parada.tiros) ? parada.tiros.length : 0), 0);
+                select.add(new Option(`${trabajo.idTrabajo} (${paradas.length} paradas · ${tiros} tiros)`, trabajo.idTrabajo));
             });
+            select.value = (trabajosGuardados || []).some(trabajo => trabajo.idTrabajo === seleccionadoAnterior) ? seleccionadoAnterior : "";
+            renderizarTarjetasTrabajosEmulsion();
+            actualizarSugerenciaTrabajoEmulsion();
+        }
+
+        function escaparHtmlEmulsion(valor) {
+            return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+            }[caracter]));
+        }
+
+        function renderizarTarjetasTrabajosEmulsion() {
+            const lista = document.getElementById("listaTrabajosEmulsion");
+            if (!lista) return;
+            const select = document.getElementById("selectIdExistente");
+            const seleccionado = select ? select.value : "";
+            const trabajos = Array.isArray(trabajosGuardados) ? trabajosGuardados : [];
+            const contador = document.getElementById("conteoTrabajosEmulsion");
+            if (contador) contador.textContent = String(trabajos.length);
+            if (!trabajos.length) {
+                lista.innerHTML = '<p class="anfo-sin-trabajos">Aún no hay trabajos guardados.</p>';
+                return;
+            }
+            lista.innerHTML = trabajos.map(trabajo => {
+                const id = String(trabajo.idTrabajo ?? "");
+                const idSeguro = escaparHtmlEmulsion(id);
+                const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+                const tiros = paradas.reduce((total, parada) => total + (Array.isArray(parada.tiros) ? parada.tiros.length : 0), 0);
+                const completa = paradas.length > 0 && paradas.every(parada => Array.isArray(parada.tiros) && parada.tiros.length > 0);
+                const etiquetaParadas = `${paradas.length} ${paradas.length === 1 ? "parada" : "paradas"}`;
+                return `<div class="anfo-trabajo-fila">
+                    <button type="button" class="anfo-trabajo-seleccion" data-seleccionar-trabajo-emulsion="${idSeguro}" aria-pressed="${id === seleccionado}">
+                        <span class="anfo-trabajo-radio" aria-hidden="true"></span>
+                        <span class="anfo-trabajo-detalle"><strong>${idSeguro}</strong><small>${etiquetaParadas} · ${tiros} ${tiros === 1 ? "tiro" : "tiros"}</small></span>
+                        <span class="anfo-trabajo-estado${completa ? "" : " sin-tiros"}">${completa ? "Completo" : "En curso"}</span>
+                    </button>
+                    <button type="button" class="anfo-btn-eliminar-trabajo" data-eliminar-trabajo-emulsion="${idSeguro}" aria-label="Eliminar el trabajo ${idSeguro}" title="Eliminar">🗑</button>
+                </div>`;
+            }).join("");
+        }
+
+        function seleccionarTrabajoDesdeTarjetaEmulsion(idTrabajo) {
+            const select = document.getElementById("selectIdExistente");
+            if (!select) return;
+            select.value = idTrabajo;
+            renderizarTarjetasTrabajosEmulsion();
+        }
+
+        function actualizarSugerenciaTrabajoEmulsion() {
+            const etiqueta = document.getElementById("sugerenciaTrabajoEmulsion");
+            if (!etiqueta) return;
+            const numeros = (trabajosGuardados || []).map(trabajo => {
+                const coincidencia = String(trabajo.idTrabajo || "").match(/^TRABAJO-(\d+)$/i);
+                return coincidencia ? Number(coincidencia[1]) : 0;
+            });
+            etiqueta.textContent = `TRABAJO-${String(Math.max(0, ...numeros) + 1).padStart(2, "0")}`;
+        }
+
+        function actualizarContextoTrabajoEmulsion() {
+            const turno = document.getElementById("turnoEmulsion")?.value || "A";
+            const fecha = document.getElementById("fechaEmulsion")?.value || "";
+            const idTronadura = document.getElementById("modalIdTronadura")?.value.trim() || "Sin asignar";
+            const resumenTurno = document.getElementById("resumenTurnoTrabajoEmulsion");
+            const resumenId = document.getElementById("resumenIdTronaduraTrabajoEmulsion");
+            if (resumenTurno) resumenTurno.textContent = `${turno} · ${fecha}`;
+            if (resumenId) resumenId.textContent = idTronadura;
         }
 
         function ejecutarAutosave() {
             guardarHistoricoTrabajos();
             const borrador = {
-                trabajos: trabajosGuardados
+                trabajos: trabajosGuardados,
+                turno: document.getElementById("turnoEmulsion").value,
+                mina: document.getElementById("modalMina").value,
+                nivel: document.getElementById("modalNivel").value,
+                bloque: document.getElementById("modalBloque").value,
+                numZanja: document.getElementById("numZanja").value,
+                calleZanja: document.getElementById("calleZanja").value,
+                calleUcl: document.getElementById("calleUcl").value,
+                paradasInicioFin: document.getElementById("paradasInicioFin").value,
+                detallePanel2: document.getElementById("detallePanel2").value,
+                faseZanja: document.getElementById("faseZanja").value
             };
             localStorage.setItem("jej_emulsion_draft", JSON.stringify(borrador));
             
@@ -264,9 +573,16 @@
 
             try {
                 const b = JSON.parse(borradorRaw);
+                if (b.turno === "A" || b.turno === "B") document.getElementById("turnoEmulsion").value = b.turno;
+                ["mina", "nivel", "bloque", "numZanja", "calleZanja", "calleUcl", "paradasInicioFin", "detallePanel2", "faseZanja"].forEach(campo => {
+                    const control = document.getElementById(({ mina: "modalMina", nivel: "modalNivel", bloque: "modalBloque", numZanja: "numZanja", calleZanja: "calleZanja", calleUcl: "calleUcl", paradasInicioFin: "paradasInicioFin", detallePanel2: "detallePanel2", faseZanja: "faseZanja" })[campo]);
+                    if (control && b[campo] !== undefined) control.value = b[campo];
+                });
                 if (b.trabajos && Array.isArray(b.trabajos)) {
                     trabajosGuardados = b.trabajos;
                 }
+                cambiarNivelModal();
+                actualizarIdTronaduraAuto();
                 actualizarListasPorTurno();
                 actualizarSelectIdsTrabajo();
             } catch (e) {
@@ -322,32 +638,58 @@
         }
 
         function actualizarResumenUnificado() {
-            const mina = document.getElementById("modalMina").value || "Esmeralda";
-            const nivel = document.getElementById("modalNivel").value || "NP";
-            const bloque = document.getElementById("modalBloque").value || "Ext Fw";
-            const tronadura = document.getElementById("modalIdTronadura").value || "Sin asignar";
-
-            const supJeJ = document.getElementById("modalSupJeJ").value || "Sin asignar";
+            const encargado = localStorage.getItem("jej_usuario_activo") || "Sin asignar";
+            const supJeJ = document.getElementById("modalSupJeJ").value.trim() || "Sin asignar";
             const supsDet = Array.from(document.querySelectorAll('#modalPersonal input[name="supervisorDet"]'))
-                                .map(i => i.value).filter(Boolean).join(", ") || "Sin asignar";
+                                .map(i => i.value.trim()).filter(Boolean).join(", ") || "Sin asignar";
             const respsDet = Array.from(document.querySelectorAll('#modalPersonal input[name="responsableDet"]'))
-                                .map(i => i.value).filter(Boolean).join(", ") || "Sin asignar";
-
-            document.getElementById("resumenUnificado").innerHTML = `
-               
-                <strong>Encargado JeJ:</strong> ${localStorage.getItem("jej_usuario_activo") || 'N/A'}<br>
-                <strong>Supervisor JeJ:</strong> ${supJeJ}<br>
-                <strong>Supervisor(es) DET:</strong> ${supsDet}<br>
-                <strong>Responsable(s) DET:</strong> ${respsDet}
-            `;
+                                .map(i => i.value.trim()).filter(Boolean).join(", ") || "Sin asignar";
+            const personas = [
+                { rol: "Encargado JeJ", nombre: encargado },
+                { rol: "Supervisor JeJ", nombre: supJeJ },
+                { rol: "Supervisor(es) DET", nombre: supsDet, det: true },
+                { rol: "Responsable(s) DET", nombre: respsDet, det: true }
+            ];
+            const resumen = document.getElementById("resumenUnificado");
+            resumen.replaceChildren();
+            personas.forEach(persona => {
+                const fila = document.createElement("div");
+                fila.className = "anfo-persona";
+                const avatar = document.createElement("span");
+                avatar.className = "anfo-avatar" + (persona.det ? " det" : "");
+                avatar.textContent = persona.nombre.split(/\s+/).filter(Boolean).slice(0, 2).map(parte => Array.from(parte)[0]).join("").toUpperCase() || "—";
+                const texto = document.createElement("span");
+                const rol = document.createElement("small");
+                rol.textContent = persona.rol;
+                const nombre = document.createElement("strong");
+                nombre.textContent = persona.nombre;
+                texto.append(rol, nombre);
+                fila.append(avatar, texto);
+                resumen.appendChild(fila);
+            });
+            const completo = personas.every(persona => persona.nombre !== "Sin asignar");
+            const estado = document.getElementById("estadoPersonalEmulsion");
+            estado.textContent = completo ? "✓ Completo" : "Pendiente";
+            estado.classList.toggle("incompleto", !completo);
         }
 
         function actualizarListasPorTurno() {
             const turnoSeleccionado = document.getElementById("turnoEmulsion").value;
-            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            let personalMap = {};
+            try { personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}"); } catch (error) { console.error("No se pudo leer el personal guardado", error); }
+
+            function nombresDelRol(rolKey, turno) {
+                if (window.JEJUsuarios && typeof window.JEJUsuarios.nombres === "function") return window.JEJUsuarios.nombres(rolKey, turno);
+                const registros = Array.isArray(personalMap[rolKey]) ? personalMap[rolKey] : [];
+                return Array.from(new Set(registros.map(item => typeof item === "object" ? item : { nombre: item, turno: "Ambos" })
+                    .filter(item => item && item.nombre && (!turno || !item.turno || item.turno === "Ambos" || item.turno === turno))
+                    .map(item => String(item.nombre).trim()).filter(Boolean)));
+            }
 
             function poblarGrupo(rolKey, selectorNombre, baseListId) {
                 const inputs = document.querySelectorAll(`input[name="${selectorNombre}"]`);
+                const todosLosNombres = nombresDelRol(rolKey, "");
+                const nombresTurno = nombresDelRol(rolKey, turnoSeleccionado);
                 inputs.forEach((input, index) => {
                     let datalistId = input.getAttribute("list") || baseListId;
                     let datalist = document.getElementById(datalistId);
@@ -360,23 +702,17 @@
                         document.body.appendChild(datalist);
                     }
 
-                    datalist.innerHTML = "";
-                    let primerNombre = "";
-
-                    if (personalMap[rolKey] && Array.isArray(personalMap[rolKey])) {
-                        personalMap[rolKey].forEach(item => {
-                            const nombre = typeof item === 'object' ? item.nombre : item;
-                            const turno = typeof item === 'object' ? item.turno : "Ambos";
-
-                            if (!turnoSeleccionado || turno === turnoSeleccionado || turno === "Ambos") {
-                                datalist.innerHTML += `<option value="${nombre}">`;
-                                if (!primerNombre) primerNombre = nombre;
-                            }
-                        });
-                    }
-
-                    if (index === 0 && input && primerNombre && !input.value) {
-                        input.value = primerNombre;
+                    datalist.replaceChildren();
+                    nombresTurno.forEach(nombre => {
+                        const opcion = document.createElement("option");
+                        opcion.value = nombre;
+                        datalist.appendChild(opcion);
+                    });
+                    const valorActual = input.value.trim();
+                    const valorGestionado = todosLosNombres.some(nombre => nombre.toLocaleLowerCase() === valorActual.toLocaleLowerCase());
+                    const valorDisponible = nombresTurno.some(nombre => nombre.toLocaleLowerCase() === valorActual.toLocaleLowerCase());
+                    if (!valorActual || (valorGestionado && !valorDisponible)) {
+                        input.value = nombresTurno[index] || (index === 0 ? nombresTurno[0] || "" : "");
                     }
                 });
             }
@@ -404,9 +740,10 @@
             
             const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
             if (trabajo) {
-                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
+                const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+                const paradaExistente = paradas.find(p => p.idParada === idParadaActual);
                 if (paradaExistente) {
-                    tirosTemporales = [...paradaExistente.tiros];
+                    tirosTemporales = Array.isArray(paradaExistente.tiros) ? [...paradaExistente.tiros] : [];
                 } else {
                     tirosTemporales = [];
                 }
@@ -468,6 +805,7 @@
                 onPrevious: anteriorTiroEmulsion,
                 onCancel: function () {
                     tirosTemporales = [];
+                    mostrarGestionParadasEmulsion();
                     ocultarTodosPasos();
                     document.getElementById("paso3").style.display = "block";
                     cargarSelectParadas();
@@ -523,15 +861,18 @@
                     let paradaIndex = trabajo.paradas.findIndex(p => p.idParada === idParadaActual);
                     if (paradaIndex >= 0) {
                         trabajo.paradas[paradaIndex].tiros = [...tirosTemporales];
+                        trabajo.paradas[paradaIndex].cantidadTiros = totalTirosParadaActual;
                     } else {
                         trabajo.paradas.push({
                             idParada: idParadaActual,
+                            cantidadTiros: totalTirosParadaActual,
                             tiros: [...tirosTemporales]
                         });
                     }
                 }
 
                 ejecutarAutosave();
+                mostrarGestionParadasEmulsion();
                 ocultarTodosPasos();
                 document.getElementById("paso3").style.display = "block";
                 cargarSelectParadas();
@@ -550,6 +891,7 @@
         }
 
         function mostrarResumenParadasFinal() {
+            document.body.classList.remove("emulsion-stop-mode");
             ocultarTodosPasos();
             document.getElementById("paso6").style.display = "block";
             document.querySelector("#paso6 h2").innerText = `Resumen de Paradas (Emulsión) - Trabajo: ${idTrabajoActual}`;
@@ -599,10 +941,13 @@
             const parada = trabajo ? trabajo.paradas.find(p => p.idParada === idParadaActual) : null;
 
             if (parada) {
-                document.getElementById("cantTirosInput").value = parada.tiros.length;
+                const tiros = Array.isArray(parada.tiros) ? parada.tiros : [];
+                const cantidad = Number(parada.cantidadTiros || parada.totalTiros) || tiros.length || 1;
+                document.getElementById("cantTirosInput").value = Math.min(50, Math.max(1, cantidad));
             }
 
             document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
+            document.body.classList.remove("emulsion-stop-mode");
             ocultarTodosPasos();
             document.getElementById("paso4").style.display = "block";
         }
