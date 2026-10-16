@@ -16,12 +16,8 @@
   const SECTION_ALIASES = {
     anfo: 'anfo',
     emulsion: 'emulsion',
-    emulsión: 'emulsion',
     perforacion: 'perforacion',
-    perforación: 'perforacion',
     reduccion: 'reduccion',
-    reducción: 'reduccion',
-    reducion: 'reduccion'
   };
 
   let msalClient;
