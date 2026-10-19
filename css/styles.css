@@ -2652,3 +2652,179 @@ body[data-section="reduccion"].rs-resumen-final-mode #v8:not([hidden]) { display
 .rs-final-footer { display:flex; justify-content:space-between; margin-top:8px; }
 .rs-final-footer button { padding:4px 0; color:#cfdbf0; background:transparent; border:0; font:inherit; font-size:9px; cursor:pointer; }
 @media(max-width:390px) { .rs-final-stats strong { font-size:19px; }.rs-final-chart { padding:8px; }.rs-chart-row { grid-template-columns:48px minmax(0,1fr); }.rs-final-tiempos { gap:5px 8px; font-size:8px; } }
+
+/* Sistema visual común ANFO · Emulsión · Perforación · Reducción.
+   Armoniza los componentes compartidos sin cambiar datos ni acciones. */
+:root {
+    --jej-control-radius: 9px;
+    --jej-card-radius: 12px;
+    --jej-touch-size: 42px;
+    --jej-focus-ring: 0 0 0 3px rgba(36, 184, 232, .18);
+}
+
+body[data-section="anfo"],
+body[data-section="emulsion"],
+body[data-section="reduccion"] {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-x: none;
+}
+
+/* Perforación comparte data-section="anfo" y controles jp-* con ANFO. */
+body[data-section="anfo"] .anfo-step-card,
+body[data-section="emulsion"] .anfo-step-card,
+body[data-section="reduccion"] .anfo-step-card,
+body[data-section="anfo"] .anfo-trabajo-panel,
+body[data-section="emulsion"] .anfo-trabajo-panel,
+body[data-section="reduccion"] .anfo-trabajo-panel,
+body[data-section="anfo"] .jp-panel,
+body[data-section="anfo"] .jp-q,
+body[data-section="anfo"] .jp-resumen-box,
+body[data-section="anfo"] .jp-perd,
+body[data-section="anfo"] .jp-campo,
+body[data-section="anfo"] .jp-multi,
+body[data-section="anfo"] .jp-lista-paradas,
+body[data-section="anfo"] .jp-parada,
+body[data-section="emulsion"] .jp-panel,
+body[data-section="emulsion"] .jp-q,
+body[data-section="emulsion"] .jp-resumen-box,
+body[data-section="reduccion"] .rs-config-card {
+    border-radius: var(--jej-card-radius);
+}
+
+body[data-section="anfo"] .anfo-step-label,
+body[data-section="emulsion"] .anfo-step-label,
+body[data-section="reduccion"] .anfo-step-label,
+body[data-section="anfo"] .anfo-trabajo-panel h3,
+body[data-section="emulsion"] .anfo-trabajo-panel h3,
+body[data-section="reduccion"] .anfo-trabajo-panel h3,
+body[data-section="anfo"] .jp-panel-t,
+body[data-section="anfo"] .jp-q-top,
+body[data-section="anfo"] .jp-sec,
+body[data-section="anfo"] .jp-parada-t,
+body[data-section="emulsion"] .jp-panel-t,
+body[data-section="emulsion"] .jp-q-top,
+body[data-section="emulsion"] .jp-sec {
+    color: #31538c;
+    font-weight: 800;
+    letter-spacing: .045em;
+}
+
+body[data-section="anfo"] input:not([type="checkbox"]):not([type="radio"]),
+body[data-section="anfo"] select,
+body[data-section="anfo"] textarea,
+body[data-section="emulsion"] input:not([type="checkbox"]):not([type="radio"]),
+body[data-section="emulsion"] select,
+body[data-section="emulsion"] textarea,
+body[data-section="reduccion"] input:not([type="checkbox"]):not([type="radio"]),
+body[data-section="reduccion"] select,
+body[data-section="reduccion"] textarea {
+    border-radius: var(--jej-control-radius);
+}
+
+body[data-section="anfo"] input:focus-visible,
+body[data-section="anfo"] select:focus-visible,
+body[data-section="anfo"] textarea:focus-visible,
+body[data-section="emulsion"] input:focus-visible,
+body[data-section="emulsion"] select:focus-visible,
+body[data-section="emulsion"] textarea:focus-visible,
+body[data-section="reduccion"] input:focus-visible,
+body[data-section="reduccion"] select:focus-visible,
+body[data-section="reduccion"] textarea:focus-visible,
+body[data-section="anfo"] .anfo-trabajo-seleccion:focus-visible,
+body[data-section="anfo"] .anfo-parada-fila:focus-visible,
+body[data-section="reduccion"] .rs-colpa-card:focus-visible,
+body[data-section="reduccion"] .rs-resumen-colpa:focus-visible {
+    outline: 2px solid var(--jej-cyan);
+    outline-offset: 2px;
+    box-shadow: var(--jej-focus-ring);
+}
+
+body[data-section="anfo"] .anfo-turno-boton,
+body[data-section="emulsion"] .anfo-turno-boton,
+body[data-section="reduccion"] .anfo-turno-boton,
+body[data-section="anfo"] .jp-opt,
+body[data-section="anfo"] .jp-chip,
+body[data-section="reduccion"] .rs-tab,
+body[data-section="reduccion"] .rs-capture-tab,
+body[data-section="reduccion"] .rs-colpa-paso {
+    touch-action: manipulation;
+}
+
+body[data-section="anfo"] .btn-primary,
+body[data-section="emulsion"] .btn-primary,
+body[data-section="reduccion"] .btn-primary,
+body[data-section="anfo"] .anfo-btn-crear,
+body[data-section="emulsion"] .anfo-btn-crear,
+body[data-section="reduccion"] .anfo-btn-crear,
+body[data-section="anfo"] .anfo-btn-usar,
+body[data-section="emulsion"] .anfo-btn-usar,
+body[data-section="reduccion"] .anfo-btn-usar,
+body[data-section="anfo"] .anfo-btn-volver,
+body[data-section="emulsion"] .anfo-btn-volver,
+body[data-section="reduccion"] .anfo-btn-volver,
+body[data-section="reduccion"] .rs-colpas-nav button {
+    min-height: var(--jej-touch-size);
+    border-radius: 10px;
+    font-weight: 800;
+    touch-action: manipulation;
+}
+
+body[data-section="anfo"] .anfo-btn-crear,
+body[data-section="emulsion"] .anfo-btn-crear,
+body[data-section="reduccion"] .anfo-btn-crear {
+    color: #fff;
+    background: linear-gradient(180deg, #f5a72d, #d77b00);
+    border: 1px solid #f5b447;
+}
+
+body[data-section="anfo"] .jp-opt.sel,
+body[data-section="anfo"] .jp-chip.on,
+body[data-section="reduccion"] .jp-opt.sel,
+body[data-section="anfo"] .anfo-choice-row button.selected,
+body[data-section="emulsion"] .anfo-choice-row button.selected {
+    color: #fff;
+    background: linear-gradient(180deg, #3b65b6, #24488f);
+    border-color: #24488f;
+}
+
+/* En tablet se aprovecha el ancho, con un límite cómodo para lectura y captura. */
+@media (min-width: 521px) and (max-width: 900px) {
+    body[data-section="anfo"].anfo-step1-mode > #anfoMain,
+    body[data-section="anfo"].anfo-work-mode > #anfoMain,
+    body[data-section="anfo"].anfo-stop-mode > #anfoMain,
+    body[data-section="emulsion"].emulsion-step1-mode > #emulsionMain,
+    body[data-section="emulsion"].emulsion-work-mode > #emulsionMain,
+    body[data-section="emulsion"].emulsion-stop-mode > #emulsionMain,
+    body[data-section="reduccion"].reduccion-step1-mode > main.card-wide,
+    body[data-section="reduccion"].rs-flow-mode > main.card-wide,
+    body[data-section="reduccion"].rs-capture-mode > main.card-wide,
+    body[data-section="reduccion"].rs-planilla-mode > main.card-wide,
+    body[data-section="reduccion"].rs-resumen-final-mode > main.card-wide {
+        width: min(calc(100% - 40px), 680px);
+        max-width: 680px;
+    }
+}
+
+@media (max-width: 520px) {
+    body[data-section="anfo"] .anfo-step-card,
+    body[data-section="emulsion"] .anfo-step-card,
+    body[data-section="reduccion"] .anfo-step-card,
+    body[data-section="anfo"] .jp-panel,
+    body[data-section="anfo"] .jp-q,
+    body[data-section="emulsion"] .jp-panel,
+    body[data-section="reduccion"] .rs-config-card {
+        padding: clamp(9px, 3vw, 12px);
+    }
+
+    body[data-section="anfo"] .anfo-turno-boton,
+    body[data-section="emulsion"] .anfo-turno-boton,
+    body[data-section="reduccion"] .anfo-turno-boton,
+    body[data-section="anfo"] .jp-opt,
+    body[data-section="anfo"] .jp-chip,
+    body[data-section="reduccion"] .rs-tab,
+    body[data-section="reduccion"] .rs-capture-tab,
+    body[data-section="reduccion"] .rs-colpa-paso {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+}
