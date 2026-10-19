@@ -16,14 +16,16 @@
 
   /* ---------- Listas desplegables ---------- */
   var LISTAS = {
-    turno:      ['A', 'B', 'Especial'],
+    turno:      ['A', 'B'],
     siNo:       ['Si', 'No'],
     nivel:      ['NP', 'UCL', 'Panel 2'],
     bloque:     ['B-2', 'B-6', 'Ext Fw', 'DHz'],
     fase:       ['1', '1 2/3', '2', '3', '4'],
     problemas:  ['Barra Pegada', 'Repasos', 'Cambio Bit', 'Cambio Barras', 'Equipo fuera servicio'],
     estadoTiro: ['Bueno', 'Tapado', 'Colapsado', 'Desviado', 'Obstruido'],
-    signo:      ['Negativo', 'Positivo']
+    signo:      ['Negativo', 'Positivo'],
+    desvio:     ['Dentro', 'Fuera'],
+    aguaEstado: ['Seco', 'Agua']
   };
 
   /* ---------- Definición de columnas del registro por tiro ---------- */
@@ -41,6 +43,11 @@
       { k: 'estado',     label: 'ESTADO TIRO',                  type: 'select', list: 'estadoTiro', w: 10, bg: 'FFF2CC' },
       { k: 'conAgua',    label: 'TIRO CON AGUA',                type: 'select', list: 'siNo', w: 8, bg: 'FFF2CC' },
       { k: 'signo',      label: 'TIRO NEGATIVO / POSITIVO',     type: 'select', list: 'signo', w: 10, bg: 'FFF2CC' },
+      { k: 'desvio',     label: 'Desvío',                       type: 'select', list: 'desvio', w: 9, bg: 'FFF2CC' },
+      { k: 'intentosDestape', label: 'Intentos de destape',     type: 'num', w: 9, bg: 'FFF2CC' },
+      { k: 'numBarras',  label: 'Número de barras',              type: 'num', w: 9, bg: 'FFF2CC' },
+      { k: 'brocas',     label: 'Brocas',                       type: 'text', w: 12, bg: 'DCE6F1' },
+      { k: 'barras',     label: 'Barras',                       type: 'text', w: 12, bg: 'DCE6F1' },
       { k: 'abat',       label: 'ÁNGULO ABATIMIENTO',           type: 'num',    w: 10, bg: '7030A0', fg: 'FFFFFF', unit: '°' },
       { k: 'rot',        label: 'ÁNGULO ROTACIÓN',              type: 'num',    w: 10, bg: '7030A0', fg: 'FFFFFF', unit: '°' },
       { k: 'entubados',  label: 'MTS ENTUBADOS',                type: 'num',    w: 9,  bg: 'FF99FF', unit: 'm' },
@@ -104,7 +111,7 @@
     return s;
   }
   function filaUsada(r) {
-    return !!(r.parada || r.tiro || r.mDiseno || r.mPerf);
+    return !!(r.capturado || r.mDiseno || r.mPerf || r.estado || r.problema || r.pPerc || r.pAv);
   }
   function filaTieneDatos(r) {
     return Object.keys(r).some(function (k) { return r[k] !== '' && r[k] !== null && r[k] !== undefined; });
@@ -862,7 +869,7 @@
   'use strict';
   var J = window.JEJ, U = J.ui, el = U.el;
 
-  var ui = { vista: 'datos', tiro: null, aviso: '', parada: '', busca: '', nuevaParada: false, asist: null };
+  var ui = { vista: 'datos', tiro: null, aviso: '', parada: '', busca: '', nuevaParada: false, asist: null, seleccionTrabajo: '', cantidadTiros: 1, pestanaTiro: 'medidas' };
   function P() { return J.store.current(); }
 
   /* ---------- Consultas sobre trabajos / paradas / tiros ---------- */
@@ -875,6 +882,11 @@
     return o;
   }
   function metros(rows) { var s = 0; rows.forEach(function (r) { var m = J.num(r.mPerf); if (!isNaN(m)) s += m; }); return s; }
+  function tiroCapturado(r) { if(!r)return false;if(Object.prototype.hasOwnProperty.call(r,'capturado'))return !!r.capturado;return !!(r.mDiseno||r.mPerf||r.estado||r.problema||r.pPerc||r.pAv); }
+  function todasParadasTienenTirosCapturados(p,trabajo){var paradas=paradasDe(p,trabajo);return paradas.length>0&&paradas.every(function(par){var rows=tirosDe(p,trabajo,par);return rows.length>0&&rows.every(tiroCapturado);});}
+  function configurarTirosExistentes(p,parada){var rows=tirosDe(p,p.trabajoActual,parada);ui.parada=parada;ui.cantidadTiros=rows.length||1;ui.agregarCantidad=false;ui.configurarExistentes=true;ui.vista='cantidad';render();window.scrollTo(0,0);}
+  function guardarTiroCaptura(row){row.capturado=true;J.store.touch();ui.diagramUpdater=null;ui.tiro=null;ui.configurarExistentes=false;ui.agregarCantidad=false;ui.vista='parada';render();window.scrollTo(0,0);}
+  function abrirPostura(p,tab){ui.tiro=null;ui.asist=null;ui.posturaTab=tab||'tiempos';ui.vista='postura';render();window.scrollTo(0,0);}
   function sinAsignar(v) { return v ? v : 'Sin asignar'; }
   function pctTxt(v) { return isFinite(v) ? Math.round(v * 100) + '%' : '—'; }
   function sugerirParada(p) {
@@ -1273,91 +1285,164 @@ var rolPersonal = {
 
   /* ---------- Paso 1: Datos generales y turno ---------- */
   function vistaDatos(host, p) {
-    var h = p.header, card = el('div', { class: 'jp-card card-wide' });
+    var h = p.header, card = el('div', { class: 'anfo-paso1' });
+    if (h.turno !== 'A' && h.turno !== 'B') { h.turno = 'A'; J.store.touch(); }
     if (aplicarPersonalPorDefecto(h)) J.store.touch();
-    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 1: Datos Generales y Turno' }));
-    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Ingrese los datos básicos del seguimiento' }));
+    card.appendChild(el('h2', { text: 'Paso 1: Datos Generales y Turno (Perforación)' }));
+    card.appendChild(el('p', { class: 'subtitle', text: 'Ingrese los datos básicos del seguimiento' }));
 
-    var box = el('div', { class: 'jej-card' }); /* tarjeta plateada del diseño v2 */
-    box.appendChild(el('label', { class: 'jp-lbl', text: 'Fecha:' }));
-    var f = el('input', { type: 'date', class: 'jp-in btn-primary', value: h.fecha || '' });
-    f.addEventListener('input', function () { h.fecha = f.value; etiquetaPlanilla(p); J.store.touch(); });
-    box.appendChild(f);
+    var fecha = el('div', { class: 'anfo-step-card' }, [el('h3', { class: 'anfo-step-label' }, [el('i'), document.createTextNode(' Fecha y turno')])]);
+    var f = el('input', { id: 'fechaPerforacion', type: 'date', value: h.fecha || '' });
+    f.addEventListener('change', function () { h.fecha = f.value; etiquetaPlanilla(p); J.store.touch(); });
+    fecha.appendChild(mf('Fecha:', f));
+    var turnos = el('div', { class: 'form-group-field' }, [el('label', { text: 'Turno:' })]);
+    var tg = el('div', { class: 'anfo-turno-botones', role: 'group', 'aria-label': 'Seleccione el turno' });
+    ['A', 'B'].forEach(function (v) {
+      tg.appendChild(el('button', { type: 'button', class: 'anfo-turno-boton' + (h.turno === v ? ' activo' : ''), 'aria-pressed': h.turno === v ? 'true' : 'false', text: (v === 'A' ? '☀ ' : '☾ ') + 'Turno ' + v, onclick: function () {
+        h.turno = v; aplicarPersonalPorDefecto(h); etiquetaPlanilla(p); J.store.touch(); render();
+      } }));
+    });
+    turnos.appendChild(tg); fecha.appendChild(turnos); card.appendChild(fecha);
 
-    box.appendChild(el('label', { class: 'jp-lbl', text: 'Turno:' }));
-    box.appendChild(sel(h, 'turno', 'turno', '-- Seleccione Turno --', function () { aplicarPersonalPorDefecto(h); etiquetaPlanilla(p); J.store.touch(); render(); }));
-
-    box.appendChild(el('div', { class: 'jp-sec' }, [
-      el('span', { text: '2. Datos de Postura y Personal' }),
-      el('button', { type: 'button', class: 'btn-primary', text: '⚙️ Ingreso / Editar Datos', onclick: function () { abrirAsistente('postura'); } })
+    var personal = el('div', { class: 'anfo-step-card anfo-personal-card' });
+    var personas = [
+      ['Encargado JeJ', sinAsignar(h.encSeg), false], ['Supervisor JeJ', sinAsignar(h.supJej), false],
+      ['Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', ')), true], ['Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', ')), true]
+    ];
+    var completos = personas.every(function (x) { return x[1] !== 'Sin asignar'; });
+    personal.appendChild(el('div', { class: 'anfo-personal-head' }, [
+      el('h3', { class: 'anfo-step-label' }, [el('i', { class: 'cyan' }), document.createTextNode(' Postura y personal')]),
+      el('span', { class: 'anfo-estado-personal' + (completos ? '' : ' incompleto'), text: completos ? '✓ Completo' : 'Pendiente' })
     ]));
-    
-    
-    function negrita(t, v) { var s = el('div'); s.appendChild(el('b', { text: t + ': ' })); s.appendChild(document.createTextNode(v)); return s; }
-    var linea1 = el('div'); 
-    box.appendChild(el('div', { class: 'jp-resumen-box resumen-box' }, 
-      [negrita('Encargado JeJ', sinAsignar(h.encSeg)), negrita('Supervisor JeJ', sinAsignar(h.supJej)),
-      negrita('Supervisor(es) DET', sinAsignar(partes(h.supDet).join(', '))), negrita('Perforista(s) DET', sinAsignar(partes(h.perforistaDet).join(', '))),]));
-
-    card.appendChild(box);
-    card.appendChild(el('div', { class: 'jp-fila2 grid-2' }, [
-      el('a', { href: '../index.html', class: 'btn-primary', text: 'Volver al Menú' }),
-      el('button', { type: 'button', class: 'btn-primary', text: 'Ir a Gestión de ID ➜', onclick: function () { ir('id'); } })
+    personas.forEach(function (x) {
+      var iniciales = x[1] === 'Sin asignar' ? '—' : x[1].split(/[ ,/]+/).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('');
+      personal.appendChild(el('div', { class: 'anfo-persona' }, [
+        el('span', { class: 'anfo-avatar' + (x[2] ? ' det' : ''), text: iniciales }),
+        el('div', null, [el('small', { text: x[0] }), el('strong', { text: x[1] })])
+      ]));
+    });
+    card.appendChild(personal);
+    card.appendChild(el('div', { class: 'anfo-pie' }, [
+      el('a', { href: '../index.html', class: 'btn-primary', text: '‹ Volver al Menú' }),
+      el('button', { type: 'button', class: 'btn-primary', text: 'Siguiente ➜', onclick: function () { ir('config'); } })
     ]));
     host.appendChild(card);
   }
 
-  /* ---------- Paso 2: Gestión de ID de trabajo ---------- */
-  function vistaId(host, p) {
-    var card = el('div', { class: 'jp-card card-wide' });
-    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 2: Gestión de ID de Trabajo' }));
-    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Cree un nuevo ID o seleccione uno ya existente' }));
-
-    /* crear */
-    var inp = el('input', { type: 'text', class: 'jp-in', placeholder: 'Ej. TRABAJO-01', 'aria-label': 'Nuevo ID de trabajo' });
-    var err = el('div', { class: 'jp-q-error' });
-    function crear() {
-      var n = inp.value.trim();
-      if (!n) { err.textContent = 'Escribe un nombre para el ID de trabajo.'; return; }
-      var ya = p.trabajos.filter(function (t) { return t.toLowerCase() === n.toLowerCase(); })[0];
-      if (ya) n = ya; else p.trabajos.push(n);
-      p.trabajoActual = n; ui.nuevaParada = paradasDe(p, n).length === 0; ui.busca = ''; J.store.touch(); ir('resumen');
+  /* ---------- Paso 2: Ubicación y postura ---------- */
+  function vistaConfiguracion(host, p) {
+    var h = p.header, card = el('div', { class: 'anfo-config-card', style: 'margin:0 auto' });
+    card.appendChild(el('h2', { text: 'Paso 2: Configuración de Postura' }));
+    function seccion(titulo, color) { return el('section', { class: 'anfo-config-section' }, [el('h3', { class: 'anfo-config-label' }, [el('i', { class: color || '' }), document.createTextNode(' ' + titulo)])]); }
+    function campo(parent, label, key, ph) {
+      var wrap = el('div', { class: 'form-group-field' }), input = el('input', { type: 'text', value: h[key] || '', placeholder: ph, 'aria-label': label });
+      wrap.appendChild(el('label', { text: label })); wrap.appendChild(input); parent.appendChild(wrap);
+      input.addEventListener('input', function () { h[key] = input.value; actualizarId(); }); return input;
     }
-    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); crear(); } });
-    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
-      el('div', { class: 'jp-panel-t', text: '➕ CREAR NUEVO ID DE TRABAJO:' }), inp, err,
-      el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:10px', text: 'Crear e Ir a Paradas', onclick: crear })
+    var loc = seccion('1 · Ubicación y postura'), mines = ['Andesita', 'Diablo Regimiento', 'Diamante', 'Esmeralda', 'NNM', 'Pacífico Superior', 'Pilar Norte', 'Reservas Norte', 'TT8'];
+    var minaSelect = el('select', { class: 'anfo-config-native', 'aria-label': 'Mina' });
+    mines.forEach(function (v) { minaSelect.appendChild(el('option', { value: v, text: v })); }); minaSelect.value = h.mina || 'Esmeralda';
+    loc.appendChild(el('span', { class: 'anfo-config-field-label', text: 'Mina' })); loc.appendChild(minaSelect);
+    var mg = el('div', { class: 'anfo-choice-row', role: 'group', 'aria-label': 'Seleccionar mina' });
+    mines.forEach(function (v) { mg.appendChild(el('button', { type: 'button', class: v === minaSelect.value ? 'selected' : '', text: ({'Diablo Regimiento':'Diablo Reg.','Pacífico Superior':'Pacífico Sup.'}[v] || v), onclick: function () { minaSelect.value = v; h.mina = v; Array.from(mg.children).forEach(function (b) { b.classList.toggle('selected', b === this); }, this); actualizarId(); } })); });
+    loc.appendChild(mg);
+    var niveles = [{v:'NP',t:'NP'},{v:'UCL',t:'UCL'},{v:'Panel 2',t:'Panel 2'}];
+    var nivelSelect = el('select', { class: 'anfo-config-native', 'aria-label': 'Nivel' });
+    niveles.forEach(function (x) { nivelSelect.appendChild(el('option', { value:x.v, text:x.t })); }); nivelSelect.value = h.nivel || 'NP';
+    loc.appendChild(el('span', { class: 'anfo-config-field-label', text: 'Nivel' })); loc.appendChild(nivelSelect);
+    var ng = el('div', { class: 'anfo-choice-row anfo-segmented', role: 'group', 'aria-label': 'Seleccionar nivel' });
+    niveles.forEach(function (x) { ng.appendChild(el('button', { type:'button', class: x.v === nivelSelect.value ? 'selected' : '', text:x.t, onclick:function(){nivelSelect.value=x.v; h.nivel=x.v; Array.from(ng.children).forEach(function(b){b.classList.toggle('selected',b===this);},this); pintarNivel(); actualizarId();} })); });
+    loc.appendChild(ng);
+    var bloqueSelect = el('select', { class: 'anfo-config-native', 'aria-label': 'Bloque' });
+    J.LISTAS.bloque.forEach(function(v){bloqueSelect.appendChild(el('option',{value:v,text:v}));}); bloqueSelect.value=h.bloque||'Ext Fw';
+    loc.appendChild(el('span',{class:'anfo-config-field-label',text:'Bloque'})); loc.appendChild(bloqueSelect);
+    var bg=el('div',{class:'anfo-choice-row anfo-bloque-choices',role:'group','aria-label':'Seleccionar bloque'});
+    J.LISTAS.bloque.forEach(function(v){bg.appendChild(el('button',{type:'button',class:v===bloqueSelect.value?'selected':'',text:v,onclick:function(){bloqueSelect.value=v;h.bloque=v;Array.from(bg.children).forEach(function(b){b.classList.toggle('selected',b===this);},this);actualizarId();}}));}); loc.appendChild(bg);
+    bloqueSelect.addEventListener('change',function(){h.bloque=bloqueSelect.value;actualizarId();});
+    minaSelect.addEventListener('change',function(){h.mina=minaSelect.value;actualizarId();}); nivelSelect.addEventListener('change',function(){h.nivel=nivelSelect.value;pintarNivel();actualizarId();});
+    card.appendChild(loc);
+
+    var detalles=seccion('2 · Detalles del nivel','cyan'), porNivel={};
+    porNivel.NP=el('div',{class:'anfo-level-fields'},[el('div',{class:'anfo-detail-grid'})]);
+    campo(porNivel.NP.firstChild,'Núm. Zanja','numZanja','Ej. 49'); campo(porNivel.NP.firstChild,'Calle Zanja 1','calleZanja1','Ej. 59'); campo(porNivel.NP.firstChild,'Calle Zanja 2','calleZanja2','Ej. 61');
+    porNivel.UCL=el('div',{class:'anfo-level-fields',hidden:true},[el('div',{class:'anfo-detail-grid'})]); campo(porNivel.UCL.firstChild,'Calle UCL','calleUcl','Ej. C41'); campo(porNivel.UCL.firstChild,'Parada inicial','paradaIni','Ej. P1'); campo(porNivel.UCL.firstChild,'Parada final (negativa)','paradaFin','Ej. P5');
+    porNivel['Panel 2']=el('div',{class:'anfo-level-fields',hidden:true});
+    campo(detalles,'Fase','fase','Ej. 2');
+    Object.keys(porNivel).forEach(function(k){detalles.appendChild(porNivel[k]);});
+    function pintarNivel(){Object.keys(porNivel).forEach(function(k){porNivel[k].hidden=k!==(h.nivel||'NP');});}
+    pintarNivel(); card.appendChild(detalles);
+
+    var idbox=seccion('ID de tronadura · Automático','green'), idInput=el('input',{type:'text',readonly:'readonly',disabled:'disabled',value:''});
+    idbox.classList.add('anfo-id-section'); idbox.appendChild(el('label',{class:'anfo-config-field-label',text:'Se genera con los datos de ubicación'})); idbox.appendChild(idInput); card.appendChild(idbox);
+    function actualizarId(){
+      var fase=h.fase?(/^(fase)/i.test(h.fase)?h.fase:'Fase '+h.fase):'', z=h.numZanja?(/^z/i.test(h.numZanja)?h.numZanja:'Z'+h.numZanja):'';
+      h.idTronadura=h.nivel==='NP'?[z,h.calleZanja1&&h.calleZanja2?h.calleZanja1+'-'+h.calleZanja2:(h.calleZanja1||h.calleZanja2),fase].filter(Boolean).join(' '):h.nivel==='UCL'?[h.calleUcl,'UCL',fase].filter(Boolean).join(' '):[fase].filter(Boolean).join(' ');
+      idInput.value=h.idTronadura||''; J.store.touch();
+    }
+    actualizarId();
+    card.appendChild(el('div',{class:'anfo-config-actions'},[
+      el('button',{type:'button',class:'anfo-config-back',text:'‹ Volver',onclick:function(){ir('datos');}}),
+      el('button',{type:'button',class:'anfo-config-apply',text:'Guardar y aplicar ✓',onclick:function(){actualizarId(); ir('id');}})
+    ]));
+    host.appendChild(card);
+  }
+
+  /* ---------- Paso 3: Gestión de trabajo ---------- */
+  function vistaId(host, p) {
+    var card = el('div', { class: 'anfo-trabajo-screen' }), selected = ui.seleccionTrabajo || p.trabajoActual || '';
+    card.appendChild(el('div', { class: 'anfo-progreso', 'aria-label': 'Progreso del seguimiento' }, [
+      el('span', { class: 'completado', text: '✓' }), el('span', { class: 'completado', text: '✓' }),
+      el('span', { class: 'actual', text: '3', 'aria-current': 'step' }),
+    ].concat(['4','5','6','7','8'].map(function (n) { return el('span', { text:n }); }))));
+    card.appendChild(el('p', { class: 'anfo-paso-indicador', text: 'PASO 3 DE 8' }));
+    card.appendChild(el('h2', { text: 'Gestión de Trabajo' }));
+    card.appendChild(el('div', { class: 'anfo-contexto-trabajo' }, [
+      el('div', null, [el('small', { text: 'Turno' }), el('strong', { text: (p.header.turno || '—') + ' · ' + (p.header.fecha || '—') })]),
+      el('div', null, [el('small', { text: 'ID Tronadura' }), el('strong', { text: p.header.idTronadura || 'Sin asignar' })])
     ]));
 
-    
-    var s = el('select', { class: 'jp-in', 'aria-label': 'ID de trabajo guardado' });
-    s.appendChild(el('option', { value: '', text: '-- Seleccione un ID guardado --' }));
-    p.trabajos.forEach(function (t) {
-      var n = tirosDe(p, t).length, o = el('option', { value: t, text: t + ' · ' + n + ' tiro(s)' });
-      if (t === p.trabajoActual) o.selected = true;
-      s.appendChild(o);
-    });
-    var err2 = el('div', { class: 'jp-q-error' });
-    var usar = el('button', { type: 'button', class: 'btn-primary', text: 'Usar Seleccionado ➜', onclick: function () {
-      if (!s.value) { err2.textContent = 'Selecciona un ID de trabajo.'; return; }
-      p.trabajoActual = s.value; ui.nuevaParada = false; ui.busca = ''; J.store.touch(); ir('resumen');
-    } });
-    var borrar = el('button', { type: 'button', class: 'btn-primary', text: '🗑️ Eliminar', onclick: function () {
-      if (!s.value) { err2.textContent = 'Selecciona un ID de trabajo.'; return; }
-      var t = s.value, n = tirosDe(p, t).length;
-      if (!confirm('¿Eliminar el ID de trabajo "' + t + '"' + (n ? ' y sus ' + n + ' tiro(s)' : '') + '? No se puede deshacer.')) return;
-      p.filas = p.filas.filter(function (r) { return r.trabajo !== t; });
-      p.trabajos.splice(p.trabajos.indexOf(t), 1);
-      if (p.trabajoActual === t) p.trabajoActual = p.trabajos[0] || '';
-      J.store.touch(); render();
-    } });
-    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
-      el('div', { class: 'jp-panel-t', text: '📁 SELECCIONAR ID DE TRABAJO EXISTENTE:' }), s, err2,
-      el('div', { class: 'jp-fila2 grid-2', style: 'margin-top:10px' }, [usar, borrar])
+    var inp = el('input', { type:'text', placeholder:'Ej. TRABAJO-01', 'aria-label':'Nombre o ID del trabajo', autocomplete:'off' });
+    var err = el('div', { class:'jp-q-error' });
+    function crear() {
+      var n=inp.value.trim(); if(!n){err.textContent='Escribe un nombre para el trabajo.';return;}
+      var ya=p.trabajos.filter(function(t){return t.toLowerCase()===n.toLowerCase();})[0];
+      if(ya)n=ya;else p.trabajos.push(n);
+      p.trabajoActual=n;ui.seleccionTrabajo=n;ui.nuevaParada=true;ui.busca='';J.store.touch();ir('resumen');
+    }
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();crear();}});
+    card.appendChild(el('section',{class:'anfo-trabajo-panel anfo-nuevo-trabajo'},[
+      el('h3',null,[el('i'),document.createTextNode(' Crear nuevo trabajo')]),
+      el('label',{text:'Nombre / ID del trabajo'}),inp,
+      el('p',{class:'anfo-sugerencia-trabajo'},[document.createTextNode('Sugerido: '),el('strong',{text:'TRABAJO-'+String(p.trabajos.length+1).padStart(2,'0')})]),err,
+      el('button',{type:'button',class:'anfo-btn-crear',text:'+ Crear e ir a paradas',onclick:crear})
     ]));
-    card.appendChild(el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:16px', text: '⬅ Volver al Paso 1', onclick: function () { ir('datos'); } }));
+    card.appendChild(el('div',{class:'anfo-separador-trabajo'},[el('span',{text:'o continúe uno existente'})]));
+    var lista=el('div',{class:'anfo-lista-trabajos','aria-label':'Trabajos guardados'});
+    p.trabajos.forEach(function(t){
+      var rows=tirosDe(p,t), stops=paradasDe(p,t).length, complete=rows.length>0;
+      var pick=el('button',{type:'button',class:'anfo-trabajo-seleccion','aria-pressed':t===selected?'true':'false',onclick:function(){
+        selected=t;ui.seleccionTrabajo=t;p.trabajoActual=t;ui.nuevaParada=paradasDe(p,t).length===0;ui.busca='';J.store.touch();ir('resumen');
+      }});
+      pick.appendChild(el('span',{class:'anfo-trabajo-radio'}));
+      pick.appendChild(el('span',{class:'anfo-trabajo-detalle'},[el('strong',{text:t}),el('small',{text:stops+' parada(s) · '+rows.length+' tiro(s)'})]));
+      pick.appendChild(el('span',{class:'anfo-trabajo-estado'+(complete?'':' sin-tiros'),text:complete?'Completo':'En curso'}));
+      lista.appendChild(el('div',{class:'anfo-trabajo-fila'},[pick,el('button',{type:'button',class:'anfo-btn-eliminar-trabajo',title:'Eliminar trabajo',text:'▤',onclick:function(){
+        if(!confirm('¿Eliminar el trabajo «'+t+'» y sus tiros?'))return;
+        p.filas=p.filas.filter(function(r){return r.trabajo!==t;});p.trabajos=p.trabajos.filter(function(x){return x!==t;});
+        if(p.trabajoActual===t)p.trabajoActual='';if(ui.seleccionTrabajo===t)ui.seleccionTrabajo='';selected=p.trabajoActual;J.store.touch();render();
+      }})]));
+    });
+    if(!p.trabajos.length)lista.appendChild(el('p',{class:'anfo-sin-trabajos',text:'Todavía no hay trabajos guardados.'}));
+    card.appendChild(el('section',{class:'anfo-trabajo-panel anfo-existentes'},[
+      el('h3',null,[el('i'),document.createTextNode(' Trabajos existentes '),el('span',{class:'anfo-conteo-trabajos',text:String(p.trabajos.length)})]),lista
+    ]));
+    card.appendChild(el('div',{class:'anfo-acciones-trabajo'},[
+      el('button',{type:'button',class:'anfo-btn-volver',text:'‹ Volver',onclick:function(){ir('config');}}),
+      el('button',{type:'button',class:'anfo-btn-usar',text:'Usar seleccionado ›',disabled:selected?null:'disabled',onclick:function(){
+        if(!selected)return; p.trabajoActual=selected;ui.seleccionTrabajo=selected;ui.nuevaParada=paradasDe(p,selected).length===0;ui.busca='';J.store.touch();ir('resumen');
+      }})
+    ]));
     host.appendChild(card);
-    setTimeout(function () { try { if (!p.trabajos.length) inp.focus(); } catch (e) { /* sin foco */ } }, 0);
   }
 
   /* ---------- Descargas (reemplaza al antiguo «Guardar Registro Completo») ---------- */
@@ -1378,70 +1463,59 @@ var rolPersonal = {
 
   /* ---------- Resumen de paradas del trabajo ---------- */
   function vistaResumen(host, p) {
-    var t = p.trabajoActual, card = el('div', { class: 'jp-card card-wide' });
-    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Resumen de Paradas - Trabajo: ' + t }));
-    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Revise sus registros guardados' }));
-    if (ui.aviso) card.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
-
-    var busca = el('input', { type: 'search', class: 'jp-in', placeholder: '🔍 Buscar ID de trabajo o parada...', value: ui.busca, 'aria-label': 'Buscar parada' });
-    card.appendChild(busca);
-    var caja = el('div', { class: 'jp-lista-paradas' });
-    function pintarLista() {
-      caja.innerHTML = '';
-      var q = ui.busca.trim().toLowerCase(), todas = paradasDe(p, t);
-      var ps = todas.filter(function (x) { return !q || x.toLowerCase().indexOf(q) >= 0 || t.toLowerCase().indexOf(q) >= 0; });
-      if (!todas.length) caja.appendChild(el('div', { class: 'jp-vacio', text: 'Este trabajo aún no tiene paradas. Registra la primera con el formulario de abajo.' }));
-      else if (!ps.length) caja.appendChild(el('div', { class: 'jp-vacio', text: 'Ninguna parada coincide con la búsqueda.' }));
-      ps.forEach(function (par) {
-        var rows = tirosDe(p, t, par), m = metros(rows);
-        caja.appendChild(el('div', { class: 'jp-parada' }, [
-          el('div', null, [el('div', { class: 'jp-parada-t', text: '📍 Parada: ' + (par || '—') }),
-            el('div', { class: 'jp-parada-s', text: rows.length + (rows.length === 1 ? ' tiro registrado' : ' tiros registrados') + (m ? ' · ' + J.fmt(m, 1) + ' m perforados' : '') })]),
-          el('div', { class: 'jp-parada-b' }, [
-            el('button', { type: 'button', class: 'btn-primary', text: '✏️ Editar', onclick: function () { ui.parada = par; ir('parada'); } }),
-            el('button', { type: 'button', class: 'btn-primary', title: 'Eliminar parada', text: '🗑️', onclick: function () {
-              if (!confirm('¿Eliminar la parada "' + par + '" con sus ' + rows.length + ' tiro(s)?')) return;
-              p.filas = p.filas.filter(function (r) { return !(r.trabajo === t && String(r.parada) === par); });
-              J.store.touch(); render();
-            } })
-          ])
-        ]));
-      });
+    var t=p.trabajoActual, paradas=paradasDe(p,t), seleccion=ui.parada;
+    if (!seleccion || paradas.indexOf(seleccion)<0) seleccion=paradas[0]||'';
+    var card=el('div',{class:'anfo-paradas-screen',style:'display:flex;min-height:calc(100dvh - 110px)'});
+    card.appendChild(el('div',{class:'anfo-progreso','aria-label':'Progreso del seguimiento'},[
+      el('span',{class:'completado',text:'✓'}),el('span',{class:'completado',text:'✓'}),el('span',{class:'completado',text:'✓'}),el('span',{class:'actual',text:'4','aria-current':'step'}),
+      el('span',{text:'5'}),el('span',{text:'6'}),el('span',{text:'7'}),el('span',{text:'8'})
+    ]));
+    card.appendChild(el('p',{class:'anfo-paso-indicador',text:'PASO 4 DE 8 · '+t.toUpperCase()}));
+    card.appendChild(el('h2',{text:'Gestión de Paradas'}));
+    var nueva=el('section',{class:'anfo-trabajo-panel anfo-parada-nueva'},[
+      el('h3',null,[el('i'),document.createTextNode(' Crear nueva parada')]),
+      el('label',{text:'ID de parada'})
+    ]);
+    var np=el('input',{type:'text',placeholder:'Ej. P1 o PARADA 1',value:sugerirParada(p),'aria-label':'Número de parada'}), e1=el('div',{class:'jp-q-error'});
+    function crearParada(){
+      var v=np.value.trim();if(!v){e1.textContent='Escribe el número o nombre de la parada.';return;}
+      ui.parada=v;ui.nuevaParada=false;
+      if(tirosDe(p,t,v).length){ui.aviso='';ir('parada');return;}
+      ui.cantidadTiros=1;ui.agregarCantidad=false;ui.configurarExistentes=false;ir('cantidad');
     }
-    busca.addEventListener('input', function () { ui.busca = busca.value; pintarLista(); });
-    pintarLista();
-    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [caja]));
+    np.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();crearParada();}});
+    nueva.appendChild(np);nueva.appendChild(e1);
+    nueva.appendChild(el('button',{type:'button',class:'anfo-btn-crear',text:'Crear parada y configurar tiros ›',onclick:crearParada}));
+    card.appendChild(nueva);
 
-    /* agregar parada */
-    if (ui.nuevaParada) {
-      var np = el('input', { type: 'text', class: 'jp-in', placeholder: 'Ej. P1', value: sugerirParada(p), 'aria-label': 'Número de parada' });
-      var e1 = el('div', { class: 'jp-q-error' });
-      var crearParada = function () {
-        var v = np.value.trim();
-        if (!v) { e1.textContent = 'Escribe el número o nombre de la parada.'; return; }
-        ui.parada = v; ui.nuevaParada = false;
-        if (tirosDe(p, t, v).length) { ir('parada'); return; }
-        nuevoTiro(p);
-      };
-      np.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); crearParada(); } });
-      card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
-        el('div', { class: 'jp-panel-t', text: '📍 NUEVA PARADA:' }), np, e1,
-        el('div', { class: 'jp-fila2 grid-2', style: 'margin-top:10px' }, [
-          el('button', { type: 'button', class: 'btn-primary', text: 'Crear y registrar tiro', onclick: crearParada }),
-          el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: function () { ui.nuevaParada = false; render(); } })
-        ])
+    var lista=el('div',{class:'anfo-lista-paradas','aria-label':'Paradas registradas'});
+    paradas.forEach(function(par){
+      var rows=tirosDe(p,t,par),m=metros(rows),nCapturados=rows.filter(tiroCapturado).length,complete=rows.length>0&&nCapturados===rows.length;
+      var badge=/^p/i.test(par)?par.toUpperCase():('P'+par);
+      var row=el('button',{type:'button',class:'anfo-parada-fila','aria-pressed':par===seleccion?'true':'false',onclick:function(){ui.parada=par;render();}});
+      row.appendChild(el('span',{class:'anfo-parada-badge',text:badge}));
+      row.appendChild(el('span',{class:'anfo-parada-detalle'},[
+        el('strong',{text:'Parada '+par}),el('small',{text:rows.length+' tiros · '+(complete?'completa':nCapturados+' de '+rows.length+' capturados')+(m?' · '+J.fmt(m,1)+' m':'')})
       ]));
-      setTimeout(function () { try { np.focus(); np.select(); } catch (e) { /* sin foco */ } }, 0);
-    } else {
-      card.appendChild(el('div', { class: 'jp-pila', style: 'margin-top:12px' }, [
-        el('div', { class: 'jp-fila2 grid-2', style: 'margin-top:0' }, [
-          el('button', { type: 'button', class: 'btn-primary', text: '+ Registrar otra parada', onclick: function () { ui.nuevaParada = true; ui.aviso = ''; render(); } }),
-          el('button', { type: 'button', class: 'btn-primary', text: '📝 Agregar Observación', onclick: modalObs })
-        ]),
-        el('button', { type: 'button', class: 'btn-primary', text: 'Continuar: completar datos y descargar ➜', disabled: paradasDe(p, t).length ? null : 'disabled', onclick: function () { irACierre(p); } }),
-        el('button', { type: 'button', class: 'btn-primary', style: 'display:block;width:100%', text: '⬅ Volver a Gestión de ID de Trabajo', onclick: function () { ir('id'); } })
-      ]));
-    }
+      row.appendChild(el('span',{class:'anfo-parada-estado'+(complete?'':' en-curso'),text:complete?'● OK':'● En curso'}));
+      lista.appendChild(row);
+    });
+    if(!paradas.length)lista.appendChild(el('p',{class:'anfo-sin-trabajos',text:'Aún no hay paradas registradas.'}));
+    var guardadas=el('section',{class:'anfo-trabajo-panel anfo-paradas-guardadas'},[
+      el('h3',null,[el('i'),document.createTextNode(' Paradas registradas '),el('span',{class:'anfo-conteo-trabajos',text:String(paradas.length)})]),lista
+    ]);
+    var borrar=el('button',{type:'button',class:'anfo-btn-eliminar-parada',text:'▤',title:'Eliminar parada',disabled:seleccion?null:'disabled',onclick:function(){
+      var rows=tirosDe(p,t,seleccion);if(!confirm('¿Eliminar la parada «'+seleccion+'» y sus '+rows.length+' tiros?'))return;
+      p.filas=p.filas.filter(function(r){return !(r.trabajo===t&&String(r.parada)===seleccion);});ui.parada='';J.store.touch();render();
+    }});
+    guardadas.appendChild(el('div',{class:'anfo-acciones-parada'},[
+      el('button',{type:'button',class:'anfo-btn-ver-tiros',text:'Editar / ver tiros ›',disabled:seleccion?null:'disabled',onclick:function(){if(!seleccion)return;ui.parada=seleccion;ui.agregarCantidad=false;ui.configurarExistentes=true;ui.cantidadTiros=tirosDe(p,t,seleccion).length||1;ui.vista='cantidad';render();window.scrollTo(0,0);}}),borrar
+    ]));
+    card.appendChild(guardadas);
+    card.appendChild(el('div',{class:'anfo-acciones-paradas'},[
+      el('button',{type:'button',class:'anfo-btn-volver',text:'‹ Volver',onclick:function(){ir('id');}}),
+      el('button',{type:'button',class:'anfo-btn-resumen-paradas',text:'Ver resumen ›',onclick:function(){if(todasParadasTienenTirosCapturados(p,t)){abrirPostura(p,'tiempos');return;}var pendiente=paradasDe(p,t).filter(function(x){var r=tirosDe(p,t,x);return !r.length||!r.every(tiroCapturado);})[0];if(!pendiente){abrirPostura(p,'tiempos');return;}ui.parada=pendiente;var pendientes=tirosDe(p,t,pendiente);if(!pendientes.length){ui.cantidadTiros=1;ui.agregarCantidad=false;ui.configurarExistentes=false;ui.vista='cantidad';render();}else{ui.vista='parada';render();}}})
+    ]));
     host.appendChild(card);
   }
 
@@ -1473,16 +1547,9 @@ var rolPersonal = {
   }
 
   function nuevoTiro(p) {
-    var t = p.trabajoActual, rows = tirosDe(p, t, ui.parada), last = rows[rows.length - 1], r = J.store.filaVaciaPerf();
-    r.trabajo = t; r.parada = ui.parada;
-    if (last && /^\d+$/.test(String(last.tiro).trim())) r.tiro = String(parseInt(last.tiro, 10) + 1);
-    // el tiro se inserta junto a los de su parada (o de su trabajo) para que el Excel quede ordenado
-    var ref = last || tirosDe(p, t).slice(-1)[0], idx = ref ? p.filas.indexOf(ref) + 1 : p.filas.length;
-    p.filas.splice(idx, 0, r); J.store.touch();
-    ui.tiro = { row: r, nuevo: true, i: 0, err: '' }; ui.aviso = ''; ui.vista = 'parada';
-    render();
+    ui.cantidadTiros=1; ui.agregarCantidad=true;ui.configurarExistentes=false; ui.vista='cantidad'; render(); window.scrollTo(0,0);
   }
-  function editarTiro(p, row) { ui.tiro = { row: row, nuevo: false, i: 0, err: '' }; ui.aviso = ''; render(); }
+  function editarTiro(p, row) { ui.tiro = { row: row, nuevo: false, i: 0, err: '' }; ui.pestanaTiro='medidas'; ui.aviso=''; ui.vista='captura'; render(); }
   function cancelarTiro(p) {
     var t = ui.tiro;
     if (t.nuevo) { var i = p.filas.indexOf(t.row); if (i >= 0) p.filas.splice(i, 1); }
@@ -1539,11 +1606,29 @@ var rolPersonal = {
       });
       q.appendChild(opts);
     } else {
-      inp = el('input', { type: c.type === 'time' ? 'time' : 'text', value: row[c.k] || '', 'aria-label': c.label });
-      if (c.type === 'num') inp.setAttribute('inputmode', 'decimal');
-      inp.addEventListener('input', function () { row[c.k] = inp.value; t.err = ''; J.store.touch(); actualizarCalc(); });
-      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); avanzar(p); } });
-      q.appendChild(el('div', { class: 'jp-q-input' }, [inp, c.unit ? el('span', { class: 'u', text: c.unit }) : null]));
+      if (c.type === 'num') {
+        var step = c.k === 'tiro' ? 1 : (c.unit === '°' ? 1 : 0.1), min = c.k === 'tiro' ? 1 : 0;
+        inp = el('input', { type:'number', step:String(step), min:String(min), value:row[c.k] || '', 'aria-label':c.label });
+        inp.addEventListener('input', function(){row[c.k]=inp.value;t.err='';J.store.touch();actualizarCalc();});
+        inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();avanzar(p);}});
+        function ajustar(delta){
+          var n=J.num(inp.value); if(isNaN(n))n=0;
+          n=Math.max(min,Math.round((n+delta*step)*10)/10);
+          if(step===1)n=Math.round(n);
+          inp.value=String(n);row[c.k]=inp.value;t.err='';J.store.touch();actualizarCalc();
+        }
+        var stepper=el('div',{class:'anfo-tiro-stepper'},[
+          el('button',{type:'button',class:'anfo-tiro-stepper-btn',text:'−',title:'Disminuir', 'aria-label':'Disminuir '+c.label,onclick:function(){ajustar(-1);}}),
+          inp,
+          el('button',{type:'button',class:'anfo-tiro-stepper-btn',text:'+',title:'Aumentar', 'aria-label':'Aumentar '+c.label,onclick:function(){ajustar(1);}})
+        ]);
+        q.appendChild(el('div',{class:'jp-q-input'},[stepper,c.unit?el('span',{class:'u',text:c.unit}):null]));
+      } else {
+        inp = el('input', { type: c.type === 'time' ? 'time' : 'text', value: row[c.k] || '', 'aria-label': c.label });
+        inp.addEventListener('input', function () { row[c.k] = inp.value; t.err = ''; J.store.touch(); actualizarCalc(); });
+        inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); avanzar(p); } });
+        q.appendChild(el('div', { class: 'jp-q-input' }, [inp, c.unit ? el('span', { class: 'u', text: c.unit }) : null]));
+      }
     }
     if (ct !== null) { calcBox = el('div', { class: 'jp-q-calc', text: ct }); q.appendChild(calcBox); }
     if (t.err) q.appendChild(el('div', { class: 'jp-q-error', text: t.err }));
@@ -1579,6 +1664,7 @@ var rolPersonal = {
   }
 
   function vistaParada(host, p) {
+    vistaParadaTiros(host,p); return;
     if (ui.tiro) { preguntaTiro(host, p); return; }
     var t = p.trabajoActual, par = ui.parada, filas = tirosDe(p, t, par), card = el('div', { class: 'jp-card card-wide' });
     card.appendChild(el('h2', { class: 'jp-card-t', text: '📍 Parada: ' + par }));
@@ -1597,7 +1683,7 @@ var rolPersonal = {
           el('td', { text: r.mDiseno && r.mPerf ? Math.round(J.calc.cumpl(r) * 100) + '%' : '—' }),
           el('td', { text: r.abat ? r.abat + '°' : '—' }), el('td', { text: r.estado || '—' }), el('td', { text: r.problema || '—' }),
           el('td', null, [el('div', { class: 'acc' }, [
-            el('button', { type: 'button', class: 'jp-link', text: 'Editar', onclick: function () { editarTiro(p, r); } }),
+            el('button', { type: 'button', class: 'jp-link', text: 'Configurar tiro', onclick: function () { editarTiro(p, r); } }),
             el('button', { type: 'button', class: 'jp-x', title: 'Eliminar tiro', text: '×', onclick: function () {
               if (confirm('¿Eliminar ' + nombreTiro(r) + '?')) {
                 p.filas.splice(p.filas.indexOf(r), 1); J.store.touch(); ui.aviso = '';
@@ -1618,12 +1704,68 @@ var rolPersonal = {
     host.appendChild(card);
   }
 
+  function vistaParadaTiros(host,p){
+    var trabajo=String(p.trabajoActual||''),parada=String(ui.parada||''),rows=tirosDe(p,trabajo,parada),capt=rows.filter(tiroCapturado).length,sanos=rows.filter(function(r){return tiroCapturado(r)&&r.estado!=='Tapado';}).length,tapados=rows.filter(function(r){return r.estado==='Tapado';}).length;
+    var page=el('div',{class:'anfo-tiros-resumen-page',style:'display:flex'});page.appendChild(el('div',{class:'anfo-resumen-progreso'},Array.from({length:8},function(_,i){return el('i',{class:i<6?'done':''});})));
+    page.appendChild(el('div',{class:'anfo-resumen-head'},[el('div',null,[el('p',{text:'PARADA '+parada.toUpperCase()+' · '+trabajo.toUpperCase()}),el('h2',{text:'Tiros de la Parada'})]),el('span',{class:'anfo-resumen-guardado',text:capt===rows.length&&rows.length?'✓ Guardado':'En curso'})]));
+    page.appendChild(el('div',{class:'anfo-resumen-stats'},[[capt+'/'+rows.length,'Capturados',''],[String(sanos),'Sanos','sanos'],[String(tapados),'Tapados','tapados']].map(function(x){return el('div',{class:'anfo-resumen-stat '+x[2]},[el('strong',{text:x[0]}),el('small',{text:x[1]})]);})));
+    var grid=el('div',{class:'anfo-tiros-grid'});rows.forEach(function(r,i){var done=tiroCapturado(r),tile=el('button',{type:'button',class:'anfo-tiro-resumen-card'+(done?'':' pendiente')+(r.estado==='Tapado'?' tapado':''),onclick:function(){editarTiro(p,r);}});tile.appendChild(el('i',{class:'anfo-mini-diagrama'}));tile.appendChild(el('span',{class:'anfo-tiro-resumen-info'},[el('span',{class:'anfo-tiro-resumen-top'},[el('strong',{text:String(i+1)}),el('small',{text:done?(r.mPerf||'—')+' m':'Pendiente'})]),el('span',{class:'anfo-tiro-tags'},done?[el('span',{class:r.estado==='Tapado'?'tapado':'',text:r.estado==='Tapado'?'Tapado':'Sano'}),el('span',{class:'agua',text:r.conAgua==='Si'?'Agua':'Seco'})]:[])]));grid.appendChild(tile);});page.appendChild(grid);
+    var siguiente=todasParadasTienenTirosCapturados(p,trabajo)?'Tiempos ›':'Paradas ›';page.appendChild(el('p',{class:'anfo-resumen-aviso',text:capt===rows.length&&rows.length?'ⓘ Tiros guardados. Continúa con los datos de postura.':'ⓘ Toque un tiro para corregirlo o complete los pendientes.'}));page.appendChild(el('div',{class:'anfo-resumen-actions'},[el('button',{class:'anfo-resumen-volver',text:'‹ Paradas',onclick:function(){ui.parada='';ir('resumen');}}),el('button',{class:'anfo-resumen-capturar',text:capt<rows.length?'Capturar tiros ›':siguiente,onclick:function(){if(capt<rows.length){configurarTirosExistentes(p,ui.parada);}else if(todasParadasTienenTirosCapturados(p,trabajo)){abrirPostura(p,'tiempos');}else{ui.parada='';ir('resumen');}}})]));host.appendChild(page);
+  }
+  function vistaCantidad(host,p){
+    var page=el('div',{class:'anfo-tiros-resumen-page',style:'display:flex'}),out=el('output',{text:String(ui.cantidadTiros)});page.appendChild(el('div',{class:'anfo-resumen-progreso'},Array.from({length:8},function(_,i){return el('i',{class:i<5?'done':''});})));
+    page.appendChild(el('div',{class:'anfo-resumen-head'},[el('div',null,[el('p',{text:'PASO 5 DE 8 · PARADA '+ui.parada.toUpperCase()}),el('h2',{text:'Configurar Tiros'})])]));
+    var box=el('section',{class:'anfo-tiros-modal-body'},[el('p',{class:'anfo-tiros-eyebrow',text:'CANTIDAD DE TIROS · RANGO 1 – 50'}),el('div',{class:'anfo-tiros-stepper'},[el('button',{type:'button',text:'−',onclick:function(){var rows=tirosDe(p,p.trabajoActual,ui.parada),capt=rows.filter(tiroCapturado).reduce(function(n,r){return Math.max(n,parseInt(r.tiro,10)||0);},0),limite=ui.configurarExistentes?Math.max(1,capt):1;ui.cantidadTiros=Math.max(limite,ui.cantidadTiros-1);out.textContent=ui.cantidadTiros;}}),el('div',{class:'anfo-tiros-value-wrap'},[out,el('span',{text:'TIROS'})]),el('button',{type:'button',text:'+',onclick:function(){ui.cantidadTiros=Math.min(50,ui.cantidadTiros+1);out.textContent=ui.cantidadTiros;}})])]);var presets=el('div',{class:'anfo-tiros-presets'});[1,5,8,9,12,15,20].forEach(function(n){presets.appendChild(el('button',{type:'button',class:ui.cantidadTiros===n?'activo':'',text:String(n),onclick:function(){var rows=tirosDe(p,p.trabajoActual,ui.parada),capt=rows.filter(tiroCapturado).reduce(function(v,r){return Math.max(v,parseInt(r.tiro,10)||0);},0);ui.cantidadTiros=ui.configurarExistentes?Math.max(capt,n):n;out.textContent=ui.cantidadTiros;}}));});box.appendChild(presets);box.appendChild(el('p',{class:'anfo-tiros-hint',text:ui.configurarExistentes?'Tiros existentes cargados. «Capturar tiros» abre el primero pendiente; los capturados se conservan.':'ⓘ Se abrirá una ficha para cada tiro, una tras otra. Puedes volver al anterior en cualquier momento.'}));page.appendChild(box);
+    page.appendChild(el('div',{class:'anfo-resumen-actions'},[el('button',{class:'anfo-resumen-volver',text:'‹ Volver',onclick:function(){ui.agregarCantidad=false;ui.configurarExistentes=false;ir('parada');}}),el('button',{class:'anfo-resumen-capturar',text:'Capturar tiros ›',onclick:function(){var existing=tirosDe(p,p.trabajoActual,ui.parada),target=Math.max(1,Math.min(50,parseInt(ui.cantidadTiros,10)||1));if(ui.configurarExistentes){var highestCaptured=existing.filter(tiroCapturado).reduce(function(n,r){return Math.max(n,parseInt(r.tiro,10)||0);},0);if(target<highestCaptured){alert('No se puede reducir la cantidad por debajo del último tiro capturado ('+highestCaptured+').');return;}if(target<existing.length){p.filas=p.filas.filter(function(r){return r.trabajo!==p.trabajoActual||String(r.parada)!==String(ui.parada)||Number(r.tiro)<=target;});existing=tirosDe(p,p.trabajoActual,ui.parada);}for(var add=existing.length;add<target;add++){var added=J.store.filaVaciaPerf();added.trabajo=p.trabajoActual;added.parada=ui.parada;added.tiro=String(add+1);added.capturado=false;p.filas.push(added);}existing=tirosDe(p,p.trabajoActual,ui.parada);var next=existing.filter(function(r){return !tiroCapturado(r);})[0]||existing[0];if(!next){ui.vista='parada';render();return;}ui.tiro={row:next,nuevo:!tiroCapturado(next),i:0,err:''};ui.configurarExistentes=false;ui.agregarCantidad=false;ui.pestanaTiro='medidas';ui.vista='captura';J.store.touch();render();return;}var start=ui.agregarCantidad?existing.length:0,n=Math.min(target,50-start);if(n<1){alert('Esta parada ya tiene 50 tiros.');return;}for(var i=0;i<n;i++){var r=J.store.filaVaciaPerf();r.trabajo=p.trabajoActual;r.parada=ui.parada;r.tiro=String(start+i+1);r.capturado=false;p.filas.push(r);}ui.agregarCantidad=false;ui.configurarExistentes=false;ui.tiro={row:tirosDe(p,p.trabajoActual,ui.parada)[start],nuevo:true,i:0,err:''};ui.pestanaTiro='medidas';ui.vista='captura';J.store.touch();render();}})]));host.appendChild(page);
+  }
+  function stepperTiro(row,key,label,unit,step,min,max,onChange){step=step||1;min=min===undefined?0:min;var input=el('input',{type:'number',step:String(step),min:String(min),value:row[key]||'', 'aria-label':label,style:'width:auto;min-width:0;flex:1;text-align:center;font-size:16px;font-weight:800;padding:0;border:0;background:transparent'});function changed(){var fn=onChange||ui.diagramUpdater;if(fn)fn();}function set(v){if(v===''){row[key]='';J.store.touch();changed();return;}var n=J.num(v);if(isNaN(n))return;if(max!==undefined)n=Math.min(max,n);if(min!==null)n=Math.max(min,n);input.value=String(n);row[key]=String(n);J.store.touch();changed();}input.addEventListener('input',function(){row[key]=input.value;J.store.touch();changed();});function bump(d){var n=J.num(input.value);if(isNaN(n))n=0;set(Math.round((n+d*step)*100)/100);}return el('div',{class:'anfo-tiro-campo'},[el('div',{class:'form-group-field'},[el('label',{text:label}),el('div',{class:'anfo-tiro-stepper'},[el('button',{type:'button',class:'anfo-tiro-stepper-btn',text:'−',onclick:function(){bump(-1);}}),input,el('button',{type:'button',class:'anfo-tiro-stepper-btn',text:'+',onclick:function(){bump(1);}})]),el('small',{text:unit||'',style:'display:block;text-align:right;color:#60759a;font-size:8px'})])]);}
+  function choiceTiro(row,key,label,values,labels){var box=el('div',{class:'anfo-tiro-campo'},[el('div',{class:'form-group-field'},[el('label',{text:label})])]),choices=el('div',{class:'anfo-choice-row'});values.forEach(function(v,i){choices.appendChild(el('button',{type:'button',class:row[key]===v?'selected':'',text:labels?labels[i]:v,onclick:function(){row[key]=v;J.store.touch();Array.from(choices.children).forEach(function(b,j){b.classList.toggle('selected',j===i);});}}));});box.appendChild(choices);return box;}
+  function textoTiro(row,key,label,placeholder){var input=el('input',{type:'text',value:row[key]||'',placeholder:placeholder||'', 'aria-label':label});input.addEventListener('input',function(){row[key]=input.value;J.store.touch();});return el('div',{class:'anfo-tiro-campo'},[el('div',{class:'form-group-field'},[el('label',{text:label}),input])]);}
+  function svgEl(tag,attrs,kids){var node=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.keys(attrs||{}).forEach(function(k){if(k==='text')node.textContent=attrs[k];else node.setAttribute(k,attrs[k]);});(kids||[]).forEach(function(k){if(k)node.appendChild(k);});return node;}
+  function vistaCapturaTiro(host,p){
+    var row=ui.tiro&&ui.tiro.row;if(!row){ui.vista='parada';vistaParadaTiros(host,p);return;}var rows=tirosDe(p,p.trabajoActual,ui.parada),idx=rows.indexOf(row),tabNames=['medidas','estado','equipo'],tabLabels=['Medidas','Estado','Equipo'];if(idx<0)idx=0;
+    var overlay=el('div',{class:'anfo-captura-overlay visible'}),modal=el('section',{class:'anfo-captura-modal','aria-label':'Captura de tiro'});modal.appendChild(el('div',{class:'anfo-captura-progress'},Array.from({length:8},function(_,i){return el('i',{class:i<5?'done':i===5?'current':''});})));modal.appendChild(el('div',{class:'anfo-captura-head'},[el('div',null,[el('p',{text:'PASO 6 DE 8 · PARADA '+ui.parada.toUpperCase()}),el('h2',{text:'Captura de Tiro'})]),el('span',{text:'Tiro '+(idx+1)+' de '+rows.length})]));
+    var nav=el('div',{class:'anfo-tiro-nav'});rows.forEach(function(r,i){nav.appendChild(el('button',{type:'button',class:(tiroCapturado(r)?'completo ':'')+(r===row?'actual':''),text:tiroCapturado(r)?'✓':String(i+1),onclick:function(){ui.tiro={row:r,nuevo:!tiroCapturado(r),i:0,err:''};ui.pestanaTiro='medidas';render();}}));});modal.appendChild(nav);
+    var m=J.num(row.mPerf);if(isNaN(m)||m<1)m=13;var svg=svgEl('svg',{class:'anfo-tiro-diagrama',viewBox:'0 0 110 310'},[svgEl('rect',{x:'17',y:'16',width:'75',height:'258',fill:'#e9e3d2'}),svgEl('line',{x1:'25',y1:'25',x2:'58',y2:String(24+Math.min(250,m*15)),stroke:'#f2a20b','stroke-width':'5'}),svgEl('line',{x1:'20',y1:'24',x2:'95',y2:'24',stroke:'#8796b4','stroke-width':'5'}),svgEl('text',{x:'24',y:'291',fill:'#48638e','font-size':'8',text:'Diseño '+(row.mDiseno||'—')+' m'}),svgEl('text',{x:'24',y:'302',fill:'#48638e','font-size':'8',text:'Real '+(row.mPerf||'—')+' m'})]);var summaryDiagram=el('div',{class:'anfo-tiro-resumen',text:'Diseño '+(row.mDiseno||'—')+' m · Real '+(row.mPerf||'—')+' m'});function updateDiagram(){var md=J.num(row.mDiseno),mp=J.num(row.mPerf),ab=J.num(row.abat);if(isNaN(md))md='—';else md=J.fmt(md,1);if(isNaN(mp))mp='—';else mp=J.fmt(mp,1);if(isNaN(ab))ab=0;svg.children[1].setAttribute('x2',String(52+Math.max(-50,Math.min(50,ab))*.65));svg.children[1].setAttribute('y2',String(24+Math.min(250,(isNaN(J.num(row.mPerf))?13:J.num(row.mPerf))*15)));svg.children[3].textContent='Diseño '+md+' m';svg.children[4].textContent='Real '+mp+' m';summaryDiagram.textContent='Diseño '+md+' m · Real '+mp+' m';}ui.diagramUpdater=updateDiagram;var workspace=el('div',{class:'anfo-captura-workspace'});workspace.appendChild(el('div',{class:'anfo-tiro-diagrama-card'},[el('strong',{text:'TIRO '+(idx+1)+' · VISTA',style:'font-size:8px;color:#24498f'}),svg,summaryDiagram]));
+    var panel=el('div',{class:'anfo-tiro-panel'}),tabs=el('div',{class:'anfo-tiro-tabs',style:'grid-template-columns:repeat(3,minmax(0,1fr))'}),fields=el('div',{class:'anfo-tiro-campos'});function fill(){fields.innerHTML='';if(ui.pestanaTiro==='medidas'){fields.appendChild(stepperTiro(row,'mDiseno','Long. diseño','m',.1,.1));fields.appendChild(stepperTiro(row,'abat','Ángulo','°',1,-90,90));fields.appendChild(stepperTiro(row,'mPerf','Largo real','m',.1,.1));fields.appendChild(stepperTiro(row,'rot','Azimut','°',1,0,360));}else if(ui.pestanaTiro==='estado'){fields.appendChild(choiceTiro(row,'estado','ESTADO DEL TIRO',['Bueno','Tapado'],['✓ Sano','Tapado']));if(row.estado==='Tapado')fields.appendChild(stepperTiro(row,'intentosDestape','Intentos de destape','intentos',1,0));fields.appendChild(choiceTiro(row,'conAgua','Agua',['No','Si'],['Seco','Agua']));fields.appendChild(choiceTiro(row,'desvio','Desvío',['Dentro','Fuera']));fields.appendChild(stepperTiro(row,'numBarras','Núm. barras','barras',1,0));}else{fields.appendChild(stepperTiro(row,'pPerc','Presión percusión','bar',1,0));fields.appendChild(choiceTiro(row,'conAgua','Agua barrido',['Si','No']));fields.appendChild(stepperTiro(row,'pAv','Presión avance','bar',1,0));fields.appendChild(textoTiro(row,'brocas','Brocas','Sin cambio · toque para agregar'));fields.appendChild(textoTiro(row,'barras','Barras','Ej. 11 · 1.2 m'));}}
+    tabNames.forEach(function(n,i){tabs.appendChild(el('button',{type:'button',class:ui.pestanaTiro===n?'activo':'',text:tabLabels[i],onclick:function(){ui.pestanaTiro=n;render();}}));});panel.appendChild(tabs);fill();panel.appendChild(fields);workspace.appendChild(panel);modal.appendChild(workspace);var ti=tabNames.indexOf(ui.pestanaTiro);modal.appendChild(el('div',{class:'anfo-captura-actions'},[el('button',{type:'button',class:'anfo-captura-prev',text:ti===0?'‹ Tiros':'‹ '+tabLabels[ti-1],onclick:function(){if(ti===0){ui.diagramUpdater=null;ui.tiro=null;ui.vista='parada';render();}else{ui.pestanaTiro=tabNames[ti-1];render();}}}),el('button',{type:'button',class:'anfo-captura-next',style:ti===2?'background:linear-gradient(#20c981,#0b985c);border-color:#30d28d;':'',text:ti===2?'Guardar tiro ✓':tabLabels[ti+1]+' ›',onclick:function(){var activeTab=tabNames.indexOf(ui.pestanaTiro);if(activeTab<2){ui.pestanaTiro=tabNames[activeTab+1];render();}else{guardarTiroCaptura(row);}}})]));overlay.appendChild(modal);host.appendChild(overlay);
+  }
+
   /* ---------- Paso 3 (ventana nueva): datos faltantes de plantilla + descargas ---------- */
   function plantillaCompleta(p) {
     return pasosPlantilla().every(function (x) {
       if (x.type === 'perd') return p.perdidas.length > 0;
       return !!p.header[x.k];
     });
+  }
+  function minutosLegibles(n){n=Math.max(0,Math.round(n||0));return n<60?n+' min':Math.floor(n/60)+' h '+(n%60)+' min';}
+  function perdidaTipo(p,tipo){var x=p.perdidas.filter(function(q){return q.tipo===tipo;})[0];if(!x&&tipo==='perforacion')x=p.perdidas.filter(function(q){return !q.tipo;})[0];if(!x)x={tipo:tipo,desc:'',tiempo:'00:00',minutos:0,activo:false};x.tipo=tipo;var mins=J.toMin(x.tiempo);if(!isFinite(mins))mins=0;x.minutos=Number(x.minutos)||mins;return x;}
+  function vistaPostura(host,p){
+    var tabs=['tiempos','equipos','perdidas'],names=['Tiempos','Equipos','Pérdidas'],ix=Math.max(0,tabs.indexOf(ui.posturaTab||'tiempos'));ui.posturaTab=tabs[ix];
+    var page=el('div',{class:'anfo-postura-page',style:'display:flex'}),progress=el('div',{class:'anfo-postura-progress','aria-label':'Paso 7 de 8'},Array.from({length:8},function(_,i){return el('i',{class:i<6?'active':''});}));page.appendChild(progress);
+    page.appendChild(el('header',{class:'anfo-postura-head'},[el('div',null,[el('p',{text:'PASO 7 DE 8 · DATOS DE PLANTILLA'}),el('h2',{text:names[ix]==='Tiempos'?'Tiempos de la postura':names[ix]==='Equipos'?'Equipos y geófono':'Pérdidas y observaciones'})]),el('span',{class:'anfo-postura-count',text:(ix===0?'8':ix===1?'14':'17')+'/17'})]));
+    var nav=el('nav',{class:'anfo-postura-tabs',role:'tablist','aria-label':'Datos de postura'});tabs.forEach(function(k,i){nav.appendChild(el('button',{type:'button',role:'tab',class:ix===i?'active':'','aria-selected':ix===i?'true':'false',text:(i===0?'◷ ':i===1?'⚙ ':'⚠ ')+names[i],onclick:function(){abrirPostura(p,k);}}));});page.appendChild(nav);
+    var panel=el('div',{class:'anfo-postura-panel'});
+    if(ix===0){
+      var schedule=el('div',{class:'anfo-postura-card anfo-tiempo-lista'}),events=[['hLlegJej','Llegada JeJ a postura'],['hIniPerf','Inicio de perforación'],['hFinPerf','Fin de perforación'],['hLlegPyt','Inicio de traslado'],['hSalPyt','Fin de traslado'],['hSalJej','Salida JeJ de postura']],deltas=[];
+      function updateDurations(){events.forEach(function(ev,i){if(!i)return;var mins=J.diffMin(p.header[events[i-1][0]],p.header[ev[0]]);deltas[i-1].textContent=isNaN(mins)?'':'↳ '+minutosLegibles(mins);});}
+      events.forEach(function(ev,i){var input=el('input',{type:'time',value:p.header[ev[0]]||'', 'aria-label':ev[1]});input.addEventListener('input',function(){p.header[ev[0]]=input.value;J.store.touch();updateDurations();});schedule.appendChild(el('div',{class:'anfo-tiempo-evento'},[el('i',{class:i===3||i===4?'amarre':''}),el('label',{text:ev[1]}),input]));if(i<events.length-1){var delta=el('small',{style:'display:block;margin:-4px 0 2px 21px;color:#54709e;font-size:8px'});deltas.push(delta);schedule.appendChild(delta);}});updateDurations();panel.appendChild(schedule);panel.appendChild(el('p',{class:'anfo-postura-nota',text:'ⓘ Los tiempos entre eventos se calculan automáticamente.'}));
+    }else if(ix===1){
+      var equipo=el('div',{class:'anfo-postura-card'},[el('h3',{text:'■ PRESIÓN Y EQUIPOS'})]),grid=el('div',{class:'anfo-equipo-grid'});
+      function field(label,key,unit,step,placeholder){var inp=el('input',{type:'number',step:String(step||1),min:'0',value:p.header[key]||'',placeholder:placeholder||'', 'aria-label':label});inp.addEventListener('input',function(){p.header[key]=inp.value;J.store.touch();});var stepper=el('div',{class:'anfo-equipo-stepper'},[el('button',{type:'button',text:'−',onclick:function(){var n=Number(inp.value||0);inp.value=String(Math.max(0,n-(step||1)));inp.dispatchEvent(new Event('input',{bubbles:true}));}}),inp,el('span',{text:unit}),el('button',{type:'button',text:'+',onclick:function(){var n=Number(inp.value||0);inp.value=String(n+(step||1));inp.dispatchEvent(new Event('input',{bubbles:true}));}})]);grid.appendChild(el('label',null,[document.createTextNode(label),stepper]));}
+      field('Compresor','presionCompresor','bar',.1,'7.0');field('Agua','presionAgua','bar',.1,'5.0');field('Diámetro de tiros','diametro','pulg',.1,'3.5');
+      var vod=el('fieldset',null,[el('legend',{text:'Tiro con VoD'})]),pill=el('div',{class:'anfo-pill-choice'});['Si','No'].forEach(function(v){pill.appendChild(el('button',{type:'button',class:p.header.tiroVod===v?'selected':'',text:v==='Si'?'Sí':'No',onclick:function(){p.header.tiroVod=v;J.store.touch();Array.from(pill.children).forEach(function(b,i){b.classList.toggle('selected',['Si','No'][i]===v);});}}));});vod.appendChild(pill);grid.appendChild(vod);equipo.appendChild(grid);panel.appendChild(equipo);
+      var geo=el('div',{class:'anfo-postura-card'},[el('h3',null,[document.createTextNode('■ GEÓFONO Y COLLAR '),el('small',{text:'Opcional'})])]),geogrid=el('div',{class:'anfo-geofono-grid'});[['Ubicación','ubicacionGeofono'],['Distancia [m]','distanciaGeofono'],['Altura [m]','alturaGeofono']].forEach(function(x){var inp=el('input',{type:'text',value:p.header[x[1]]||'',placeholder:'Opcional'});inp.addEventListener('input',function(){p.header[x[1]]=inp.value;J.store.touch();});geogrid.appendChild(el('label',null,[document.createTextNode(x[0]),inp]));});geo.appendChild(geogrid);panel.appendChild(geo);
+    }else{
+      var lossData=[['perforacion','DURANTE LA PERFORACIÓN',['Espera de jumbo','Falla de equipo','Sin acceso','Otro']],['traslado','DURANTE EL TRASLADO',['Bloqueo de vía','Ventilación','Falla de equipo','Otro']]],total=el('p',{class:'anfo-perdida-total'});
+      function updateTotal(){var sum=p.perdidas.reduce(function(s,x){var m=Number(x.minutos);if(!isFinite(m))m=J.toMin(x.tiempo);return s+(x.activo&&isFinite(m)?m:0);},0);total.textContent='⚠ Pérdida total '+minutosLegibles(sum)+'. Se descontará del tiempo efectivo.';}
+      lossData.forEach(function(info){var item=perdidaTipo(p,info[0]),active=!!item.activo,card=el('div',{class:'anfo-postura-card anfo-perdida-card'+(active?' registrando':'' )}),clear=el('button',{type:'button',class:active?'':'active',text:'Sin pérd.',onclick:function(){item.activo=false;item.desc='';item.otro='';item.minutos=0;item.tiempo='00:00';var index=p.perdidas.indexOf(item);if(index>=0)p.perdidas.splice(index,1);J.store.touch();abrirPostura(p,'perdidas');}}),reg=el('button',{type:'button',class:active?'active':'',text:'Registrar',onclick:function(){item.activo=true;if(p.perdidas.indexOf(item)<0)p.perdidas.push(item);J.store.touch();abrirPostura(p,'perdidas');}});card.appendChild(el('h3',null,[el('span',{text:'■ '+info[1]}),el('div',null,[clear,reg])]));
+        if(active){var details=el('div',{class:'anfo-perdida-detalle'}),chips=el('div',{class:'anfo-chip-list'}),selected=(item.desc||'').split(' · ').filter(Boolean);info[2].forEach(function(reason){var b=el('button',{type:'button',class:selected.indexOf(reason)>=0?'selected':'',text:reason});b.addEventListener('click',function(){b.classList.toggle('selected');var values=Array.from(chips.querySelectorAll('button.selected')).map(function(x){return x.textContent;});item.desc=values.join(' · ');if(values.indexOf('Otro')<0)item.otro='';J.store.touch();abrirPostura(p,'perdidas');});chips.appendChild(b);});details.appendChild(chips);if(selected.indexOf('Otro')>=0){var other=el('input',{type:'text',class:'anfo-perdida-otro',value:item.otro||'',placeholder:'Especifica la pérdida'});other.addEventListener('input',function(){item.otro=other.value;J.store.touch();});details.appendChild(other);}
+          var mins=Number(item.minutos)||0,minuteInput=el('input',{type:'number',min:'0',step:'5',value:String(mins),'aria-label':'Minutos de pérdida'});function setMinutes(n){mins=Math.max(0,n);item.minutos=mins;item.tiempo=('0'+Math.floor(mins/60)).slice(-2)+':'+('0'+(mins%60)).slice(-2);minuteInput.value=String(mins);updateTotal();}minuteInput.addEventListener('input',function(){setMinutes(Number(minuteInput.value)||0);});var presets=el('div',{class:'anfo-minute-chips'});[10,15,30].forEach(function(n){presets.appendChild(el('button',{type:'button',text:String(n),onclick:function(){setMinutes(n);}}));});details.appendChild(el('div',{class:'anfo-perdida-tiempo'},[el('button',{type:'button',text:'−',onclick:function(){setMinutes(mins-5);}}),el('strong',null,[minuteInput,el('small',{text:'min'})]),el('button',{type:'button',text:'+',onclick:function(){setMinutes(mins+5);}}),presets]));card.appendChild(details);
+        }panel.appendChild(card);});
+      var obs=el('textarea',{rows:'2',placeholder:'Comentarios adicionales de la postura...'});obs.value=p.obs[0]||'';obs.addEventListener('input',function(){p.obs[0]=obs.value;J.store.touch();});panel.appendChild(el('div',{class:'anfo-postura-card'},[el('h3',{text:'■ OBSERVACIONES GENERALES'}),obs]));panel.appendChild(total);updateTotal();
+    }
+    page.appendChild(panel);page.appendChild(el('footer',{class:'anfo-postura-actions'},[el('button',{type:'button',text:ix?'‹ '+names[ix-1]:'‹ Tiros',onclick:function(){if(ix){abrirPostura(p,tabs[ix-1]);}else{ui.parada='';ir('resumen');}}}),el('button',{type:'button',style:ix===2?'background:linear-gradient(#20c981,#0b985c);border:1px solid #30d28d;':'',text:ix<2?names[ix+1]+' ›':'Ir al resumen ✓',onclick:function(){if(ix<2)abrirPostura(p,tabs[ix+1]);else{J.store.touch();ui.vista='final';render();window.scrollTo(0,0);}}})]));host.appendChild(page);
   }
   // Desde el resumen: si faltan datos abre directo el asistente; si ya están, muestra la ventana de descargas
   function irACierre(p) {
@@ -1632,6 +1774,21 @@ var rolPersonal = {
     if (!plantillaCompleta(p)) abrirAsistente('plantilla'); else { render(); window.scrollTo(0, 0); }
   }
   function vistaFinal(host, p) {
+    vistaResumenGeneralPerforacion(host,p); return;
+  }
+  function vistaResumenGeneralPerforacion(host,p){
+    var used=p.filas.filter(J.filaUsada),groups={};used.forEach(function(r){var key=(r.trabajo||'')+'||'+String(r.parada||'—'),g=groups[key]||(groups[key]={trabajo:r.trabajo||'Trabajo',parada:r.parada||'—',total:0,sanos:0,tapados:0});g.total++;if(r.estado==='Tapado')g.tapados++;else g.sanos++;});var filas=Object.keys(groups).map(function(k){return groups[k];}),max=Math.max(1,...filas.map(function(x){return x.total;})),tapados=used.filter(function(r){return r.estado==='Tapado';}).length,perdida=J.totalPerdidas(p),detalle={};
+    p.filas.filter(function(r){return r.trabajo&&r.parada!=='';}).forEach(function(r){var key=String(r.trabajo)+'||'+String(r.parada),g=detalle[key]||(detalle[key]={trabajo:r.trabajo,parada:String(r.parada),rows:[]});g.rows.push(r);});var detalleFilas=Object.keys(detalle).map(function(k){return detalle[k];});
+    var page=el('div',{class:'anfo-resumen-final-mode anfo-final-page',style:'display:flex;min-height:calc(100dvh - 92px);flex-direction:column;gap:8px;color:#fff'});page.appendChild(el('div',{class:'anfo-final-progress'},Array.from({length:8},function(){return el('i');})));page.appendChild(el('header',{class:'anfo-final-head'},[el('div',null,[el('p',{text:'PERFORACIÓN · '+(p.trabajoActual||'SEGUIMIENTO')}),el('h2',{text:'Resumen General'})]),el('span',{text:'✓ Guardado'})]));
+    page.appendChild(el('div',{class:'anfo-final-stats'},[[p.trabajos.length,'Trabajos',''],[filas.length,'Paradas',''],[used.length,'Tiros',''],[tapados,'Tapados','tapado']].map(function(x){return el('article',{class:x[2]},[el('strong',{text:String(x[0])}),el('small',{text:x[1]})]);})));
+    var chart=el('section',{class:'anfo-final-chart'},[el('header',null,[el('strong',{text:'■ TIROS POR PARADA'}),el('span',{text:used.length?Math.round((used.length-tapados)/used.length*100)+'% sanos':'0% sanos'})])]);
+    if(filas.length){var chartRows=el('div',{class:'anfo-final-chart-rows'});filas.forEach(function(g){var bars=el('div',{class:'anfo-final-bars'});[['total',g.total],['sanos',g.sanos],['tapados',g.tapados]].forEach(function(x){bars.appendChild(el('span',{class:x[0],style:'width:'+Math.max(x[1]?3:0,x[1]/max*100)+'%'},[el('b',{text:String(x[1])})]));});chartRows.appendChild(el('div',{class:'anfo-final-chart-row'},[el('label',{text:g.trabajo+' · '+g.parada}),bars]));});chart.appendChild(chartRows);}else chart.appendChild(el('p',{class:'anfo-final-empty',text:'Aún no hay tiros registrados.'}));chart.appendChild(el('footer',null,[el('span',null,[el('i',{class:'total'}),document.createTextNode(' Total')]),el('span',null,[el('i',{class:'sanos'}),document.createTextNode(' Sanos')]),el('span',null,[el('i',{class:'tapados'}),document.createTextNode(' Tapados')])]));page.appendChild(chart);
+    page.appendChild(el('section',{class:'anfo-final-times'},[el('span',{text:'◷ Perforación '},[el('b',{text:minutosLegibles(J.tPerforacion(p.header))})]),el('span',{text:'Traslado '},[el('b',{text:minutosLegibles(J.diffMin(p.header.hFinPerf,p.header.hSalJej))})]),el('span',{text:'Pérdidas '},[el('b',{text:minutosLegibles(perdida)})])]));
+    var details=el('details',{class:'anfo-final-shot-details'}),summary=el('summary',{text:'Ver información de tiros por parada'});details.appendChild(summary);detalleFilas.forEach(function(g){var stop=el('div',{class:'anfo-final-stop-detail'}),items=el('div');stop.appendChild(el('strong',{text:g.trabajo+' · Parada '+g.parada}));g.rows.forEach(function(r,i){var done=tiroCapturado(r),article=el('article',{class:done?'':'pending'});if(!done){article.appendChild(el('b',{text:'Tiro '+(r.tiro||i+1)+' · Pendiente'}));}else{article.appendChild(el('b',{text:'Tiro '+(r.tiro||i+1)+' · '+(r.estado||'Sin estado')+' · '+(r.conAgua==='Si'?'Con agua':r.conAgua==='No'?'Seco':'Agua s/d')}));article.appendChild(el('small',{text:'Diseño '+(r.mDiseno||'—')+' m · Taco '+(r.taco||'—')+' m · Perforado '+(r.mPerf||'—')+' m · Abatimiento '+(r.abat||'—')+'° · Azimut '+(r.rot||'—')+'°'}));article.appendChild(el('small',{text:'Problema '+(r.problema||'Ninguno')+' · Percusión '+(r.pPerc||'—')+' bar · Avance '+(r.pAv||'—')+' bar · Barras '+(r.numBarras||r.barras||'—')+' · Brocas '+(r.brocas||'—')}));}items.appendChild(article);});stop.appendChild(items);details.appendChild(stop);});page.appendChild(details);
+    var actions=el('div',{class:'anfo-final-actions'},[el('button',{type:'button',class:'save',text:'▣',onclick:function(){J.store.saveNow();window.location.href='../index.html';}},[el('b',{text:'Guardar y Salir'}),el('small',{text:'Cierra el seguimiento'})]),el('button',{type:'button',class:'cloud',text:'☁',onclick:function(){J.store.saveNow();var button=document.getElementById('btn-subir-onedrive');if(button)button.click();else alert('No está disponible el selector de archivos para OneDrive.');}},[el('b',{text:'OneDrive'}),el('small',{text:'Subir a la nube'})]),el('button',{type:'button',class:'excel',text:'▦',onclick:function(){J.store.saveNow();J.excel.download(p);}},[el('b',{text:'Generar Excel'}),el('small',{text:'Planilla de terreno'})]),el('button',{type:'button',class:'report',text:'▤',onclick:function(){J.store.saveNow();J.informe.abrir(p);}},[el('b',{text:'Generar Nota Técnica'}),el('small',{text:'Con diagramas de tiros'})])]);page.appendChild(actions);
+    page.appendChild(el('footer',{class:'anfo-final-footer'},[el('button',{type:'button',text:'‹ Volver a postura',onclick:function(){abrirPostura(p,'tiempos');}}),el('button',{type:'button',text:'+ Registrar otro trabajo',onclick:function(){ir('id');}})]));host.appendChild(page);
+  }
+  /*
     var R = J.resumen(p), card = el('div', { class: 'jp-card card-wide' });
     card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 3: Datos Faltantes y Descarga' }));
     card.appendChild(el('p', { class: 'jp-card-sub', text: 'Complete los datos de la plantilla y descargue su registro.' }));
@@ -1650,6 +1807,7 @@ var rolPersonal = {
     card.appendChild(el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:14px', text: '⬅ Volver al Resumen de Paradas', onclick: function () { ir('resumen'); } }));
     host.appendChild(card);
   }
+  */
 
   /* ---------- Navegación y render ---------- */
   function descartarTiroVacio(p) {
@@ -1663,11 +1821,19 @@ var rolPersonal = {
     ui.asist = null; ui.tiro = null; ui.aviso = ''; ui.vista = v;
     render(); window.scrollTo(0, 0);
   }
-  var VISTAS = { datos: vistaDatos, id: vistaId, resumen: vistaResumen, parada: vistaParada, final: vistaFinal };
+  var VISTAS = { datos: vistaDatos, config: vistaConfiguracion, id: vistaId, resumen: vistaResumen, cantidad: vistaCantidad, captura: vistaCapturaTiro, parada: vistaParada, postura: vistaPostura, final: vistaFinal };
   function render() {
     var p = P(), host = U.$('#paso'); host.innerHTML = '';
+    document.body.classList.toggle('anfo-step1-mode', ui.vista === 'datos');
+    document.body.classList.toggle('anfo-work-mode', ui.vista === 'config' || ui.vista === 'id');
+    document.body.classList.toggle('anfo-stop-mode', ui.vista === 'resumen' || ui.vista === 'parada' || ui.vista === 'cantidad' || ui.vista === 'captura' || ui.vista === 'postura' || ui.vista === 'final');
+    document.body.classList.toggle('anfo-resumen-tiros-mode', ui.vista === 'parada' || ui.vista === 'cantidad');
+    document.body.classList.toggle('anfo-tiro-captura-activo', ui.vista === 'captura');
+    document.body.classList.toggle('emulsion-plantilla-mode', ui.vista === 'postura');
+    document.body.classList.toggle('anfo-resumen-final-mode', ui.vista === 'final');
+    document.body.classList.toggle('emulsion-work-mode', ui.vista === 'id' || ui.vista === 'resumen');
     if (ui.asist) { asistenteVista(host, p); return; }
-    if (!p.trabajoActual && (ui.vista === 'resumen' || ui.vista === 'parada' || ui.vista === 'final')) ui.vista = 'id';
+    if (!p.trabajoActual && (ui.vista === 'resumen' || ui.vista === 'parada' || ui.vista === 'cantidad' || ui.vista === 'captura' || ui.vista === 'postura' || ui.vista === 'final')) ui.vista = 'id';
     if (ui.vista === 'parada' && !ui.parada) ui.vista = 'resumen';
     VISTAS[ui.vista](host, p);
   }
@@ -1675,5 +1841,14 @@ var rolPersonal = {
   /* ---------- Arranque ---------- */
   refrescarToolbar();
   render();
+  function agregarIngresoMenu() {
+    var menu = document.querySelector('#dropdownMenu ul');
+    if (!menu || menu.querySelector('[data-perforacion-ingreso]')) return;
+    var li = document.createElement('li'), a = document.createElement('a');
+    a.href = '#'; a.dataset.perforacionIngreso = '1'; a.textContent = '⚙️ Ingreso / Editar Datos';
+    a.addEventListener('click', function (e) { e.preventDefault(); var dd = document.getElementById('dropdownMenu'); if (dd) dd.classList.remove('show'); abrirAsistente('postura'); });
+    li.appendChild(a); menu.insertBefore(li, menu.children[1] || null);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', agregarIngresoMenu); else agregarIngresoMenu();
   window.addEventListener('beforeunload', function () { J.store.saveNow(); });
 })();

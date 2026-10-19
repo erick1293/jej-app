@@ -1,697 +1,2071 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Seguimiento Emulsión - App JEJ</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css" />
     <script src="../js/vendor/exceljs.min.js"></script>
-    <style>
-
-    </style>
-</head>
-<body class="pagina-fondo" data-section="emulsion">
-
+    <style></style>
+  </head>
+  <body class="pagina-fondo" data-section="emulsion">
     <main id="emulsionMain" class="card-wide">
-        
-        <!-- PASO 1: SELECCIÓN DE TURNO Y RESUMEN GENERAL -->
-        <div id="paso1" class="anfo-paso1 emulsion-paso1">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>Paso 1: Datos Generales (Emulsión)</h2>
-                <span id="indicadorAutosave" class="badge-autosave" style="display:none;">✔ AutoGuardado</span>
-            </div>
-            <p class="subtitle">Ingrese los datos básicos del seguimiento de emulsión</p>
+      <!-- PASO 1: SELECCIÓN DE TURNO Y RESUMEN GENERAL -->
+      <div id="paso1" class="anfo-paso1 emulsion-paso1">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h2>Paso 1: Datos Generales (Emulsión)</h2>
+          <span
+            id="indicadorAutosave"
+            class="badge-autosave"
+            style="display: none"
+            >✔ AutoGuardado</span
+          >
+        </div>
+        <p class="subtitle">
+          Ingrese los datos básicos del seguimiento de emulsión
+        </p>
 
-            <div class="anfo-step-card anfo-fecha-turno">
-            <h3 class="anfo-step-label"><i></i> Fecha y turno</h3>
+        <div class="anfo-step-card anfo-fecha-turno">
+          <h3 class="anfo-step-label"><i></i> Fecha y turno</h3>
+          <div class="form-group-field">
+            <label>Fecha:</label>
+            <input
+              type="text"
+              id="fechaEmulsion"
+              readonly
+              style="background-color: #f1f5f9"
+            />
+          </div>
+
+          <div class="form-group-field">
+            <label>Turno:</label>
+            <select
+              id="turnoEmulsion"
+              class="anfo-select-original"
+              required
+              aria-hidden="true"
+              tabindex="-1"
+            >
+              <option value="A" selected>Turno A</option>
+              <option value="B">Turno B</option>
+            </select>
+            <div
+              class="anfo-turno-botones"
+              role="group"
+              aria-label="Seleccione el turno"
+            >
+              <button
+                type="button"
+                class="anfo-turno-boton activo"
+                data-turno-emulsion="A"
+                aria-pressed="true"
+              >
+                ☀ Turno A
+              </button>
+              <button
+                type="button"
+                class="anfo-turno-boton"
+                data-turno-emulsion="B"
+                aria-pressed="false"
+              >
+                ☾ Turno B
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="anfo-step-card anfo-personal-card">
+          <div class="anfo-personal-head">
+            <h3 class="anfo-step-label">
+              <i class="cyan"></i> Postura y personal
+            </h3>
+            <span id="estadoPersonalEmulsion" class="anfo-estado-personal"
+              >Cargando…</span
+            >
+          </div>
+          <div id="resumenUnificado" class="anfo-resumen-personal">
+            <em
+              >Seleccione un turno e ingrese los datos en la ventana
+              emergente.</em
+            >
+          </div>
+        </div>
+
+        <div
+          class="anfo-pie"
+          style="
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 25px;
+          "
+        >
+          <a
+            href="../index.html"
+            class="btn-primary"
+            style="
+              background-color: #64748b;
+              text-decoration: none;
+              text-align: center;
+              width: 45%;
+            "
+            >Volver al Menú</a
+          >
+          <button
+            type="button"
+            onclick="irAPaso2()"
+            class="btn-primary"
+            style="width: 50%; background-color: #2563eb"
+          >
+            Siguiente ➔
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 2: GESTIÓN DE ID DE TRABAJO -->
+      <div
+        id="paso2"
+        class="anfo-trabajo-screen emulsion-trabajo-screen"
+        style="display: none"
+      >
+        <div class="anfo-progreso" aria-label="Progreso del seguimiento">
+          <span class="completado" aria-label="Datos completados">✓</span>
+          <span class="completado" aria-label="Postura completada">✓</span>
+          <span class="actual" aria-current="step">3</span>
+          <span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+        </div>
+        <p class="anfo-paso-indicador">PASO 3 DE 8</p>
+        <h2>Gestión de Trabajo</h2>
+        <div class="anfo-contexto-trabajo">
+          <div>
+            <small>Turno</small
+            ><strong id="resumenTurnoTrabajoEmulsion">A · --/--/----</strong>
+          </div>
+          <div>
+            <small>ID Tronadura</small
+            ><strong id="resumenIdTronaduraTrabajoEmulsion">Sin asignar</strong>
+          </div>
+        </div>
+        <section class="anfo-trabajo-panel anfo-nuevo-trabajo">
+          <h3><i></i> Crear nuevo trabajo</h3>
+          <label for="nuevoIdInput">Nombre / ID del trabajo</label>
+          <input
+            type="text"
+            id="nuevoIdInput"
+            placeholder="Ej. TRABAJO-01"
+            autocomplete="off"
+          />
+          <p class="anfo-sugerencia-trabajo">
+            Sugerido: <strong id="sugerenciaTrabajoEmulsion">TRABAJO-01</strong>
+          </p>
+          <button
+            type="button"
+            onclick="crearNuevoIdTrabajo()"
+            class="anfo-btn-crear"
+          >
+            ＋ Crear e ir a paradas
+          </button>
+        </section>
+        <div class="anfo-separador-trabajo">
+          <span>o continúe uno existente</span>
+        </div>
+        <section class="anfo-trabajo-panel anfo-existentes">
+          <h3>
+            <i></i> Trabajos existentes
+            <span id="conteoTrabajosEmulsion" class="anfo-conteo-trabajos"
+              >0</span
+            >
+          </h3>
+          <div
+            id="listaTrabajosEmulsion"
+            class="anfo-lista-trabajos"
+            aria-label="Trabajos guardados"
+          ></div>
+          <select
+            id="selectIdExistente"
+            class="anfo-select-trabajo-interno"
+            aria-hidden="true"
+            tabindex="-1"
+          >
+            <option value="" disabled selected>
+              -- Seleccione un ID guardado --
+            </option>
+          </select>
+        </section>
+        <div class="anfo-acciones-trabajo">
+          <button type="button" onclick="irAPaso1()" class="anfo-btn-volver">
+            ‹ Volver
+          </button>
+          <button
+            type="button"
+            id="btnUsarTrabajoEmulsion"
+            class="anfo-btn-usar"
+          >
+            Usar seleccionado ›
+          </button>
+        </div>
+        <p
+          id="estadoSeleccionTrabajoEmulsion"
+          class="anfo-estado-seleccion"
+          aria-live="polite"
+        ></p>
+      </div>
+
+      <!-- PASO 3: GESTIÓN DE PARADAS PARA EL TRABAJO SELECCIONADO -->
+      <div
+        id="paso3"
+        class="anfo-paradas-screen emulsion-paradas-screen"
+        style="display: none"
+      >
+        <div class="anfo-progreso" aria-label="Progreso del seguimiento">
+          <span class="completado" aria-label="Datos completados">✓</span>
+          <span class="completado" aria-label="Postura completada">✓</span>
+          <span class="completado" aria-label="Trabajo seleccionado">✓</span>
+          <span class="actual" aria-current="step">4</span>
+          <span>5</span><span>6</span><span>7</span><span>8</span>
+        </div>
+        <p class="anfo-paso-indicador">
+          PASO 4 DE 8 · <span id="etiquetaTrabajoParadasEmulsion">TRABAJO</span>
+        </p>
+        <h2>Gestión de Paradas</h2>
+
+        <section class="anfo-trabajo-panel anfo-parada-nueva">
+          <h3><i></i> Crear nueva parada</h3>
+          <label for="idParadaInput">ID de parada</label>
+          <input
+            type="text"
+            id="idParadaInput"
+            placeholder="Ej. P1 o PARADA 1"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            onclick="irAPaso4DesdeCrearParada()"
+            class="anfo-btn-crear"
+          >
+            Crear parada y configurar tiros ›
+          </button>
+        </section>
+
+        <section class="anfo-trabajo-panel anfo-paradas-guardadas">
+          <h3>
+            <i></i> Paradas registradas
+            <span id="conteoParadasEmulsion" class="anfo-conteo-trabajos"
+              >0</span
+            >
+          </h3>
+          <div
+            id="listaParadasEmulsion"
+            class="anfo-lista-paradas"
+            role="listbox"
+            aria-label="Paradas registradas"
+          ></div>
+          <select
+            id="selectParadaExistente"
+            class="anfo-select-trabajo-interno"
+            aria-label="Parada seleccionada"
+          >
+            <option value="" disabled selected>
+              -- Seleccione una parada guardada --
+            </option>
+          </select>
+          <div class="anfo-acciones-parada">
+            <button
+              type="button"
+              onclick="seleccionarParadaExistente()"
+              class="anfo-btn-ver-tiros"
+            >
+              Editar / ver tiros ›
+            </button>
+            <button
+              type="button"
+              onclick="eliminarParadaSeleccionada()"
+              class="anfo-btn-eliminar-parada"
+              aria-label="Eliminar parada seleccionada"
+              title="Eliminar"
+            >
+              🗑
+            </button>
+          </div>
+        </section>
+
+        <div class="anfo-acciones-trabajo anfo-acciones-paradas">
+          <button
+            type="button"
+            onclick="volverAPaso2()"
+            class="anfo-btn-volver"
+          >
+            ‹ Volver
+          </button>
+          <button
+            type="button"
+            onclick="irAResumenFinalDesdeParadas()"
+            class="anfo-btn-resumen-paradas"
+          >
+            Ver resumen ›
+          </button>
+        </div>
+        <p
+          id="estadoSeleccionParadaEmulsion"
+          class="anfo-estado-seleccion"
+          aria-live="polite"
+        ></p>
+      </div>
+
+      <!-- PASO 4: CONFIGURACIÓN DE CANTIDAD DE TIROS -->
+      <div id="paso4" style="display: none">
+        <h2>Paso 4: Configurar Tiros</h2>
+        <p class="subtitle" id="subtituloPaso4">Parada: -</p>
+
+        <div class="wizard-card">
+          <div class="form-group-field">
+            <label>CANTIDAD DE TIROS (RANGO: 1 - 50):</label>
+            <div class="emulsion-cantidad-control">
+              <button
+                type="button"
+                data-cantidad-tiros="-1"
+                aria-label="Disminuir cantidad de tiros"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                id="cantTirosInput"
+                value="3"
+                min="1"
+                max="50"
+                inputmode="numeric"
+                aria-label="Cantidad de tiros"
+              />
+              <button
+                type="button"
+                data-cantidad-tiros="1"
+                aria-label="Aumentar cantidad de tiros"
+              >
+                +
+              </button>
+            </div>
+            <div
+              class="emulsion-cantidad-presets"
+              aria-label="Cantidades frecuentes"
+            >
+              <button type="button" data-cantidad-preset="1">1</button
+              ><button type="button" data-cantidad-preset="5">5</button>
+              <button type="button" data-cantidad-preset="8">8</button
+              ><button type="button" data-cantidad-preset="9">9</button>
+              <button type="button" data-cantidad-preset="12">12</button
+              ><button type="button" data-cantidad-preset="15">15</button>
+              <button type="button" data-cantidad-preset="20">20</button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 25px;
+          "
+        >
+          <button
+            type="button"
+            onclick="volverAPaso3()"
+            class="btn-primary"
+            style="background-color: #64748b; width: 45%"
+          >
+            ⬅ Volver
+          </button>
+          <button
+            type="button"
+            onclick="iniciarRegistroTiros()"
+            class="btn-primary"
+            style="background-color: #2563eb; width: 50%"
+          >
+            Siguiente: Capturar Tiros ➔
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 5: CAPTURA INDIVIDUAL DE CADA TIRO (EMULSIÓN) -->
+      <div id="paso5" style="display: none">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h2 id="tituloTiroActual">Captura de Tiro - Emulsión</h2>
+          <span
+            id="badgeProgreso"
+            style="
+              background: #2563eb;
+              color: white;
+              padding: 4px 10px;
+              border-radius: 12px;
+              font-weight: bold;
+              font-size: 12px;
+            "
+            >Tiro 1 de 3</span
+          >
+        </div>
+        <p class="subtitle" id="subtituloParadaActual">
+          ID Trabajo / Parada: -
+        </p>
+
+        <div class="wizard-card emulsion-capture-source">
+          <div class="grid-2">
             <div class="form-group-field">
-                <label>Fecha:</label>
-                <input type="text" id="fechaEmulsion" readonly style="background-color: #f1f5f9;">
+              <label>Long. Diseño [m]:</label>
+              <input
+                type="number"
+                step="0.1"
+                id="emulsionLongDiseno"
+                value="12.9"
+              />
             </div>
-
             <div class="form-group-field">
-                <label>Turno:</label>
-                <select id="turnoEmulsion" class="anfo-select-original" required aria-hidden="true" tabindex="-1">
-                    <option value="A" selected>Turno A</option>
-                    <option value="B">Turno B</option>
-                </select>
-                <div class="anfo-turno-botones" role="group" aria-label="Seleccione el turno">
-                    <button type="button" class="anfo-turno-boton activo" data-turno-emulsion="A" aria-pressed="true">☀ Turno A</button>
-                    <button type="button" class="anfo-turno-boton" data-turno-emulsion="B" aria-pressed="false">☾ Turno B</button>
-                </div>
+              <label>Taco [m]:</label>
+              <input type="number" step="0.1" id="emulsionTaco" value="8.0" />
             </div>
-            </div>
+          </div>
 
-            <div class="anfo-step-card anfo-personal-card">
-            <div class="anfo-personal-head">
-                <h3 class="anfo-step-label"><i class="cyan"></i> Postura y personal</h3>
-                <span id="estadoPersonalEmulsion" class="anfo-estado-personal">Cargando…</span>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Largo Momento Cargar [m]:</label>
+              <input
+                type="number"
+                step="0.1"
+                id="emulsionLargoMomento"
+                value="13.0"
+              />
             </div>
-            <div id="resumenUnificado" class="anfo-resumen-personal">
-                <em>Seleccione un turno e ingrese los datos en la ventana emergente.</em>
+            <div class="form-group-field">
+              <label>Taco Real [m]:</label>
+              <input
+                type="number"
+                step="0.1"
+                id="emulsionTacoReal"
+                value="8.0"
+              />
             </div>
-            </div>
+          </div>
 
-            <div class="anfo-pie" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
-                <a href="../index.html" class="btn-primary" style="background-color: #64748b; text-decoration: none; text-align: center; width: 45%;">Volver al Menú</a>
-                <button type="button" onclick="irAPaso2()" class="btn-primary" style="width: 50%; background-color: #2563eb;">Siguiente ➔</button>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Estado Tiro:</label>
+              <select
+                id="emulsionEstado"
+                onchange="toggleIntentosDestapeEmulsion()"
+              >
+                <option value="Sano" selected>Sano</option>
+                <option value="Tapado">Tapado</option>
+              </select>
             </div>
+            <div class="form-group-field">
+              <label>Intentos Destape (solo tapados):</label>
+              <input
+                type="number"
+                id="emulsionIntentosDestape"
+                placeholder="Cant."
+                disabled
+              />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Tiro con Agua:</label>
+              <select id="emulsionAgua">
+                <option value="Seco" selected>Seco</option>
+                <option value="Agua">Agua</option>
+              </select>
+            </div>
+            <div class="form-group-field">
+              <label>Tiro Negativo / Positivo:</label>
+              <select id="emulsionPosNeg">
+                <option value="Positivo" selected>Positivo</option>
+                <option value="Negativo">Negativo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-title" style="font-size: 14px; margin-top: 10px">
+            Detalle de Producto y Carguío
+          </div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Tipo de Emulsión / Producto:</label>
+              <input type="text" id="tipoEmulsion" value="Emulnor 3000" />
+            </div>
+            <div class="form-group-field">
+              <label>Kilos / Litros Usados:</label>
+              <input
+                type="number"
+                step="0.1"
+                id="kilosEmulsion"
+                placeholder="Ej. 45.5"
+              />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Núm. Pera / Equipo:</label>
+              <input type="number" id="emulsionNumPera" value="7" />
+            </div>
+            <div class="form-group-field">
+              <label>Cama Explosivo [m]:</label>
+              <input
+                type="number"
+                step="0.1"
+                id="emulsionCamaExplosivo"
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
+
+          <div class="section-title" style="font-size: 14px; margin-top: 10px">
+            Cebo y Sistema de Iniciación
+          </div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Cebo Superior:</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                id="emulsionCeboSup"
+                value="150.0"
+              />
+            </div>
+            <div class="form-group-field">
+              <label>Araña Cebo Sup.:</label>
+              <select id="emulsionAranaSup">
+                <option value="Si" selected>Si</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Cant. Cartuchos / Boosters:</label>
+              <input type="number" id="emulsionCantCartuchos" value="1" />
+            </div>
+            <div class="form-group-field">
+              <label>Cebo Inferior:</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                id="emulsionCeboInf"
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
+
+          <div class="section-title" style="font-size: 14px; margin-top: 10px">
+            Detalle de la Carga de Columna [m]
+          </div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Long. al Terminar la Cama:</label>
+              <input
+                type="number"
+                step="0.01"
+                id="emulsionLongTerminarCama"
+                placeholder="Opcional"
+              />
+            </div>
+            <div class="form-group-field">
+              <label>Long. 1er Cebo (cama + 0.3 m):</label>
+              <input
+                type="number"
+                step="0.01"
+                id="emulsionLong1erCebo"
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Long. al Terminar Carga Intermedia:</label>
+              <input
+                type="number"
+                step="0.01"
+                id="emulsionLongTerminarIntermedia"
+                placeholder="Opcional"
+              />
+            </div>
+            <div class="form-group-field">
+              <label>Long. 2do Cebo (intermedia + 0.3 m):</label>
+              <input
+                type="number"
+                step="0.01"
+                id="emulsionLong2doCebo"
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Long. Carga Inferior:</label>
+              <input
+                type="number"
+                step="0.01"
+                id="emulsionLongCargaInferior"
+                placeholder="Opcional"
+              />
+            </div>
+            <div class="form-group-field">
+              <label>Long. Retenedor:</label>
+              <input
+                type="number"
+                step="0.01"
+                id="emulsionLongRetenedor"
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
+          <div class="form-group-field">
+            <label>Long. Taco de Greda:</label>
+            <input
+              type="number"
+              step="0.01"
+              id="emulsionLongTacoGreda"
+              placeholder="Opcional"
+            />
+          </div>
         </div>
 
-        <!-- PASO 2: GESTIÓN DE ID DE TRABAJO -->
-        <div id="paso2" class="anfo-trabajo-screen emulsion-trabajo-screen" style="display: none;">
-            <div class="anfo-progreso" aria-label="Progreso del seguimiento">
-                <span class="completado" aria-label="Datos completados">✓</span>
-                <span class="completado" aria-label="Postura completada">✓</span>
-                <span class="actual" aria-current="step">3</span>
-                <span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 25px;
+          "
+        >
+          <button
+            type="button"
+            onclick="anteriorTiroEmulsion()"
+            class="btn-primary"
+            style="background-color: #64748b; width: 45%"
+          >
+            ⬅ Anterior Tiro
+          </button>
+          <button
+            type="button"
+            id="btnSiguienteTiroEmulsion"
+            onclick="siguienteTiroEmulsion()"
+            class="btn-primary"
+            style="background-color: #16a34a; width: 50%"
+          >
+            Siguiente Tiro ➔
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="modalCapturaTiroEmulsion"
+        class="emulsion-captura-overlay"
+        aria-hidden="true"
+      >
+        <section
+          class="emulsion-captura-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tituloCapturaTiroEmulsion"
+        >
+          <div
+            class="emulsion-captura-progress"
+            id="progresoCapturaTiroEmulsion"
+          ></div>
+          <header class="emulsion-captura-head">
+            <div>
+              <p id="contextoCapturaTiroEmulsion">PASO 6 DE 8 · PARADA</p>
+              <h2 id="tituloCapturaTiroEmulsion">Captura de Tiro</h2>
             </div>
-            <p class="anfo-paso-indicador">PASO 3 DE 8</p>
-            <h2>Gestión de Trabajo</h2>
-            <div class="anfo-contexto-trabajo">
-                <div><small>Turno</small><strong id="resumenTurnoTrabajoEmulsion">A · --/--/----</strong></div>
-                <div><small>ID Tronadura</small><strong id="resumenIdTronaduraTrabajoEmulsion">Sin asignar</strong></div>
-            </div>
-            <section class="anfo-trabajo-panel anfo-nuevo-trabajo">
-                <h3><i></i> Crear nuevo trabajo</h3>
-                <label for="nuevoIdInput">Nombre / ID del trabajo</label>
-                <input type="text" id="nuevoIdInput" placeholder="Ej. TRABAJO-01" autocomplete="off">
-                <p class="anfo-sugerencia-trabajo">Sugerido: <strong id="sugerenciaTrabajoEmulsion">TRABAJO-01</strong></p>
-                <button type="button" onclick="crearNuevoIdTrabajo()" class="anfo-btn-crear">＋ Crear e ir a paradas</button>
+            <span id="badgeCapturaTiroEmulsion">Tiro 1 de 1</span>
+          </header>
+          <nav
+            id="navegacionTirosEmulsion"
+            class="emulsion-tiro-nav"
+            aria-label="Seleccionar tiro"
+          ></nav>
+          <div class="emulsion-captura-workspace">
+            <section
+              class="emulsion-tiro-diagrama-card"
+              aria-label="Vista y resumen del tiro"
+            >
+              <div id="diagramaTiroEmulsion"></div>
+              <div
+                id="resumenDiagramaTiroEmulsion"
+                class="emulsion-tiro-resumen"
+              ></div>
             </section>
-            <div class="anfo-separador-trabajo"><span>o continúe uno existente</span></div>
-            <section class="anfo-trabajo-panel anfo-existentes">
-                <h3><i></i> Trabajos existentes <span id="conteoTrabajosEmulsion" class="anfo-conteo-trabajos">0</span></h3>
-                <div id="listaTrabajosEmulsion" class="anfo-lista-trabajos" aria-label="Trabajos guardados"></div>
-                <select id="selectIdExistente" class="anfo-select-trabajo-interno" aria-hidden="true" tabindex="-1">
-                    <option value="" disabled selected>-- Seleccione un ID guardado --</option>
-                </select>
-            </section>
-            <div class="anfo-acciones-trabajo">
-                <button type="button" onclick="irAPaso1()" class="anfo-btn-volver">‹ Volver</button>
-                <button type="button" onclick="usarTrabajoSeleccionadoEmulsion()" class="anfo-btn-usar">Usar seleccionado ›</button>
-            </div>
-            <p id="estadoSeleccionTrabajoEmulsion" class="anfo-estado-seleccion" aria-live="polite"></p>
-        </div>
-
-        <!-- PASO 3: GESTIÓN DE PARADAS PARA EL TRABAJO SELECCIONADO -->
-        <div id="paso3" class="anfo-paradas-screen emulsion-paradas-screen" style="display: none;">
-            <div class="anfo-progreso" aria-label="Progreso del seguimiento">
-                <span class="completado" aria-label="Datos completados">✓</span>
-                <span class="completado" aria-label="Postura completada">✓</span>
-                <span class="completado" aria-label="Trabajo seleccionado">✓</span>
-                <span class="actual" aria-current="step">4</span>
-                <span>5</span><span>6</span><span>7</span><span>8</span>
-            </div>
-            <p class="anfo-paso-indicador">PASO 4 DE 8 · <span id="etiquetaTrabajoParadasEmulsion">TRABAJO</span></p>
-            <h2>Gestión de Paradas</h2>
-
-            <section class="anfo-trabajo-panel anfo-parada-nueva">
-                <h3><i></i> Crear nueva parada</h3>
-                <label for="idParadaInput">ID de parada</label>
-                <input type="text" id="idParadaInput" placeholder="Ej. P1 o PARADA 1" autocomplete="off">
-                <button type="button" onclick="irAPaso4DesdeCrearParada()" class="anfo-btn-crear">Crear parada y configurar tiros ›</button>
-            </section>
-
-            <section class="anfo-trabajo-panel anfo-paradas-guardadas">
-                <h3><i></i> Paradas registradas <span id="conteoParadasEmulsion" class="anfo-conteo-trabajos">0</span></h3>
-                <div id="listaParadasEmulsion" class="anfo-lista-paradas" role="listbox" aria-label="Paradas registradas"></div>
-                <select id="selectParadaExistente" class="anfo-select-trabajo-interno" aria-label="Parada seleccionada">
-                    <option value="" disabled selected>-- Seleccione una parada guardada --</option>
-                </select>
-                <div class="anfo-acciones-parada">
-                    <button type="button" onclick="seleccionarParadaExistente()" class="anfo-btn-ver-tiros">Editar / ver tiros ›</button>
-                    <button type="button" onclick="eliminarParadaSeleccionada()" class="anfo-btn-eliminar-parada" aria-label="Eliminar parada seleccionada" title="Eliminar">🗑</button>
-                </div>
-            </section>
-
-            <div class="anfo-acciones-trabajo anfo-acciones-paradas">
-                <button type="button" onclick="volverAPaso2()" class="anfo-btn-volver">‹ Volver</button>
-                <button type="button" onclick="irAResumenFinalDesdeParadas()" class="anfo-btn-resumen-paradas">Ver resumen ›</button>
-            </div>
-            <p id="estadoSeleccionParadaEmulsion" class="anfo-estado-seleccion" aria-live="polite"></p>
-        </div>
-
-        <!-- PASO 4: CONFIGURACIÓN DE CANTIDAD DE TIROS -->
-        <div id="paso4" style="display: none;">
-            <h2>Paso 4: Configurar Tiros</h2>
-            <p class="subtitle" id="subtituloPaso4">Parada: -</p>
-
-            <div class="wizard-card">
-                <div class="form-group-field">
-                    <label>CANTIDAD DE TIROS (RANGO: 1 - 50):</label>
-                    <div class="emulsion-cantidad-control">
-                        <button type="button" data-cantidad-tiros="-1" aria-label="Disminuir cantidad de tiros">−</button>
-                        <input type="number" id="cantTirosInput" value="3" min="1" max="50" inputmode="numeric" aria-label="Cantidad de tiros">
-                        <button type="button" data-cantidad-tiros="1" aria-label="Aumentar cantidad de tiros">+</button>
-                    </div>
-                    <div class="emulsion-cantidad-presets" aria-label="Cantidades frecuentes">
-                        <button type="button" data-cantidad-preset="1">1</button><button type="button" data-cantidad-preset="5">5</button>
-                        <button type="button" data-cantidad-preset="8">8</button><button type="button" data-cantidad-preset="9">9</button>
-                        <button type="button" data-cantidad-preset="12">12</button><button type="button" data-cantidad-preset="15">15</button>
-                        <button type="button" data-cantidad-preset="20">20</button>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
-                <button type="button" onclick="volverAPaso3()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Volver</button>
-                <button type="button" onclick="iniciarRegistroTiros()" class="btn-primary" style="background-color: #2563eb; width: 50%;">Siguiente: Capturar Tiros ➔</button>
-            </div>
-        </div>
-
-        <!-- PASO 5: CAPTURA INDIVIDUAL DE CADA TIRO (EMULSIÓN) -->
-        <div id="paso5" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 id="tituloTiroActual">Captura de Tiro - Emulsión</h2>
-                <span id="badgeProgreso" style="background: #2563eb; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 12px;">Tiro 1 de 3</span>
-            </div>
-            <p class="subtitle" id="subtituloParadaActual">ID Trabajo / Parada: -</p>
-
-            <div class="wizard-card emulsion-capture-source">
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Long. Diseño [m]:</label>
-                        <input type="number" step="0.1" id="emulsionLongDiseno" value="12.9">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Taco [m]:</label>
-                        <input type="number" step="0.1" id="emulsionTaco" value="8.0">
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Largo Momento Cargar [m]:</label>
-                        <input type="number" step="0.1" id="emulsionLargoMomento" value="13.0">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Taco Real [m]:</label>
-                        <input type="number" step="0.1" id="emulsionTacoReal" value="8.0">
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Estado Tiro:</label>
-                        <select id="emulsionEstado" onchange="toggleIntentosDestapeEmulsion()">
-                            <option value="Sano" selected>Sano</option>
-                            <option value="Tapado">Tapado</option>
-                        </select>
-                    </div>
-                    <div class="form-group-field">
-                        <label>Intentos Destape (solo tapados):</label>
-                        <input type="number" id="emulsionIntentosDestape" placeholder="Cant." disabled>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Tiro con Agua:</label>
-                        <select id="emulsionAgua">
-                            <option value="Seco" selected>Seco</option>
-                            <option value="Agua">Agua</option>
-                        </select>
-                    </div>
-                    <div class="form-group-field">
-                        <label>Tiro Negativo / Positivo:</label>
-                        <select id="emulsionPosNeg">
-                            <option value="Positivo" selected>Positivo</option>
-                            <option value="Negativo">Negativo</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="section-title" style="font-size: 14px; margin-top: 10px;">Detalle de Producto y Carguío</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Tipo de Emulsión / Producto:</label>
-                        <input type="text" id="tipoEmulsion" value="Emulnor 3000">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Kilos / Litros Usados:</label>
-                        <input type="number" step="0.1" id="kilosEmulsion" placeholder="Ej. 45.5">
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Núm. Pera / Equipo:</label>
-                        <input type="number" id="emulsionNumPera" value="7">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Cama Explosivo [m]:</label>
-                        <input type="number" step="0.1" id="emulsionCamaExplosivo" placeholder="Opcional">
-                    </div>
-                </div>
-
-                <div class="section-title" style="font-size: 14px; margin-top: 10px;">Cebo y Sistema de Iniciación</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Cebo Superior:</label>
-                        <input type="number" min="0" step="1" id="emulsionCeboSup" value="150.0">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Araña Cebo Sup.:</label>
-                        <select id="emulsionAranaSup">
-                            <option value="Si" selected>Si</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Cant. Cartuchos / Boosters:</label>
-                        <input type="number" id="emulsionCantCartuchos" value="1">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Cebo Inferior:</label>
-                        <input type="number" min="0" step="1" id="emulsionCeboInf" placeholder="Opcional">
-                    </div>
-                </div>
-
-                <div class="section-title" style="font-size: 14px; margin-top: 10px;">Detalle de la Carga de Columna [m]</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Long. al Terminar la Cama:</label>
-                        <input type="number" step="0.01" id="emulsionLongTerminarCama" placeholder="Opcional">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Long. 1er Cebo (cama + 0.3 m):</label>
-                        <input type="number" step="0.01" id="emulsionLong1erCebo" placeholder="Opcional">
-                    </div>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Long. al Terminar Carga Intermedia:</label>
-                        <input type="number" step="0.01" id="emulsionLongTerminarIntermedia" placeholder="Opcional">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Long. 2do Cebo (intermedia + 0.3 m):</label>
-                        <input type="number" step="0.01" id="emulsionLong2doCebo" placeholder="Opcional">
-                    </div>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Long. Carga Inferior:</label>
-                        <input type="number" step="0.01" id="emulsionLongCargaInferior" placeholder="Opcional">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Long. Retenedor:</label>
-                        <input type="number" step="0.01" id="emulsionLongRetenedor" placeholder="Opcional">
-                    </div>
-                </div>
-                <div class="form-group-field">
-                    <label>Long. Taco de Greda:</label>
-                    <input type="number" step="0.01" id="emulsionLongTacoGreda" placeholder="Opcional">
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
-                <button type="button" onclick="anteriorTiroEmulsion()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Anterior Tiro</button>
-                <button type="button" id="btnSiguienteTiroEmulsion" onclick="siguienteTiroEmulsion()" class="btn-primary" style="background-color: #16a34a; width: 50%;">Siguiente Tiro ➔</button>
-            </div>
-        </div>
-
-        <div id="modalCapturaTiroEmulsion" class="emulsion-captura-overlay" aria-hidden="true">
-            <section class="emulsion-captura-modal" role="dialog" aria-modal="true" aria-labelledby="tituloCapturaTiroEmulsion">
-                <div class="emulsion-captura-progress" id="progresoCapturaTiroEmulsion"></div>
-                <header class="emulsion-captura-head">
-                    <div><p id="contextoCapturaTiroEmulsion">PASO 6 DE 8 · PARADA</p><h2 id="tituloCapturaTiroEmulsion">Captura de Tiro</h2></div>
-                    <span id="badgeCapturaTiroEmulsion">Tiro 1 de 1</span>
-                </header>
-                <nav id="navegacionTirosEmulsion" class="emulsion-tiro-nav" aria-label="Seleccionar tiro"></nav>
-                <div class="emulsion-captura-workspace">
-                    <section class="emulsion-tiro-diagrama-card" aria-label="Vista y resumen del tiro">
-                        <div id="diagramaTiroEmulsion"></div>
-                        <div id="resumenDiagramaTiroEmulsion" class="emulsion-tiro-resumen"></div>
-                    </section>
-                    <section class="emulsion-tiro-panel">
-                        <div class="emulsion-tiro-tabs" role="tablist" aria-label="Datos del tiro">
-                            <button type="button" data-tab-tiro-emulsion="medidas" role="tab" aria-selected="true">Medidas</button>
-                            <button type="button" data-tab-tiro-emulsion="estado" role="tab" aria-selected="false">Estado</button>
-                            <button type="button" data-tab-tiro-emulsion="producto" role="tab" aria-selected="false">Producto</button>
-                            <button type="button" data-tab-tiro-emulsion="columna" role="tab" aria-selected="false">Columna</button>
-                        </div>
-                        <div id="camposCapturaTiroEmulsion" class="emulsion-tiro-campos"></div>
-                    </section>
-                </div>
-                <footer class="emulsion-captura-actions">
-                    <button type="button" id="anteriorCapturaTiroEmulsion">‹ Cantidad</button>
-                    <button type="button" id="siguienteCapturaTiroEmulsion">Estado ›</button>
-                </footer>
-            </section>
-        </div>
-
-        <!-- PASO 6: RESUMEN Y BÚSQUEDA FINAL -->
-        <div id="paso6" style="display: none;">
-            <h2>Resumen General de Paradas - Emulsión</h2>
-            <p class="subtitle">Revise sus registros guardados</p>
-
-            <div class="form-group-field" style="margin-bottom: 15px;">
-                <input type="text" id="searchParada" placeholder="🔍 Buscar ID de trabajo o parada..." oninput="filtrarParadasResumen()">
-            </div>
-
-            <div id="listaParadasRegistradas" class="wizard-card" style="background: #ffffff; max-height: 300px; overflow-y: auto;">
-                <!-- Se puebla dinámicamente -->
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="irAGestionTrabajoEmulsion()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">+ Registrar Otro ID de Trabajo</button>
-                <button type="button" onclick="abrirModalObservaciones()" class="btn-primary" style="background-color: #d97706; flex: 1; font-size: 13px;">📝 Agregar Observación</button>
-            </div>
-
-            <div style="margin-top: 10px;">
-                <button type="button" onclick="abrirModalPlantillaFinal()" class="btn-primary" style="background-color: #0d9488; font-size: 14px; padding: 10px;">📋 Rellenar Datos Faltantes de Plantilla (Tiempos/Presiones)</button>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button type="button" onclick="guardarFormularioEmulsionYExportarExcel()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    ⬇ Descargar Excel
+            <section class="emulsion-tiro-panel">
+              <div
+                class="emulsion-tiro-tabs"
+                role="tablist"
+                aria-label="Datos del tiro"
+              >
+                <button
+                  type="button"
+                  data-tab-tiro-emulsion="medidas"
+                  role="tab"
+                  aria-selected="true"
+                >
+                  Medidas
                 </button>
-                <button type="button" onclick="generarInformeTecnicoHTML()" class="btn-primary" style="flex: 1; background-color: #2563eb; font-size: 14px; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    ⬇ Descargar Informe Técnico
+                <button
+                  type="button"
+                  data-tab-tiro-emulsion="estado"
+                  role="tab"
+                  aria-selected="false"
+                >
+                  Estado
                 </button>
+                <button
+                  type="button"
+                  data-tab-tiro-emulsion="producto"
+                  role="tab"
+                  aria-selected="false"
+                >
+                  Producto
+                </button>
+                <button
+                  type="button"
+                  data-tab-tiro-emulsion="columna"
+                  role="tab"
+                  aria-selected="false"
+                >
+                  Columna
+                </button>
+              </div>
+              <div
+                id="camposCapturaTiroEmulsion"
+                class="emulsion-tiro-campos"
+              ></div>
+            </section>
+          </div>
+          <footer class="emulsion-captura-actions">
+            <button type="button" id="anteriorCapturaTiroEmulsion">
+              ‹ Cantidad
+            </button>
+            <button type="button" id="siguienteCapturaTiroEmulsion">
+              Estado ›
+            </button>
+          </footer>
+        </section>
+      </div>
+
+      <section
+        id="paso7"
+        class="anfo-tiros-resumen-page emulsion-flow-screen"
+        style="display: none"
+        aria-live="polite"
+      ></section>
+      <section
+        id="paso8"
+        class="anfo-postura-page emulsion-flow-screen"
+        style="display: none"
+        aria-live="polite"
+      >
+        <div class="anfo-postura-progress" aria-label="Paso 7 de 8">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i class="active"></i
+          ><i></i>
+        </div>
+        <header class="anfo-postura-head">
+          <div>
+            <p>
+              PARADA <span id="emulsionPosturaParada">—</span> · DATOS DE
+              PLANTILLA
+            </p>
+            <h2 id="emulsionPosturaTitulo">Tiempos de la postura</h2>
+          </div>
+          <span class="anfo-postura-count" id="emulsionPosturaContador"
+            >1/3</span
+          >
+        </header>
+        <nav
+          class="anfo-postura-tabs"
+          role="tablist"
+          aria-label="Datos de la postura"
+        >
+          <button
+            type="button"
+            role="tab"
+            data-emulsion-postura-tab="tiempos"
+            aria-selected="true"
+          >
+            ◷ Tiempos</button
+          ><button
+            type="button"
+            role="tab"
+            data-emulsion-postura-tab="equipos"
+            aria-selected="false"
+          >
+            ⚙ Equipos</button
+          ><button
+            type="button"
+            role="tab"
+            data-emulsion-postura-tab="perdidas"
+            aria-selected="false"
+          >
+            ⚠ Pérdidas
+          </button>
+        </nav>
+        <div class="anfo-postura-panel" data-emulsion-postura-panel="tiempos">
+          <div class="anfo-postura-card anfo-tiempo-lista">
+            <div class="anfo-tiempo-evento">
+              <i></i><label>Llegada JeJ a postura</label
+              ><input type="time" data-emulsion-source="hLlegadaJeJ" />
             </div>
+            <div class="anfo-tiempo-evento">
+              <i></i><label>Inicio de carguío</label
+              ><input type="time" data-emulsion-source="hInicioCarguio" />
+            </div>
+            <div class="anfo-tiempo-evento">
+              <i></i><label>Fin de carguío</label
+              ><input type="time" data-emulsion-source="hFinCarguio" />
+            </div>
+            <div class="anfo-tiempo-evento">
+              <i class="amarre"></i><label>Inicio de amarre</label
+              ><input type="time" data-emulsion-source="hInicioAmarre" />
+            </div>
+            <div class="anfo-tiempo-evento">
+              <i class="amarre"></i><label>Fin de amarre</label
+              ><input type="time" data-emulsion-source="hFinAmarre" />
+            </div>
+            <div class="anfo-tiempo-evento">
+              <i></i><label>Salida JeJ de postura</label
+              ><input type="time" data-emulsion-source="hSalidaJeJ" />
+            </div>
+          </div>
+          <p class="anfo-postura-nota">
+            ⓘ Registra los horarios de la postura. Los datos se conservan en la
+            plantilla.
+          </p>
+        </div>
+        <div
+          class="anfo-postura-panel"
+          data-emulsion-postura-panel="equipos"
+          hidden
+        >
+          <div class="anfo-postura-card">
+            <h3>■ PRESIÓN Y EQUIPOS</h3>
+            <div class="anfo-equipo-grid">
+              <label
+                >Compresor
+                <div class="anfo-equipo-stepper">
+                  <button
+                    type="button"
+                    data-emulsion-step="presionCompresor"
+                    data-delta="-0.1"
+                  >
+                    −</button
+                  ><input
+                    type="number"
+                    step="0.1"
+                    placeholder="7.0"
+                    data-emulsion-source="presionCompresor"
+                  /><span>bar</span
+                  ><button
+                    type="button"
+                    data-emulsion-step="presionCompresor"
+                    data-delta="0.1"
+                  >
+                    +
+                  </button>
+                </div></label
+              >
+              <label
+                >Pera
+                <div class="anfo-equipo-stepper">
+                  <button
+                    type="button"
+                    data-emulsion-step="presionPera"
+                    data-delta="-0.1"
+                  >
+                    −</button
+                  ><input
+                    type="number"
+                    step="0.1"
+                    placeholder="5.0"
+                    data-emulsion-source="presionPera"
+                  /><span>bar</span
+                  ><button
+                    type="button"
+                    data-emulsion-step="presionPera"
+                    data-delta="0.1"
+                  >
+                    +
+                  </button>
+                </div></label
+              >
+              <label
+                >Diámetro de tiros
+                <div class="anfo-equipo-stepper">
+                  <button
+                    type="button"
+                    data-emulsion-step="diametroTiros"
+                    data-delta="-0.1"
+                  >
+                    −</button
+                  ><input
+                    type="number"
+                    step="0.1"
+                    placeholder="3.5"
+                    data-emulsion-source="diametroTiros"
+                  /><span>pulg</span
+                  ><button
+                    type="button"
+                    data-emulsion-step="diametroTiros"
+                    data-delta="0.1"
+                  >
+                    +
+                  </button>
+                </div></label
+              >
+              <fieldset>
+                <legend>Tiro con VoD</legend>
+                <div class="anfo-pill-choice">
+                  <button
+                    type="button"
+                    data-emulsion-choice="tiroVod"
+                    data-value="Si"
+                  >
+                    Sí</button
+                  ><button
+                    type="button"
+                    data-emulsion-choice="tiroVod"
+                    data-value="No"
+                  >
+                    No
+                  </button>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+          <div class="anfo-postura-card">
+            <h3>■ GEÓFONO Y AMARRE <small>Opcional</small></h3>
+            <div class="anfo-geofono-grid">
+              <label
+                >Ubicación<input
+                  type="text"
+                  placeholder="Opcional"
+                  data-emulsion-source="ubicacionGeofono" /></label
+              ><label
+                >Distancia [m]<input
+                  type="text"
+                  placeholder="Opcional"
+                  data-emulsion-source="distanciaGeofono" /></label
+              ><label
+                >Altura [m]<input
+                  type="text"
+                  placeholder="Opcional"
+                  data-emulsion-source="alturaGeofono"
+              /></label>
+            </div>
+          </div>
+        </div>
+        <div
+          class="anfo-postura-panel"
+          data-emulsion-postura-panel="perdidas"
+          hidden
+        >
+          <div
+            class="anfo-postura-card anfo-perdida-card"
+            data-emulsion-perdida="carguio"
+          >
+            <h3>
+              <span>■ DURANTE EL CARGUÍO</span>
+              <div>
+                <button
+                  type="button"
+                  class="active"
+                  data-emulsion-perdida-clear="carguio"
+                >
+                  Sin pérd.</button
+                ><button type="button" data-emulsion-perdida-register="carguio">
+                  Registrar
+                </button>
+              </div>
+            </h3>
+            <div
+              class="anfo-perdida-detalle"
+              data-emulsion-perdida-detalle="carguio"
+              hidden
+            >
+              <div class="anfo-chip-list" data-emulsion-perdida-chips="carguio">
+                <button type="button">Espera de camión</button
+                ><button type="button">Falla de equipo</button
+                ><button type="button">Sin acceso</button
+                ><button type="button" data-emulsion-otro-chip>Otro</button>
+              </div>
+              <input
+                class="anfo-perdida-otro"
+                type="text"
+                placeholder="Especifique otro motivo"
+                data-emulsion-perdida-otro="carguio"
+                hidden
+              />
+              <div class="anfo-perdida-tiempo">
+                <button
+                  type="button"
+                  data-emulsion-min="tiempoPerdidaCarguio"
+                  data-delta="-5"
+                >
+                  −</button
+                ><strong
+                  ><input
+                    type="number"
+                    min="0"
+                    step="5"
+                    value="0"
+                    data-emulsion-min-value="tiempoPerdidaCarguio"
+                  /><small>min</small></strong
+                ><button
+                  type="button"
+                  data-emulsion-min="tiempoPerdidaCarguio"
+                  data-delta="5"
+                >
+                  +
+                </button>
+                <div class="anfo-minute-chips">
+                  <button
+                    type="button"
+                    data-emulsion-min-preset="tiempoPerdidaCarguio"
+                    data-min="10"
+                  >
+                    10</button
+                  ><button
+                    type="button"
+                    data-emulsion-min-preset="tiempoPerdidaCarguio"
+                    data-min="15"
+                  >
+                    15</button
+                  ><button
+                    type="button"
+                    data-emulsion-min-preset="tiempoPerdidaCarguio"
+                    data-min="30"
+                  >
+                    30
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="anfo-postura-card anfo-perdida-card"
+            data-emulsion-perdida="amarre"
+          >
+            <h3>
+              <span>■ DURANTE EL AMARRE</span>
+              <div>
+                <button
+                  type="button"
+                  class="active"
+                  data-emulsion-perdida-clear="amarre"
+                >
+                  Sin pérd.</button
+                ><button type="button" data-emulsion-perdida-register="amarre">
+                  Registrar
+                </button>
+              </div>
+            </h3>
+            <div
+              class="anfo-perdida-detalle"
+              data-emulsion-perdida-detalle="amarre"
+              hidden
+            >
+              <div class="anfo-chip-list" data-emulsion-perdida-chips="amarre">
+                <button type="button">Bloqueo de vía</button
+                ><button type="button">Ventilación</button
+                ><button type="button">Falla de equipo</button
+                ><button type="button" data-emulsion-otro-chip>Otro</button>
+              </div>
+              <input
+                class="anfo-perdida-otro"
+                type="text"
+                placeholder="Especifique otro motivo"
+                data-emulsion-perdida-otro="amarre"
+                hidden
+              />
+              <div class="anfo-perdida-tiempo">
+                <button
+                  type="button"
+                  data-emulsion-min="tiempoPerdidaAmarre"
+                  data-delta="-5"
+                >
+                  −</button
+                ><strong
+                  ><input
+                    type="number"
+                    min="0"
+                    step="5"
+                    value="0"
+                    data-emulsion-min-value="tiempoPerdidaAmarre"
+                  /><small>min</small></strong
+                ><button
+                  type="button"
+                  data-emulsion-min="tiempoPerdidaAmarre"
+                  data-delta="5"
+                >
+                  +
+                </button>
+                <div class="anfo-minute-chips">
+                  <button
+                    type="button"
+                    data-emulsion-min-preset="tiempoPerdidaAmarre"
+                    data-min="10"
+                  >
+                    10</button
+                  ><button
+                    type="button"
+                    data-emulsion-min-preset="tiempoPerdidaAmarre"
+                    data-min="20"
+                  >
+                    20</button
+                  ><button
+                    type="button"
+                    data-emulsion-min-preset="tiempoPerdidaAmarre"
+                    data-min="30"
+                  >
+                    30
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="anfo-postura-card">
+            <h3>■ OBSERVACIONES GENERALES</h3>
+            <textarea
+              rows="2"
+              placeholder="Comentarios adicionales..."
+              data-emulsion-source="obsGenerales"
+            ></textarea>
+          </div>
+          <p class="anfo-perdida-total" id="emulsionPerdidaTotal">
+            ⚠ Pérdida total 0 min. Se descontará del tiempo efectivo.
+          </p>
+        </div>
+        <footer class="anfo-postura-actions">
+          <button type="button" id="emulsionPosturaAtras">
+            ‹ Resumen tiros</button
+          ><button type="button" id="emulsionPosturaSiguiente">
+            Equipos ›
+          </button>
+        </footer>
+      </section>
+      <section
+        id="paso9"
+        class="anfo-resumen-final emulsion-flow-screen"
+        style="display: none"
+        aria-live="polite"
+      ></section>
+
+      <!-- PASO FINAL: RESUMEN Y BÚSQUEDA -->
+      <div id="paso6" style="display: none">
+        <h2>Resumen General de Paradas - Emulsión</h2>
+        <p class="subtitle">Revise sus registros guardados</p>
+
+        <div class="form-group-field" style="margin-bottom: 15px">
+          <input
+            type="text"
+            id="searchParada"
+            placeholder="🔍 Buscar ID de trabajo o parada..."
+            oninput="filtrarParadasResumen()"
+          />
         </div>
 
+        <div
+          id="listaParadasRegistradas"
+          class="wizard-card"
+          style="background: #ffffff; max-height: 300px; overflow-y: auto"
+        >
+          <!-- Se puebla dinámicamente -->
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px">
+          <button
+            type="button"
+            onclick="irAGestionTrabajoEmulsion()"
+            class="btn-primary"
+            style="background-color: #0284c7; flex: 1; font-size: 13px"
+          >
+            + Registrar Otro ID de Trabajo
+          </button>
+          <button
+            type="button"
+            onclick="abrirModalObservaciones()"
+            class="btn-primary"
+            style="background-color: #d97706; flex: 1; font-size: 13px"
+          >
+            📝 Agregar Observación
+          </button>
+        </div>
+
+        <div style="margin-top: 10px">
+          <button
+            type="button"
+            onclick="abrirModalPlantillaFinal()"
+            class="btn-primary"
+            style="background-color: #0d9488; font-size: 14px; padding: 10px"
+          >
+            📋 Rellenar Datos Faltantes de Plantilla (Tiempos/Presiones)
+          </button>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px">
+          <button
+            type="button"
+            onclick="guardarFormularioEmulsionYExportarExcel()"
+            class="btn-primary"
+            style="
+              flex: 1;
+              background-color: #2563eb;
+              font-size: 14px;
+              padding: 12px;
+              font-weight: bold;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            "
+          >
+            ⬇ Descargar Excel
+          </button>
+          <button
+            type="button"
+            onclick="generarInformeTecnicoHTML()"
+            class="btn-primary"
+            style="
+              flex: 1;
+              background-color: #2563eb;
+              font-size: 14px;
+              padding: 12px;
+              font-weight: bold;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            "
+          >
+            ⬇ Descargar Informe Técnico
+          </button>
+        </div>
+      </div>
     </main>
 
- <!-- MODAL PERSONAL (Ingreso / Editar Datos) -->
+    <!-- MODAL PERSONAL (Ingreso / Editar Datos) -->
     <div id="modalPersonal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Configuración de Postura y Personal</h3>
+      <div class="modal-content">
+        <h3
+          style="
+            margin-top: 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+          "
+        >
+          Configuración de Postura y Personal
+        </h3>
 
-            <!-- 2. PERSONAL RESPONSABLE -->
-            <div class="section-title">2. Personal Responsable</div>
-            <div class="form-group-field">
-                <label>Encargado Seguimiento JeJ (Tú):</label>
-                <input type="text" id="modalEncargado" readonly style="background-color: #f1f5f9; font-weight: bold;">
-            </div>
-
-            <div class="form-group-field">
-                <label>Supervisor JeJ:</label>
-                <input type="text" id="modalSupJeJ" name="supervisorJeJ" list="listaSupJeJ" placeholder="Seleccione o escriba...">
-                <datalist id="listaSupJeJ"></datalist>
-            </div>
-
-            <div class="form-group-field">
-                <label>Supervisor(es) DET:</label>
-                <div id="contenedorSupDetModal" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" name="supervisorDet" list="listaSupDet" placeholder="Seleccione o escriba..." style="flex: 1;">
-                        <datalist id="listaSupDet"></datalist>
-                    </div>
-                </div>
-                <button type="button" onclick="agregarCampoModal('contenedorSupDetModal', 'supervisorDet')" style="margin-top: 5px; width: fit-content; font-size: 12px; background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px;">+ Agregar otro Supervisor DET</button>
-            </div>
-
-            <div class="form-group-field">
-                <label>Responsable(s) Carguío DET:</label>
-                <div id="contenedorRespDetModal" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" name="responsableDet" list="listaRespDet" placeholder="Seleccione o escriba..." style="flex: 1;">
-                        <datalist id="listaRespDet"></datalist>
-                    </div>
-                </div>
-                <button type="button" onclick="agregarCampoModal('contenedorRespDetModal', 'responsableDet')" style="margin-top: 5px; width: fit-content; font-size: 12px; background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px;">+ Agregar otro Responsable DET</button>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="cerrarModalPersonal()" class="btn-primary" style="background-color: #64748b;">Cancelar</button>
-                <button type="button" onclick="guardarModalPersonal()" class="btn-primary" style="background-color: #16a34a;">Guardar y Aplicar</button>
-            </div>
+        <!-- 2. PERSONAL RESPONSABLE -->
+        <div class="section-title">2. Personal Responsable</div>
+        <div class="form-group-field">
+          <label>Encargado Seguimiento JeJ (Tú):</label>
+          <input
+            type="text"
+            id="modalEncargado"
+            readonly
+            style="background-color: #f1f5f9; font-weight: bold"
+          />
         </div>
+
+        <div class="form-group-field">
+          <label>Supervisor JeJ:</label>
+          <input
+            type="text"
+            id="modalSupJeJ"
+            name="supervisorJeJ"
+            list="listaSupJeJ"
+            placeholder="Seleccione o escriba..."
+          />
+          <datalist id="listaSupJeJ"></datalist>
+        </div>
+
+        <div class="form-group-field">
+          <label>Supervisor(es) DET:</label>
+          <div
+            id="contenedorSupDetModal"
+            style="display: flex; flex-direction: column; gap: 8px"
+          >
+            <div style="display: flex; gap: 8px">
+              <input
+                type="text"
+                name="supervisorDet"
+                list="listaSupDet"
+                placeholder="Seleccione o escriba..."
+                style="flex: 1"
+              />
+              <datalist id="listaSupDet"></datalist>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="
+              agregarCampoModal('contenedorSupDetModal', 'supervisorDet')
+            "
+            style="
+              margin-top: 5px;
+              width: fit-content;
+              font-size: 12px;
+              background: #e2e8f0;
+              border: none;
+              padding: 4px 8px;
+              border-radius: 4px;
+            "
+          >
+            + Agregar otro Supervisor DET
+          </button>
+        </div>
+
+        <div class="form-group-field">
+          <label>Responsable(s) Carguío DET:</label>
+          <div
+            id="contenedorRespDetModal"
+            style="display: flex; flex-direction: column; gap: 8px"
+          >
+            <div style="display: flex; gap: 8px">
+              <input
+                type="text"
+                name="responsableDet"
+                list="listaRespDet"
+                placeholder="Seleccione o escriba..."
+                style="flex: 1"
+              />
+              <datalist id="listaRespDet"></datalist>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="
+              agregarCampoModal('contenedorRespDetModal', 'responsableDet')
+            "
+            style="
+              margin-top: 5px;
+              width: fit-content;
+              font-size: 12px;
+              background: #e2e8f0;
+              border: none;
+              padding: 4px 8px;
+              border-radius: 4px;
+            "
+          >
+            + Agregar otro Responsable DET
+          </button>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+          "
+        >
+          <button
+            type="button"
+            onclick="cerrarModalPersonal()"
+            class="btn-primary"
+            style="background-color: #64748b"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onclick="guardarModalPersonal()"
+            class="btn-primary"
+            style="background-color: #16a34a"
+          >
+            Guardar y Aplicar
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- MODAL PASO 2: CONFIGURACIÓN DE POSTURA -->
-    <div id="modalConfiguracionEmulsion" class="modal-overlay anfo-config-overlay" role="dialog" aria-modal="true" aria-labelledby="tituloConfiguracionEmulsion">
-        <div class="anfo-config-card">
-            <h2 id="tituloConfiguracionEmulsion">Paso 2: Configuración de Postura</h2>
-            <section class="anfo-config-section">
-                <h3 class="anfo-config-label"><i></i> 1 · Ubicación y postura</h3>
-                <span class="anfo-config-field-label">Mina</span>
-                <select id="cfgEmulsionMina" class="anfo-config-native" aria-label="Mina">
-                    <option value="andesita">Andesita</option><option value="Diablo Regimiento">Diablo Regimiento</option><option value="Diamante">Diamante</option><option value="Esmeralda">Esmeralda</option><option value="NNM">NNM</option><option value="Pacífico Superior">Pacífico Superior</option><option value="Pilar Norte">Pilar Norte</option><option value="Reservas Norte">Reservas Norte</option><option value="TT8">TT8</option>
-                </select>
-                <div class="anfo-choice-row anfo-mina-choices" role="group" aria-label="Seleccionar mina">
-                    <button type="button" data-emulsion-select="cfgEmulsionMina" data-value="andesita">Andesita</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="Diablo Regimiento">Diablo Reg.</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="Diamante">Diamante</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="Esmeralda">Esmeralda</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="NNM">NNM</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="Pacífico Superior">Pacífico Sup.</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="Pilar Norte">Pilar Norte</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="Reservas Norte">Reservas Norte</button><button type="button" data-emulsion-select="cfgEmulsionMina" data-value="TT8">TT8</button>
-                </div>
-                <span class="anfo-config-field-label">Nivel</span>
-                <select id="cfgEmulsionNivel" class="anfo-config-native" aria-label="Nivel">
-                    <option value="NP">NP (Nivel de Producción)</option><option value="UCL">UCL (Nivel UCL)</option><option value="Panel2">Panel 2</option>
-                </select>
-                <div class="anfo-choice-row anfo-segmented" role="group" aria-label="Seleccionar nivel">
-                    <button type="button" data-emulsion-select="cfgEmulsionNivel" data-value="NP">NP</button><button type="button" data-emulsion-select="cfgEmulsionNivel" data-value="UCL">UCL</button><button type="button" data-emulsion-select="cfgEmulsionNivel" data-value="Panel2">Panel 2</button>
-                </div>
-                <span class="anfo-config-field-label">Bloque</span>
-                <select id="cfgEmulsionBloque" class="anfo-config-native" aria-label="Bloque">
-                    <option value="B-2">B-2</option><option value="B-6">B-6</option><option value="Ext Fw">Ext Fw</option><option value="DhZ">DhZ</option>
-                </select>
-                <div class="anfo-choice-row anfo-bloque-choices" role="group" aria-label="Seleccionar bloque">
-                    <button type="button" data-emulsion-select="cfgEmulsionBloque" data-value="B-2">B-2</button><button type="button" data-emulsion-select="cfgEmulsionBloque" data-value="B-6">B-6</button><button type="button" data-emulsion-select="cfgEmulsionBloque" data-value="Ext Fw">Ext Fw</button><button type="button" data-emulsion-select="cfgEmulsionBloque" data-value="DhZ">DhZ</button>
-                </div>
-            </section>
-            <section class="anfo-config-section anfo-details-section">
-                <h3 class="anfo-config-label"><i class="cyan"></i> 2 · Detalles del nivel</h3>
-                <div class="anfo-level-fields" data-emulsion-level-fields="NP">
-                    <div class="anfo-detail-grid"><div class="form-group-field"><label for="cfgEmulsionNumZanja">Núm. Zanja</label><input type="text" id="cfgEmulsionNumZanja" placeholder="Ej. 49"></div><div class="form-group-field"><label for="cfgEmulsionCalleZanja">Calles Zanja</label><input type="text" id="cfgEmulsionCalleZanja" placeholder="Ej. 59-61"></div></div>
-                </div>
-                <div class="anfo-level-fields" data-emulsion-level-fields="UCL" hidden>
-                    <div class="anfo-detail-grid"><div class="form-group-field"><label for="cfgEmulsionCalleUcl">Calle UCL</label><input type="text" id="cfgEmulsionCalleUcl" placeholder="Ej. C41"></div><div class="form-group-field"><label for="cfgEmulsionParadas">Paradas Inicio / Fin</label><input type="text" id="cfgEmulsionParadas" placeholder="Ej. P1 a P5"></div></div>
-                </div>
-                <div class="anfo-level-fields" data-emulsion-level-fields="Panel2" hidden>
-                    <div class="form-group-field"><label for="cfgEmulsionPanel2">Detalle Panel 2</label><input type="text" id="cfgEmulsionPanel2" placeholder="Ingrese detalles de Panel 2..."></div>
-                </div>
-                <div class="form-group-field" id="cfgEmulsionFaseRow"><label for="cfgEmulsionFase">Fase</label><input type="text" id="cfgEmulsionFase" placeholder="Ej. 2"></div>
-            </section>
-            <section class="anfo-config-section anfo-id-section">
-                <h3 class="anfo-config-label"><i class="green"></i> ID de tronadura · Automático</h3>
-                <label class="anfo-config-field-label" for="cfgEmulsionIdTronadura">Se conserva la lógica actual</label>
-                <input type="text" id="cfgEmulsionIdTronadura" readonly disabled placeholder="Se actualiza automáticamente...">
-            </section>
-            <div class="anfo-config-actions"><button type="button" class="anfo-config-back" onclick="cerrarConfiguracionEmulsion()">‹ Volver</button><button type="button" class="anfo-config-apply" onclick="guardarConfiguracionEmulsion()">Siguiente →</button></div>
+    <div
+      id="modalConfiguracionEmulsion"
+      class="modal-overlay anfo-config-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloConfiguracionEmulsion"
+    >
+      <div class="anfo-config-card">
+        <h2 id="tituloConfiguracionEmulsion">
+          Paso 2: Configuración de Postura
+        </h2>
+        <section class="anfo-config-section">
+          <h3 class="anfo-config-label"><i></i> 1 · Ubicación y postura</h3>
+          <span class="anfo-config-field-label">Mina</span>
+          <select
+            id="cfgEmulsionMina"
+            class="anfo-config-native"
+            aria-label="Mina"
+          >
+            <option value="andesita">Andesita</option>
+            <option value="Diablo Regimiento">Diablo Regimiento</option>
+            <option value="Diamante">Diamante</option>
+            <option value="Esmeralda">Esmeralda</option>
+            <option value="NNM">NNM</option>
+            <option value="Pacífico Superior">Pacífico Superior</option>
+            <option value="Pilar Norte">Pilar Norte</option>
+            <option value="Reservas Norte">Reservas Norte</option>
+            <option value="TT8">TT8</option>
+          </select>
+          <div
+            class="anfo-choice-row anfo-mina-choices"
+            role="group"
+            aria-label="Seleccionar mina"
+          >
+            <button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="andesita"
+            >
+              Andesita</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="Diablo Regimiento"
+            >
+              Diablo Reg.</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="Diamante"
+            >
+              Diamante</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="Esmeralda"
+            >
+              Esmeralda</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="NNM"
+            >
+              NNM</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="Pacífico Superior"
+            >
+              Pacífico Sup.</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="Pilar Norte"
+            >
+              Pilar Norte</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="Reservas Norte"
+            >
+              Reservas Norte</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionMina"
+              data-value="TT8"
+            >
+              TT8
+            </button>
+          </div>
+          <span class="anfo-config-field-label">Nivel</span>
+          <select
+            id="cfgEmulsionNivel"
+            class="anfo-config-native"
+            aria-label="Nivel"
+          >
+            <option value="NP">NP (Nivel de Producción)</option>
+            <option value="UCL">UCL (Nivel UCL)</option>
+            <option value="Panel2">Panel 2</option>
+          </select>
+          <div
+            class="anfo-choice-row anfo-segmented"
+            role="group"
+            aria-label="Seleccionar nivel"
+          >
+            <button
+              type="button"
+              data-emulsion-select="cfgEmulsionNivel"
+              data-value="NP"
+            >
+              NP</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionNivel"
+              data-value="UCL"
+            >
+              UCL</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionNivel"
+              data-value="Panel2"
+            >
+              Panel 2
+            </button>
+          </div>
+          <span class="anfo-config-field-label">Bloque</span>
+          <select
+            id="cfgEmulsionBloque"
+            class="anfo-config-native"
+            aria-label="Bloque"
+          >
+            <option value="B-2">B-2</option>
+            <option value="B-6">B-6</option>
+            <option value="Ext Fw">Ext Fw</option>
+            <option value="DhZ">DhZ</option>
+          </select>
+          <div
+            class="anfo-choice-row anfo-bloque-choices"
+            role="group"
+            aria-label="Seleccionar bloque"
+          >
+            <button
+              type="button"
+              data-emulsion-select="cfgEmulsionBloque"
+              data-value="B-2"
+            >
+              B-2</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionBloque"
+              data-value="B-6"
+            >
+              B-6</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionBloque"
+              data-value="Ext Fw"
+            >
+              Ext Fw</button
+            ><button
+              type="button"
+              data-emulsion-select="cfgEmulsionBloque"
+              data-value="DhZ"
+            >
+              DhZ
+            </button>
+          </div>
+        </section>
+        <section class="anfo-config-section anfo-details-section">
+          <h3 class="anfo-config-label">
+            <i class="cyan"></i> 2 · Detalles del nivel
+          </h3>
+          <div class="anfo-level-fields" data-emulsion-level-fields="NP">
+            <div class="anfo-detail-grid">
+              <div class="form-group-field">
+                <label for="cfgEmulsionNumZanja">Núm. Zanja</label
+                ><input
+                  type="text"
+                  id="cfgEmulsionNumZanja"
+                  placeholder="Ej. 49"
+                />
+              </div>
+              <div class="form-group-field">
+                <label for="cfgEmulsionCalleZanja">Calles Zanja</label
+                ><input
+                  type="text"
+                  id="cfgEmulsionCalleZanja"
+                  placeholder="Ej. 59-61"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            class="anfo-level-fields"
+            data-emulsion-level-fields="UCL"
+            hidden
+          >
+            <div class="anfo-detail-grid">
+              <div class="form-group-field">
+                <label for="cfgEmulsionCalleUcl">Calle UCL</label
+                ><input
+                  type="text"
+                  id="cfgEmulsionCalleUcl"
+                  placeholder="Ej. C41"
+                />
+              </div>
+              <div class="form-group-field">
+                <label for="cfgEmulsionParadas">Paradas Inicio / Fin</label
+                ><input
+                  type="text"
+                  id="cfgEmulsionParadas"
+                  placeholder="Ej. P1 a P5"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            class="anfo-level-fields"
+            data-emulsion-level-fields="Panel2"
+            hidden
+          >
+            <div class="form-group-field">
+              <label for="cfgEmulsionPanel2">Detalle Panel 2</label
+              ><input
+                type="text"
+                id="cfgEmulsionPanel2"
+                placeholder="Ingrese detalles de Panel 2..."
+              />
+            </div>
+          </div>
+          <div class="form-group-field" id="cfgEmulsionFaseRow">
+            <label for="cfgEmulsionFase">Fase</label
+            ><input type="text" id="cfgEmulsionFase" placeholder="Ej. 2" />
+          </div>
+        </section>
+        <section class="anfo-config-section anfo-id-section">
+          <h3 class="anfo-config-label">
+            <i class="green"></i> ID de tronadura · Automático
+          </h3>
+          <label class="anfo-config-field-label" for="cfgEmulsionIdTronadura"
+            >Se conserva la lógica actual</label
+          >
+          <input
+            type="text"
+            id="cfgEmulsionIdTronadura"
+            readonly
+            disabled
+            placeholder="Se actualiza automáticamente..."
+          />
+        </section>
+        <div class="anfo-config-actions">
+          <button
+            type="button"
+            class="anfo-config-back"
+            onclick="cerrarConfiguracionEmulsion()"
+          >
+            ‹ Volver</button
+          ><button
+            type="button"
+            class="anfo-config-apply"
+            onclick="guardarConfiguracionEmulsion()"
+          >
+            Siguiente →
+          </button>
         </div>
+      </div>
     </div>
 
     <!-- MODAL DATOS FALTANTES PLANTILLA -->
     <div id="modalPlantillaFinal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Completar Datos de Plantilla (Emulsión)</h3>
+      <div class="modal-content">
+        <h3
+          style="
+            margin-top: 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+          "
+        >
+          Completar Datos de Plantilla (Emulsión)
+        </h3>
 
-            <!-- 1. UBICACIÓN Y POSTURA -->
-            <div class="section-title">1. Ubicación y Postura</div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Mina:</label>
-                    <select id="modalMina" onchange="actualizarIdTronaduraAuto()">
-                        <option value="andesita">Andesita</option>
-                        <option value="Diablo Regimiento">Diablo Regimiento</option>
-                        <option value="Diamante">Diamante</option>
-                        <option value="Esmeralda" selected>Esmeralda</option>
-                        <option value="NNM">NNM</option>
-                        <option value="Pacífico Superior">Pacífico Superior</option>
-                        <option value="Pilar Norte">Pilar Norte</option>
-                        <option value="Reservas Norte">Reservas Norte</option>
-                        <option value="TT8">TT8</option>
-                    </select>
-                </div>
-                <div class="form-group-field">
-                    <label>Nivel:</label>
-                    <select id="modalNivel" onchange="cambiarNivelModal(); actualizarIdTronaduraAuto();">
-                        <option value="NP" selected>NP (Nivel de Producción)</option>
-                        <option value="UCL">UCL (Nivel UCL)</option>
-                        <option value="Panel2">Panel 2</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Bloque:</label>
-                    <select id="modalBloque" onchange="ejecutarAutosave()">
-                        <option value="B-2">B-2</option>
-                        <option value="B-6">B-6</option>
-                        <option value="Ext Fw" selected>Ext Fw</option> 
-                        <option value="DhZ">DhZ</option>
-                    </select>
-                </div>
-                <div class="form-group-field">
-                    <label>ID de Tronadura (Automático):</label>
-                    <input type="text" id="modalIdTronadura" readonly disabled style="background-color: #f1f5f9; font-weight: bold; color: #475569;" placeholder="Se actualiza automáticamente...">
-                </div>
-            </div>
-
-            <!-- Fase transversal compartida -->
-            <div class="form-group-field">
-                <label>Fase (Transversal):</label>
-                <input type="text" id="faseZanja" placeholder="Ej. Fase 1" oninput="actualizarIdTronaduraAuto()">
-            </div>
-
-            <!-- SECCIÓN CONDICIONAL: NIVEL DE PRODUCCIÓN (NP) -->
-            <div id="seccionNP" style="display: block;">
-                <div class="section-title" style="color: #2563eb; background: #eff6ff; padding: 4px 8px; border-radius: 4px;">Nivel de Producción</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Núm. Zanja (Producción):</label>
-                        <input type="text" id="numZanja" placeholder="Ej. 47" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Calle Zanja (Producción):</label>
-                        <input type="text" id="calleZanja" placeholder="Ej. C41-43" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN CONDICIONAL: NIVEL UCL -->
-            <div id="seccionUCL" style="display: none;">
-                <div class="section-title" style="color: #16a34a; background: #f0fdf4; padding: 4px 8px; border-radius: 4px;">Nivel UCL</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label>Calle UCL:</label>
-                        <input type="text" id="calleUcl" placeholder="Ej. C41" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                    <div class="form-group-field">
-                        <label>Paradas Inicio / Fin:</label>
-                        <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5">
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN CONDICIONAL: PANEL 2 -->
-            <div id="seccionPanel2" style="display: none;">
-                <div class="section-title" style="color: #d97706; background: #fffbeb; padding: 4px 8px; border-radius: 4px;">Panel 2</div>
-                <div class="form-group-field">
-                    <label>Detalle Panel 2:</label>
-                    <input type="text" id="detallePanel2" placeholder="Ingrese detalles de Panel 2..." oninput="actualizarIdTronaduraAuto()">
-                </div>
-            </div>
-
-            <div class="section-title">1. Tiempos de Postura y Carguío</div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>H. Llegada JeJ a Postura:</label>
-                    <input type="time" id="hLlegadaJeJ">
-                </div>
-                <div class="form-group-field">
-                    <label>H. Salida JeJ de Postura:</label>
-                    <input type="time" id="hSalidaJeJ">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>H. Llegada PyT a Postura:</label>
-                    <input type="time" id="hLlegadaPyT">
-                </div>
-                <div class="form-group-field">
-                    <label>H. Salida PyT de Postura:</label>
-                    <input type="time" id="hSalidaPyT">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>H. Inicio Carguío:</label>
-                    <input type="time" id="hInicioCarguio">
-                </div>
-                <div class="form-group-field">
-                    <label>H. Fin Carguío:</label>
-                    <input type="time" id="hFinCarguio">
-                </div>
-            </div>
-
-            <div class="section-title">2. Parámetros de Presión y Equipos</div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Presión en Compresor [bar]:</label>
-                    <input type="number" step="0.1" id="presionCompresor" placeholder="Ej. 7.0">
-                </div>
-                <div class="form-group-field">
-                    <label>Presión en Pera [bar]:</label>
-                    <input type="number" step="0.1" id="presionPera" placeholder="Ej. 5.0">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Diámetro Tiros [pulg]:</label>
-                    <input type="number" step="0.1" id="diametroTiros" placeholder="Ej. 3.5">
-                </div>
-                <div class="form-group-field">
-                    <label>Tiro con VoD:</label>
-                    <select id="tiroVod">
-                        <option value="No" selected>No</option>
-                        <option value="Si">Si</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="section-title">3. Geófono</div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Ubicación Geófono:</label>
-                    <input type="text" id="ubicacionGeofono" placeholder="Opcional">
-                </div>
-                <div class="form-group-field">
-                    <label>Altura / Distancia Geófono [m]:</label>
-                    <input type="text" id="distanciaGeofono" placeholder="Opcional">
-                </div>
-            </div>
-            <div class="section-title">4. Amarre</div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label>Hora Inicio Amarre:</label>
-                    <input type="time" id="hInicioAmarre">
-                </div>
-                <div class="form-group-field">
-                    <label>Hora Fin Amarre:</label>
-                    <input type="time" id="hFinAmarre">
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="cerrarModalPlantillaFinal()" class="btn-primary" style="background-color: #64748b;">Cancelar</button>
-                <button type="button" onclick="guardarModalPlantillaFinal()" class="btn-primary" style="background-color: #16a34a;">Guardar Datos Plantilla</button>
-            </div>
+        <!-- 1. UBICACIÓN Y POSTURA -->
+        <div class="section-title">1. Ubicación y Postura</div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>Mina:</label>
+            <select id="modalMina" onchange="actualizarIdTronaduraAuto()">
+              <option value="andesita">Andesita</option>
+              <option value="Diablo Regimiento">Diablo Regimiento</option>
+              <option value="Diamante">Diamante</option>
+              <option value="Esmeralda" selected>Esmeralda</option>
+              <option value="NNM">NNM</option>
+              <option value="Pacífico Superior">Pacífico Superior</option>
+              <option value="Pilar Norte">Pilar Norte</option>
+              <option value="Reservas Norte">Reservas Norte</option>
+              <option value="TT8">TT8</option>
+            </select>
+          </div>
+          <div class="form-group-field">
+            <label>Nivel:</label>
+            <select
+              id="modalNivel"
+              onchange="
+                cambiarNivelModal();
+                actualizarIdTronaduraAuto();
+              "
+            >
+              <option value="NP" selected>NP (Nivel de Producción)</option>
+              <option value="UCL">UCL (Nivel UCL)</option>
+              <option value="Panel2">Panel 2</option>
+            </select>
+          </div>
         </div>
+
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>Bloque:</label>
+            <select id="modalBloque" onchange="ejecutarAutosave()">
+              <option value="B-2">B-2</option>
+              <option value="B-6">B-6</option>
+              <option value="Ext Fw" selected>Ext Fw</option>
+              <option value="DhZ">DhZ</option>
+            </select>
+          </div>
+          <div class="form-group-field">
+            <label>ID de Tronadura (Automático):</label>
+            <input
+              type="text"
+              id="modalIdTronadura"
+              readonly
+              disabled
+              style="
+                background-color: #f1f5f9;
+                font-weight: bold;
+                color: #475569;
+              "
+              placeholder="Se actualiza automáticamente..."
+            />
+          </div>
+        </div>
+
+        <!-- Fase transversal compartida -->
+        <div class="form-group-field">
+          <label>Fase (Transversal):</label>
+          <input
+            type="text"
+            id="faseZanja"
+            placeholder="Ej. Fase 1"
+            oninput="actualizarIdTronaduraAuto()"
+          />
+        </div>
+
+        <!-- SECCIÓN CONDICIONAL: NIVEL DE PRODUCCIÓN (NP) -->
+        <div id="seccionNP" style="display: block">
+          <div
+            class="section-title"
+            style="
+              color: #2563eb;
+              background: #eff6ff;
+              padding: 4px 8px;
+              border-radius: 4px;
+            "
+          >
+            Nivel de Producción
+          </div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Núm. Zanja (Producción):</label>
+              <input
+                type="text"
+                id="numZanja"
+                placeholder="Ej. 47"
+                oninput="actualizarIdTronaduraAuto()"
+              />
+            </div>
+            <div class="form-group-field">
+              <label>Calle Zanja (Producción):</label>
+              <input
+                type="text"
+                id="calleZanja"
+                placeholder="Ej. C41-43"
+                oninput="actualizarIdTronaduraAuto()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN CONDICIONAL: NIVEL UCL -->
+        <div id="seccionUCL" style="display: none">
+          <div
+            class="section-title"
+            style="
+              color: #16a34a;
+              background: #f0fdf4;
+              padding: 4px 8px;
+              border-radius: 4px;
+            "
+          >
+            Nivel UCL
+          </div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label>Calle UCL:</label>
+              <input
+                type="text"
+                id="calleUcl"
+                placeholder="Ej. C41"
+                oninput="actualizarIdTronaduraAuto()"
+              />
+            </div>
+            <div class="form-group-field">
+              <label>Paradas Inicio / Fin:</label>
+              <input
+                type="text"
+                id="paradasInicioFin"
+                placeholder="Ej. P1 a P5"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN CONDICIONAL: PANEL 2 -->
+        <div id="seccionPanel2" style="display: none">
+          <div
+            class="section-title"
+            style="
+              color: #d97706;
+              background: #fffbeb;
+              padding: 4px 8px;
+              border-radius: 4px;
+            "
+          >
+            Panel 2
+          </div>
+          <div class="form-group-field">
+            <label>Detalle Panel 2:</label>
+            <input
+              type="text"
+              id="detallePanel2"
+              placeholder="Ingrese detalles de Panel 2..."
+              oninput="actualizarIdTronaduraAuto()"
+            />
+          </div>
+        </div>
+
+        <div class="section-title">1. Tiempos de Postura y Carguío</div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>H. Llegada JeJ a Postura:</label>
+            <input type="time" id="hLlegadaJeJ" />
+          </div>
+          <div class="form-group-field">
+            <label>H. Salida JeJ de Postura:</label>
+            <input type="time" id="hSalidaJeJ" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>H. Llegada PyT a Postura:</label>
+            <input type="time" id="hLlegadaPyT" />
+          </div>
+          <div class="form-group-field">
+            <label>H. Salida PyT de Postura:</label>
+            <input type="time" id="hSalidaPyT" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>H. Inicio Carguío:</label>
+            <input type="time" id="hInicioCarguio" />
+          </div>
+          <div class="form-group-field">
+            <label>H. Fin Carguío:</label>
+            <input type="time" id="hFinCarguio" />
+          </div>
+        </div>
+
+        <div class="section-title">2. Parámetros de Presión y Equipos</div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>Presión en Compresor [bar]:</label>
+            <input
+              type="number"
+              step="0.1"
+              id="presionCompresor"
+              placeholder="Ej. 7.0"
+            />
+          </div>
+          <div class="form-group-field">
+            <label>Presión en Pera [bar]:</label>
+            <input
+              type="number"
+              step="0.1"
+              id="presionPera"
+              placeholder="Ej. 5.0"
+            />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>Diámetro Tiros [pulg]:</label>
+            <input
+              type="number"
+              step="0.1"
+              id="diametroTiros"
+              placeholder="Ej. 3.5"
+            />
+          </div>
+          <div class="form-group-field">
+            <label>Tiro con VoD:</label>
+            <select id="tiroVod">
+              <option value="No" selected>No</option>
+              <option value="Si">Si</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title">3. Geófono</div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>Ubicación Geófono:</label>
+            <input type="text" id="ubicacionGeofono" placeholder="Opcional" />
+          </div>
+          <div class="form-group-field">
+            <label>Altura / Distancia Geófono [m]:</label>
+            <input type="text" id="distanciaGeofono" placeholder="Opcional" />
+          </div>
+        </div>
+        <div class="section-title">4. Amarre</div>
+        <div class="grid-2">
+          <div class="form-group-field">
+            <label>Hora Inicio Amarre:</label>
+            <input type="time" id="hInicioAmarre" />
+          </div>
+          <div class="form-group-field">
+            <label>Hora Fin Amarre:</label>
+            <input type="time" id="hFinAmarre" />
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+          "
+        >
+          <button
+            type="button"
+            onclick="cerrarModalPlantillaFinal()"
+            class="btn-primary"
+            style="background-color: #64748b"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onclick="guardarModalPlantillaFinal()"
+            class="btn-primary"
+            style="background-color: #16a34a"
+          >
+            Guardar Datos Plantilla
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- MODAL OBSERVACIONES Y PÉRDIDAS -->
     <div id="modalObservaciones" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Observaciones y Pérdidas Operacionales</h3>
+      <div class="modal-content">
+        <h3
+          style="
+            margin-top: 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+          "
+        >
+          Observaciones y Pérdidas Operacionales
+        </h3>
 
-            <div class="form-group-field">
-                <label>Pérdida Operacional Durante el Carguío:</label>
-                <input type="text" id="obsPerdidaCarguio" placeholder="Ej. Espera de camión / Falla de equipo">
-            </div>
-
-            <div class="form-group-field">
-                <label>Tiempo Pérdida Carguío:</label>
-                <input type="text" id="tiempoPerdidaCarguio" placeholder="Ej. 15 min o 00:15">
-            </div>
-
-            <div class="form-group-field" style="margin-top: 10px;">
-                <label>Pérdida Operacional Durante el Amarre:</label>
-                <input type="text" id="obsPerdidaAmarre" placeholder="Ej. Bloqueo de vía">
-            </div>
-
-            <div class="form-group-field">
-                <label>Tiempo Pérdida Amarre:</label>
-                <input type="text" id="tiempoPerdidaAmarre" placeholder="Ej. 20 min">
-            </div>
-
-            <div class="form-group-field" style="margin-top: 10px;">
-                <label>Observaciones Generales Adicionales:</label>
-                <textarea id="obsGenerales" rows="3" placeholder="Comentarios adicionales..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; resize: vertical;"></textarea>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="cerrarModalObservaciones()" class="btn-primary" style="background-color: #64748b;">Cancelar</button>
-                <button type="button" onclick="guardarModalObservaciones()" class="btn-primary" style="background-color: #16a34a;">Guardar Observaciones</button>
-            </div>
+        <div class="form-group-field">
+          <label>Pérdida Operacional Durante el Carguío:</label>
+          <input
+            type="text"
+            id="obsPerdidaCarguio"
+            placeholder="Ej. Espera de camión / Falla de equipo"
+          />
         </div>
+
+        <div class="form-group-field">
+          <label>Tiempo Pérdida Carguío:</label>
+          <input
+            type="text"
+            id="tiempoPerdidaCarguio"
+            placeholder="Ej. 15 min o 00:15"
+          />
+        </div>
+
+        <div class="form-group-field" style="margin-top: 10px">
+          <label>Pérdida Operacional Durante el Amarre:</label>
+          <input
+            type="text"
+            id="obsPerdidaAmarre"
+            placeholder="Ej. Bloqueo de vía"
+          />
+        </div>
+
+        <div class="form-group-field">
+          <label>Tiempo Pérdida Amarre:</label>
+          <input
+            type="text"
+            id="tiempoPerdidaAmarre"
+            placeholder="Ej. 20 min"
+          />
+        </div>
+
+        <div class="form-group-field" style="margin-top: 10px">
+          <label>Observaciones Generales Adicionales:</label>
+          <textarea
+            id="obsGenerales"
+            rows="3"
+            placeholder="Comentarios adicionales..."
+            style="
+              padding: 10px;
+              border: 1px solid #cbd5e1;
+              border-radius: 6px;
+              font-size: 14px;
+              resize: vertical;
+            "
+          ></textarea>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+          "
+        >
+          <button
+            type="button"
+            onclick="cerrarModalObservaciones()"
+            class="btn-primary"
+            style="background-color: #64748b"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onclick="guardarModalObservaciones()"
+            class="btn-primary"
+            style="background-color: #16a34a"
+          >
+            Guardar Observaciones
+          </button>
+        </div>
+      </div>
     </div>
-    
+
     <script src="../js/onedrive-integration.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
@@ -701,6 +2075,5 @@
     <script src="../js/diagrama-carga.js"></script>
     <script src="../js/informe-carguio.js"></script>
     <script src="../js/emulsion.js"></script>
-    <script src="../js/emulsion-captura.js"></script>
-</body>
+  </body>
 </html>

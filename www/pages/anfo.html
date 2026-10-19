@@ -6,23 +6,20 @@
     <title>Seguimiento ANFO - App JEJ</title>
     <link rel="stylesheet" href="../css/styles.css">
     <script src="../js/vendor/exceljs.min.js"></script>
-    <style>
-     
-    </style>
 </head>
 <body class="pagina-fondo" data-section="anfo">
-
-    <main class="card-wide">
+    <main id="anfoMain" class="card-wide">
         
         <!-- PASO 1: SELECCIÓN DE TURNO Y RESUMEN GENERAL -->
-        <div id="paso1">
+        <div id="paso1" class="anfo-paso1">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>Paso 1: Datos Generales y Turno</h2>
                 <span id="indicadorAutosave" class="badge-autosave" style="display:none;">✔ AutoGuardado</span>
             </div>
             <p class="subtitle">Ingrese los datos básicos del seguimiento</p>
 
-            <div class="jej-card">
+            <div class="anfo-step-card anfo-fecha-turno">
+            <h3 class="anfo-step-label"><i></i> Fecha y turno</h3>
             <div class="form-group-field">
                 <label>Fecha:</label>
                 <input type="text" id="fechaAnfo" readonly style="background-color: #f1f5f9;">
@@ -30,94 +27,144 @@
 
             <div class="form-group-field">
                 <label>Turno:</label>
-                <select id="turnoAnfo" required>
+                <select id="turnoAnfo" class="anfo-select-original" required aria-hidden="true" tabindex="-1">
                     <option value="A" selected >Turno A</option>
                     <option value="B">Turno B</option>
                 </select>
+                <div class="anfo-turno-botones" role="group" aria-label="Seleccione el turno">
+                    <button type="button" class="anfo-turno-boton activo" data-turno-anfo="A" aria-pressed="true">☀ Turno A</button>
+                    <button type="button" class="anfo-turno-boton" data-turno-anfo="B" aria-pressed="false">☾ Turno B</button>
+                </div>
+            </div>
             </div>
 
-            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>2. Datos de Postura y Personal</span>
-                <button type="button" onclick="abrirModalPersonal()" class="btn-primary" style="padding: 6px 12px; font-size: 12px; background-color: #0284c7;">⚙️ Ingreso / Editar Datos</button>
+            <div class="anfo-step-card anfo-personal-card">
+            <div class="anfo-personal-head">
+                <h3 class="anfo-step-label"><i class="cyan"></i> Postura y personal</h3>
+                <span id="estadoPersonalAnfo" class="anfo-estado-personal">Cargando…</span>
             </div>
-
-            <div id="resumenUnificado" class="resumen-box">
+            <div id="resumenUnificado" class="anfo-resumen-personal">
                 <em>Seleccione un turno e ingrese los datos en la ventana emergente.</em>
             </div>
-            </div><!-- /.jej-card -->
+            </div>
 
-            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
+            <div class="anfo-pie" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
                 <a href="../index.html" class="btn-primary" style="background-color: #64748b; text-decoration: none; text-align: center; width: 45%;">Volver al Menú</a>
                 <button type="button" onclick="irAPaso2()" class="btn-primary" style="width: 50%; background-color: #2563eb;">Siguiente ➔</button>
             </div>
         </div>
 
-        <!-- PASO 2: GESTIÓN DE ID DE TRABAJO -->
-        <div id="paso2" style="display: none;">
-            <h2>Paso 2: Gestión de Trabajo</h2>
-            <p class="subtitle">Cree un nuevo trabajo o seleccione uno ya existente</p>
+        <!-- PASO 2: GESTIÓN DE TRABAJO -->
+        <div id="paso2" class="anfo-trabajo-screen" style="display: none;">
+            <div class="anfo-progreso" aria-label="Progreso del seguimiento">
+                <span class="completado" aria-label="Datos completados">✓</span>
+                <span class="completado" aria-label="Postura completada">✓</span>
+                <span class="actual" aria-current="step">3</span>
+                <span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+            </div>
+            <p class="anfo-paso-indicador">PASO 3 DE 8</p>
+            <h2>Gestión de Trabajo</h2>
 
-            <div class="wizard-card" style="margin-bottom: 15px;">
-                <div class="form-group-field">
-                    <label>➕ CREAR NUEVO TRABAJO:</label>
-                    <input type="text" id="nuevoIdInput" placeholder="Ej. TRABAJO-01" autocomplete="off" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    <button type="button" onclick="crearNuevoIdTrabajo()" class="btn-primary" style="background-color: #16a34a; width: 100%; font-size: 13px; padding: 10px;">Crear e Ir a Paradas</button>
-                </div>
+            <div class="anfo-contexto-trabajo">
+                <div><small>Turno</small><strong id="resumenTurnoTrabajo">A · --/--/----</strong></div>
+                <div><small>ID Tronadura</small><strong id="resumenIdTronaduraTrabajo">Sin asignar</strong></div>
             </div>
 
-            <div class="wizard-card">
-                <div class="form-group-field">
-                    <label>📂 SELECCIONAR UN TRABAJO EXISTENTE:</label>
-                    <select id="selectIdExistente" style="margin-bottom: 10px; width: 100%; box-sizing: border-box;">
-                        <option value="" disabled selected>-- Seleccione un trabajoguardado --</option>
-                    </select>
-                </div>
+            <section class="anfo-trabajo-panel anfo-nuevo-trabajo">
+                <h3><i></i> Crear nuevo trabajo</h3>
+                <label for="nuevoIdInput">Nombre / ID del trabajo</label>
+                <input type="text" id="nuevoIdInput" placeholder="Ej. TRABAJO-01" autocomplete="off">
+                <p class="anfo-sugerencia-trabajo">Sugerido: <strong id="sugerenciaTrabajoAnfo">TRABAJO-01</strong></p>
+                <button type="button" onclick="crearNuevoIdTrabajo()" class="anfo-btn-crear">＋ Crear e ir a paradas</button>
+            </section>
 
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="seleccionarIdExistente()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">Usar Seleccionado ➔</button>
-                    <button type="button" onclick="eliminarIdSeleccionado()" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">🗑️ Eliminar</button>
-                </div>
-            </div>
+            <div class="anfo-separador-trabajo"><span>o continúe uno existente</span></div>
 
-            <div style="display: flex; justify-content: flex-start; margin-top: 25px;">
-                <button type="button" onclick="irAPaso1()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Volver al Paso 1</button>
+            <section class="anfo-trabajo-panel anfo-existentes">
+                <h3><i></i> Trabajos existentes <span id="conteoTrabajosAnfo" class="anfo-conteo-trabajos">0</span></h3>
+                <div id="listaTrabajosAnfo" class="anfo-lista-trabajos" aria-label="Trabajos guardados"></div>
+                <select id="selectIdExistente" class="anfo-select-trabajo-interno" aria-hidden="true" tabindex="-1">
+                    <option value="" disabled selected>-- Seleccione un ID guardado --</option>
+                </select>
+            </section>
+
+            <div class="anfo-acciones-trabajo">
+                <button type="button" onclick="irAPaso1()" class="anfo-btn-volver">‹ Volver</button>
+                <button type="button" onclick="seleccionarIdExistente()" class="anfo-btn-usar">Usar seleccionado ›</button>
             </div>
+            <p id="estadoSeleccionTrabajoAnfo" class="anfo-estado-seleccion" aria-live="polite"></p>
         </div>
 
         <!-- PASO 3: GESTIÓN DE PARADAS PARA EL TRABAJO SELECCIONADO -->
-        <div id="paso3" style="display: none;">
-            <h2>Paso 3: Gestión de Paradas</h2>
-            <p class="subtitle" id="subtituloPaso3">Nombre de Trabajo: -</p>
-
-            <div class="wizard-card" style="margin-bottom: 15px;">
-                <div class="form-group-field">
-                    <label>➕ CREAR NUEVA PARADA:</label>
-                    <input type="text" id="idParadaInput" placeholder="Ej. P1 o PARADA 1" autocomplete="off" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    <button type="button" onclick="irAPaso4DesdeCrearParada()" class="btn-primary" style="background-color: #16a34a; width: 100%; font-size: 13px; padding: 10px;">Crear Parada y Configurar Tiros ➔</button>
-                </div>
+        <div id="paso3" class="anfo-paradas-screen" style="display: none;">
+            <div class="anfo-progreso" aria-label="Progreso del seguimiento">
+                <span class="completado" aria-label="Datos completados">✓</span>
+                <span class="completado" aria-label="Postura completada">✓</span>
+                <span class="completado" aria-label="Trabajo seleccionado">✓</span>
+                <span class="actual" aria-current="step">4</span>
+                <span>5</span><span>6</span><span>7</span><span>8</span>
             </div>
+            <p class="anfo-paso-indicador">PASO 4 DE 8 · <span id="etiquetaTrabajoParadas">TRABAJO</span></p>
+            <h2>Gestión de Paradas</h2>
 
-            <div class="wizard-card">
-                <div class="form-group-field">
-                    <label>📂 PARADAS REGISTRADAS EN ESTE TRABAJO:</label>
-                    <select id="selectParadaExistente" style="margin-bottom: 10px; width: 100%; box-sizing: border-box;">
-                        <option value="" disabled selected>-- Seleccione una parada guardada --</option>
-                    </select>
+            <section class="anfo-trabajo-panel anfo-parada-nueva">
+                <h3><i></i> Crear nueva parada</h3>
+                <label for="idParadaInput">ID de parada</label>
+                <input type="text" id="idParadaInput" placeholder="Ej. P1 o PARADA 1" autocomplete="off">
+                <button type="button" onclick="crearParadaYAbrirModalTiros()" class="anfo-btn-crear">Crear parada y configurar tiros ›</button>
+            </section>
+
+            <section class="anfo-trabajo-panel anfo-paradas-guardadas">
+                <h3><i></i> Paradas registradas <span id="conteoParadasAnfo" class="anfo-conteo-trabajos">0</span></h3>
+                <div id="listaParadasAnfo" class="anfo-lista-paradas" aria-label="Paradas registradas"></div>
+                <select id="selectParadaExistente" class="anfo-select-trabajo-interno" aria-hidden="true" tabindex="-1">
+                    <option value="" disabled selected>-- Seleccione una parada guardada --</option>
+                </select>
+                <div class="anfo-acciones-parada">
+                    <button type="button" onclick="seleccionarParadaExistente()" class="anfo-btn-ver-tiros">Editar / ver tiros ›</button>
+                    <button type="button" onclick="eliminarParadaSeleccionada()" class="anfo-btn-eliminar-parada" aria-label="Eliminar parada seleccionada" title="Eliminar">🗑</button>
                 </div>
+            </section>
 
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="seleccionarParadaExistente()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">Editar / Ver Tiros ➔</button>
-                    <button type="button" onclick="eliminarParadaSeleccionada()" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">🗑️ Eliminar</button>
-                </div>
+            <div class="anfo-acciones-trabajo anfo-acciones-paradas">
+                <button type="button" onclick="volverAPaso2()" class="anfo-btn-volver">‹ Volver</button>
+                <button type="button" onclick="irAResumenFinalDesdeParadas()" class="anfo-btn-resumen-paradas">Ver resumen ›</button>
             </div>
-
-            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 25px;">
-                <button type="button" onclick="volverAPaso2()" class="btn-primary" style="background-color: #64748b; width: 45%;">⬅ Volver</button>
-                <button type="button" onclick="irAResumenFinalDesdeParadas()" class="btn-primary" style="background-color: #d97706; width: 50%;">Ver Resumen General ➔</button>
-            </div>
+            <p id="estadoSeleccionParadaAnfo" class="anfo-estado-seleccion" aria-live="polite"></p>
         </div>
 
-        <!-- PASO 4: CONFIGURACIÓN DE CANTIDAD DE TIROS -->
+        <div id="modalCantidadTiros" class="anfo-tiros-overlay" role="dialog" aria-modal="true" aria-labelledby="tituloCantidadTiros" aria-hidden="true">
+        <section class="anfo-tiros-modal">
+            <header class="anfo-tiros-modal-head">
+                <span class="anfo-tiros-modal-icon" aria-hidden="true">5</span>
+                <h2 id="tituloCantidadTiros">Configurar tiros</h2>
+                <span class="anfo-tiros-modal-context">Cantidad</span>
+            </header>
+            <div class="anfo-tiros-modal-body">
+                <p class="anfo-tiros-eyebrow">CANTIDAD DE TIROS · RANGO 1 – 50</p>
+                <div class="anfo-tiros-stepper">
+                    <button type="button" onclick="ajustarCantidadTiros(-1)" aria-label="Disminuir cantidad">−</button>
+                    <div class="anfo-tiros-value-wrap"><output id="cantidadTirosValor">1</output><span>TIROS</span></div>
+                    <button type="button" onclick="ajustarCantidadTiros(1)" aria-label="Aumentar cantidad">＋</button>
+                </div>
+                <div class="anfo-tiros-presets" aria-label="Cantidades frecuentes">
+                    <button type="button" data-cantidad="1" onclick="elegirCantidadTiros(1)">1</button>
+                    <button type="button" data-cantidad="5" onclick="elegirCantidadTiros(5)">5</button>
+                    <button type="button" data-cantidad="8" onclick="elegirCantidadTiros(8)">8</button>
+                    <button type="button" data-cantidad="9" onclick="elegirCantidadTiros(9)">9</button>
+                    <button type="button" data-cantidad="12" onclick="elegirCantidadTiros(12)">12</button>
+                    <button type="button" data-cantidad="15" onclick="elegirCantidadTiros(15)">15</button>
+                    <button type="button" data-cantidad="20" onclick="elegirCantidadTiros(20)">20</button>
+                </div>
+                <p class="anfo-tiros-hint">ⓘ Se abrirá una ficha por cada tiro, una tras otra. Podrá volver al anterior en cualquier momento.</p>
+            </div>
+            <footer class="anfo-tiros-modal-actions">
+                <button type="button" class="anfo-tiros-back" onclick="cerrarModalCantidadTiros()">‹ Volver</button>
+                <button type="button" class="anfo-tiros-next" onclick="continuarDesdeModalCantidadTiros()">Capturar tiros ›</button>
+            </footer>
+        </section>
+    </div>
+    <!-- PASO 4: CONFIGURACIÓN DE CANTIDAD DE TIROS -->
         <div id="paso4" style="display: none;">
             <h2>Paso 4: Configurar Tiros</h2>
             <p class="subtitle" id="subtituloPaso4">Parada: -</p>
@@ -266,7 +313,86 @@
             </div>
         </div>
 
-        <!-- PASO 6: RESUMEN Y BÚSQUEDA FINAL -->
+        <div id="modalCapturaTiroAnfo" class="anfo-captura-overlay" aria-hidden="true">
+        <section class="anfo-captura-modal" role="dialog" aria-modal="true" aria-labelledby="tituloCapturaTiroAnfo">
+            <div class="anfo-captura-progress" id="progresoCapturaTiroAnfo" aria-label="Paso 6 de 8"></div>
+            <header class="anfo-captura-head">
+                <div><p id="contextoCapturaTiroAnfo">PASO 6 DE 8 · PARADA</p><h2 id="tituloCapturaTiroAnfo">Captura de Tiro</h2></div>
+                <span id="badgeCapturaTiroAnfo">Tiro 1 de 1</span>
+            </header>
+            <nav id="navegacionTirosAnfo" class="anfo-tiro-nav" aria-label="Seleccionar tiro"></nav>
+            <div class="anfo-captura-workspace">
+                <section class="anfo-tiro-diagrama-card" aria-label="Vista y resumen del tiro">
+                    <div id="diagramaTiroAnfo"></div>
+                    <div id="resumenDiagramaTiroAnfo" class="anfo-tiro-resumen"></div>
+                </section>
+                <section class="anfo-tiro-panel">
+                    <div class="anfo-tiro-tabs" role="tablist" aria-label="Datos del tiro">
+                        <button type="button" data-tab-tiro="medidas" role="tab" aria-selected="true">Medidas</button>
+                        <button type="button" data-tab-tiro="estado" role="tab" aria-selected="false">Estado</button>
+                        <button type="button" data-tab-tiro="producto" role="tab" aria-selected="false">Producto</button>
+                        <button type="button" data-tab-tiro="columna" role="tab" aria-selected="false">Columna</button>
+                    </div>
+                    <div id="camposCapturaTiroAnfo" class="anfo-tiro-campos"></div>
+                </section>
+            </div>
+            <footer class="anfo-captura-actions">
+                <button type="button" class="anfo-captura-prev" id="anteriorCapturaTiroAnfo">‹ Anterior</button>
+                <button type="button" class="anfo-captura-next" id="siguienteCapturaTiroAnfo">Estado ›</button>
+            </footer>
+        </section>
+    </div>
+    <section id="paso7" class="anfo-tiros-resumen-page" style="display:none" aria-live="polite"></section>
+    <section id="paso8" class="anfo-postura-page" style="display:none" aria-live="polite">
+        <div class="anfo-postura-progress" aria-label="Paso 7 de 8"><i></i><i></i><i></i><i></i><i></i><i></i><i class="active"></i><i></i></div>
+        <header class="anfo-postura-head"><div><p>PARADA <span id="anfoPosturaParada">—</span> · DATOS DE PLANTILLA</p><h2 id="anfoPosturaTitulo">Tiempos de la postura</h2></div><span class="anfo-postura-count" id="anfoPosturaContador">8/17</span></header>
+        <nav class="anfo-postura-tabs" role="tablist" aria-label="Datos de la postura">
+            <button type="button" role="tab" data-postura-tab="tiempos" aria-selected="true">◷ Tiempos</button>
+            <button type="button" role="tab" data-postura-tab="equipos" aria-selected="false">⚙ Equipos</button>
+            <button type="button" role="tab" data-postura-tab="perdidas" aria-selected="false">⚠ Pérdidas</button>
+        </nav>
+        <div class="anfo-postura-panel" data-postura-panel="tiempos">
+            <div class="anfo-postura-card anfo-tiempo-lista">
+                <div class="anfo-tiempo-evento"><i></i><label>Llegada JeJ a postura</label><input type="time" data-postura-source="hLlegadaJeJ"></div>
+                <div class="anfo-tiempo-evento"><i></i><label>Inicio de carguío</label><input type="time" data-postura-source="hInicioCarguio"></div>
+                <div class="anfo-tiempo-evento"><i></i><label>Fin de carguío</label><input type="time" data-postura-source="hFinCarguio"></div>
+                <div class="anfo-tiempo-evento"><i class="amarre"></i><label>Inicio de amarre</label><input type="time" data-postura-source="hInicioAmarre"></div>
+                <div class="anfo-tiempo-evento"><i class="amarre"></i><label>Fin de amarre</label><input type="time" data-postura-source="hFinAmarre"></div>
+                <div class="anfo-tiempo-evento"><i></i><label>Salida JeJ de postura</label><input type="time" data-postura-source="hSalidaJeJ"></div>
+            </div>
+            <p class="anfo-postura-nota" id="anfoTiempoTotal">ⓘ Registra los horarios de la postura. Los tiempos entre eventos se calculan automáticamente.</p>
+        </div>
+        <div class="anfo-postura-panel" data-postura-panel="equipos" hidden>
+            <div class="anfo-postura-card"><h3>■ PRESIÓN Y EQUIPOS</h3><div class="anfo-equipo-grid">
+                <label>Compresor<div class="anfo-equipo-stepper"><button type="button" data-equipo-stepper="presionCompresor" data-delta="-0.1">−</button><input type="number" step="0.1" placeholder="7.0" data-postura-source="presionCompresor"><span>bar</span><button type="button" data-equipo-stepper="presionCompresor" data-delta="0.1">+</button></div></label>
+                <label>Pera<div class="anfo-equipo-stepper"><button type="button" data-equipo-stepper="presionPera" data-delta="-0.1">−</button><input type="number" step="0.1" placeholder="5.0" data-postura-source="presionPera"><span>bar</span><button type="button" data-equipo-stepper="presionPera" data-delta="0.1">+</button></div></label>
+                <label>Diámetro de tiros<div class="anfo-equipo-stepper"><button type="button" data-equipo-stepper="diametroTiros" data-delta="-0.1">−</button><input type="number" step="0.1" placeholder="3.5" data-postura-source="diametroTiros"><span>pulg</span><button type="button" data-equipo-stepper="diametroTiros" data-delta="0.1">+</button></div></label>
+                <fieldset><legend>Tiro con VoD</legend><div class="anfo-pill-choice"><button type="button" data-source="tiroVod" data-value="Si">Sí</button><button type="button" data-source="tiroVod" data-value="No">No</button></div></fieldset>
+            </div></div>
+            <div class="anfo-postura-card"><h3>■ GEÓFONO Y AMARRE <small>Opcional</small></h3><div class="anfo-geofono-grid">
+                <label>Ubicación<input type="text" placeholder="Opcional" data-postura-source="ubicacionGeofono"></label>
+                <label>Distancia [m]<input type="text" placeholder="Opcional" data-postura-source="distanciaGeofono"></label>
+                <label>Altura [m]<input type="text" placeholder="Opcional" data-postura-source="alturaGeofono"></label>
+            </div></div>
+        </div>
+        <div class="anfo-postura-panel" data-postura-panel="perdidas" hidden>
+            <div class="anfo-postura-card anfo-perdida-card" data-perdida-card="carguio"><h3><span>■ DURANTE EL CARGUÍO</span><div><button type="button" class="active" data-perdida-clear="carguio">Sin pérd.</button><button type="button" data-perdida-register="carguio">Registrar</button></div></h3>
+                <div class="anfo-perdida-detalle" data-perdida-detalle="carguio" hidden><div class="anfo-chip-list" data-perdida-chips="carguio"><button type="button">Espera de camión</button><button type="button">Falla de equipo</button><button type="button">Sin acceso</button><button type="button">Otro</button></div>
+                <div class="anfo-perdida-tiempo"><button type="button" data-stepper="tiempoPerdidaCarguio" data-delta="-5">−</button><strong><input type="number" min="0" step="5" value="0" data-postura-source="tiempoPerdidaCarguio"><small>min</small></strong><button type="button" data-stepper="tiempoPerdidaCarguio" data-delta="5">+</button><div class="anfo-minute-chips"><button type="button" data-min="10">10</button><button type="button" data-min="15">15</button><button type="button" data-min="30">30</button></div></div>
+                </div>
+            </div>
+            <div class="anfo-postura-card anfo-perdida-card" data-perdida-card="amarre"><h3><span>■ DURANTE EL AMARRE</span><div><button type="button" class="active" data-perdida-clear="amarre">Sin pérd.</button><button type="button" data-perdida-register="amarre">Registrar</button></div></h3>
+                <div class="anfo-perdida-detalle" data-perdida-detalle="amarre" hidden><div class="anfo-chip-list" data-perdida-chips="amarre"><button type="button">Bloqueo de vía</button><button type="button">Ventilación</button><button type="button">Falla de equipo</button><button type="button">Otro</button></div>
+                <div class="anfo-perdida-tiempo"><button type="button" data-stepper="tiempoPerdidaAmarre" data-delta="-5">−</button><strong><input type="number" min="0" step="5" value="0" data-postura-source="tiempoPerdidaAmarre"><small>min</small></strong><button type="button" data-stepper="tiempoPerdidaAmarre" data-delta="5">+</button><div class="anfo-minute-chips"><button type="button" data-min="10">10</button><button type="button" data-min="20">20</button><button type="button" data-min="30">30</button></div></div>
+                </div>
+            </div>
+            <div class="anfo-postura-card"><h3>■ OBSERVACIONES GENERALES</h3><textarea data-postura-source="obsGenerales" rows="2" placeholder="Comentarios adicionales de la postura..."></textarea></div>
+            <p class="anfo-perdida-total" id="anfoPerdidaTotal">⚠ Pérdida total 0 min. Se descontará del tiempo efectivo.</p>
+        </div>
+        <footer class="anfo-postura-actions"><button type="button" id="anfoPosturaAtras">‹ Resumen tiros</button><button type="button" id="anfoPosturaSiguiente">Equipos ›</button></footer>
+    </section>
+    <section id="paso9" class="anfo-resumen-final" style="display:none" aria-live="polite"></section>
+    <!-- PASO 6: RESUMEN Y BÚSQUEDA FINAL -->
         <div id="paso6" style="display: none;">
             <h2>Resumen General de Paradas y Trabajos</h2>
             <p class="subtitle">Revise sus registros guardados</p>
@@ -281,7 +407,7 @@
 
             <!-- BOTONES EN LÍNEA PARA LOS DOS PRIMEROS -->
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="irAPaso2()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">Registrar Otro Trabajo</button>
+                <button type="button" onclick="irAGestionTrabajo()" class="btn-primary" style="background-color: #0284c7; flex: 1; font-size: 13px;">Registrar Otro Trabajo</button>
                 <button type="button" onclick="abrirModalObservaciones()" class="btn-primary" style="background-color: #d97706; flex: 1; font-size: 13px;">📝 Agregar Observación</button>
             </div>
 
@@ -354,89 +480,119 @@
 
     </div>
 
+    <!-- MODAL CONFIGURACIÓN DE POSTURA: se abre al avanzar desde el Paso 1 -->
+    <div id="modalConfiguracionPostura" class="modal-overlay anfo-config-overlay" role="dialog" aria-modal="true" aria-labelledby="tituloConfiguracionPostura">
+        <div class="anfo-config-card">
+            <h2 id="tituloConfiguracionPostura">Paso 2: Configuración de Postura</h2>
+
+            <section class="anfo-config-section">
+                <h3 class="anfo-config-label"><i></i> 1 · Ubicación y postura</h3>
+                <span class="anfo-config-field-label">Mina</span>
+                <select id="modalMina" class="anfo-config-native" onchange="actualizarIdTronaduraAuto(); ejecutarAutosave();" aria-label="Mina">
+                    <option value="andesita">Andesita</option>
+                    <option value="Diablo Regimiento">Diablo Regimiento</option>
+                    <option value="Diamante">Diamante</option>
+                    <option value="Esmeralda" selected>Esmeralda</option>
+                    <option value="NNM">NNM</option>
+                    <option value="Pacífico Superior">Pacífico Superior</option>
+                    <option value="Pilar Norte">Pilar Norte</option>
+                    <option value="Reservas Norte">Reservas Norte</option>
+                    <option value="TT8">TT8</option>
+                </select>
+                <div class="anfo-choice-row anfo-mina-choices" role="group" aria-label="Seleccionar mina">
+                    <button type="button" data-anfo-select="modalMina" data-value="andesita">Andesita</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="Diablo Regimiento">Diablo Reg.</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="Diamante">Diamante</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="Esmeralda">Esmeralda</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="NNM">NNM</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="Pacífico Superior">Pacífico Sup.</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="Pilar Norte">Pilar Norte</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="Reservas Norte">Reservas Norte</button>
+                    <button type="button" data-anfo-select="modalMina" data-value="TT8">TT8</button>
+                </div>
+
+                <span class="anfo-config-field-label">Nivel</span>
+                <select id="modalNivel" class="anfo-config-native" onchange="cambiarNivelModal(); actualizarIdTronaduraAuto(); ejecutarAutosave();" aria-label="Nivel">
+                    <option value="NP" selected>NP (Nivel de Producción)</option>
+                    <option value="UCL">UCL (Nivel UCL)</option>
+                    <option value="Panel2">Panel 2</option>
+                </select>
+                <div class="anfo-choice-row anfo-segmented" role="group" aria-label="Seleccionar nivel">
+                    <button type="button" data-anfo-select="modalNivel" data-value="NP">NP</button>
+                    <button type="button" data-anfo-select="modalNivel" data-value="UCL">UCL</button>
+                    <button type="button" data-anfo-select="modalNivel" data-value="Panel2">Panel 2</button>
+                </div>
+
+                <span class="anfo-config-field-label">Bloque</span>
+                <select id="modalBloque" class="anfo-config-native" onchange="ejecutarAutosave()" aria-label="Bloque">
+                    <option value="B-2">B-2</option>
+                    <option value="B-6">B-6</option>
+                    <option value="Ext Fw" selected>Ext Fw</option>
+                    <option value="DhZ">DhZ</option>
+                </select>
+                <div class="anfo-choice-row anfo-bloque-choices" role="group" aria-label="Seleccionar bloque">
+                    <button type="button" data-anfo-select="modalBloque" data-value="B-2">B-2</button>
+                    <button type="button" data-anfo-select="modalBloque" data-value="B-6">B-6</button>
+                    <button type="button" data-anfo-select="modalBloque" data-value="Ext Fw">Ext Fw</button>
+                    <button type="button" data-anfo-select="modalBloque" data-value="DhZ">DhZ</button>
+                </div>
+            </section>
+
+            <section class="anfo-config-section anfo-details-section">
+                <h3 class="anfo-config-label"><i class="cyan"></i> 2 · Detalles del nivel</h3>
+                <div id="seccionNP" class="anfo-level-fields" style="display:block;">
+                    <div class="anfo-detail-grid">
+                        <div class="form-group-field">
+                            <label for="numZanja">Núm. Zanja</label>
+                            <input type="text" id="numZanja" placeholder="Ej. 49" oninput="actualizarIdTronaduraAuto(); ejecutarAutosave();">
+                        </div>
+                        <div class="form-group-field">
+                            <label for="calleZanja">Calles Zanja</label>
+                            <input type="text" id="calleZanja" placeholder="Ej. 59-61" oninput="actualizarIdTronaduraAuto(); ejecutarAutosave();">
+                        </div>
+                    </div>
+                </div>
+                <div id="seccionUCL" class="anfo-level-fields" style="display:none;">
+                    <div class="anfo-detail-grid">
+                        <div class="form-group-field">
+                            <label for="calleUcl">Calle UCL</label>
+                            <input type="text" id="calleUcl" placeholder="Ej. C41" oninput="actualizarIdTronaduraAuto(); ejecutarAutosave();">
+                        </div>
+                        <div class="form-group-field">
+                            <label for="paradasInicioFin">Paradas Inicio / Fin</label>
+                            <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5" oninput="ejecutarAutosave()">
+                        </div>
+                    </div>
+                </div>
+                <div id="seccionPanel2" class="anfo-level-fields" style="display:none;">
+                    <div class="form-group-field">
+                        <label for="detallePanel2">Detalle Panel 2</label>
+                        <input type="text" id="detallePanel2" placeholder="Ingrese detalles de Panel 2..." oninput="actualizarIdTronaduraAuto(); ejecutarAutosave();">
+                    </div>
+                </div>
+                <div id="anfoFaseRow" class="form-group-field">
+                    <label for="faseZanja">Fase</label>
+                    <input type="text" id="faseZanja" placeholder="Ej. 2" oninput="actualizarIdTronaduraAuto(); ejecutarAutosave();">
+                </div>
+            </section>
+
+            <section class="anfo-config-section anfo-id-section">
+                <h3 class="anfo-config-label"><i class="green"></i> ID de tronadura · Automático</h3>
+                <label class="anfo-config-field-label" for="modalIdTronadura">Se conserva la lógica actual</label>
+                <input type="text" id="modalIdTronadura" readonly disabled placeholder="Se actualiza automáticamente...">
+            </section>
+
+            <div class="anfo-config-actions">
+                <button type="button" class="anfo-config-back" onclick="cerrarConfiguracionPostura()">‹ Volver</button>
+                <button type="button" class="anfo-config-apply" onclick="guardarConfiguracionPostura()">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DATOS FALTANTES PLANTILLA -->
     <div id="modalPlantillaFinal" class="modal-overlay">
-        <div class="modal-content">
+        <div id="datosPlantillaAdicionales" class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Completar Datos de Plantilla (Horarios y Operación)</h3>
-
-            <!-- 1. UBICACIÓN Y POSTURA: completar los datos de identificación de la plantilla -->
-            <div class="section-title">1. Ubicación y Postura</div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label for="modalMina">Mina:</label>
-                    <select id="modalMina" onchange="actualizarIdTronaduraAuto()">
-                        <option value="andesita">Andesita</option>
-                        <option value="Diablo Regimiento">Diablo Regimiento</option>
-                        <option value="Diamante">Diamante</option>
-                        <option value="Esmeralda" selected>Esmeralda</option>
-                        <option value="NNM">NNM</option>
-                        <option value="Pacífico Superior">Pacífico Superior</option>
-                        <option value="Pilar Norte">Pilar Norte</option>
-                        <option value="Reservas Norte">Reservas Norte</option>
-                        <option value="TT8">TT8</option>
-                    </select>
-                </div>
-                <div class="form-group-field">
-                    <label for="modalNivel">Nivel:</label>
-                    <select id="modalNivel" onchange="cambiarNivelModal(); actualizarIdTronaduraAuto();">
-                        <option value="NP" selected>NP (Nivel de Producción)</option>
-                        <option value="UCL">UCL (Nivel UCL)</option>
-                        <option value="Panel2">Panel 2</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group-field">
-                    <label for="modalBloque">Bloque:</label>
-                    <select id="modalBloque" onchange="ejecutarAutosave()">
-                        <option value="B-2">B-2</option>
-                        <option value="B-6">B-6</option>
-                        <option value="Ext Fw" selected>Ext Fw</option>
-                        <option value="DhZ">DhZ</option>
-                    </select>
-                </div>
-                <div class="form-group-field">
-                    <label for="modalIdTronadura">ID de Tronadura (Automático):</label>
-                    <input type="text" id="modalIdTronadura" readonly disabled style="background-color: #f1f5f9; font-weight: bold; color: #475569;" placeholder="Se actualiza automáticamente...">
-                </div>
-            </div>
-            <div class="form-group-field">
-                <label for="faseZanja">Fase (Transversal):</label>
-                <input type="text" id="faseZanja" placeholder="Ej. Fase 1" oninput="actualizarIdTronaduraAuto()">
-            </div>
-            <div id="seccionNP" style="display: block;">
-                <div class="section-title" style="color: #2563eb; background: #eff6ff; padding: 4px 8px; border-radius: 4px;">Nivel de Producción</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label for="numZanja">Núm. Zanja (Producción):</label>
-                        <input type="text" id="numZanja" placeholder="Ej. 47" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                    <div class="form-group-field">
-                        <label for="calleZanja">Calle Zanja (Producción):</label>
-                        <input type="text" id="calleZanja" placeholder="Ej. C41-43" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                </div>
-            </div>
-            <div id="seccionUCL" style="display: none;">
-                <div class="section-title" style="color: #16a34a; background: #f0fdf4; padding: 4px 8px; border-radius: 4px;">Nivel UCL</div>
-                <div class="grid-2">
-                    <div class="form-group-field">
-                        <label for="calleUcl">Calle UCL:</label>
-                        <input type="text" id="calleUcl" placeholder="Ej. C41" oninput="actualizarIdTronaduraAuto()">
-                    </div>
-                    <div class="form-group-field">
-                        <label for="paradasInicioFin">Paradas Inicio / Fin:</label>
-                        <input type="text" id="paradasInicioFin" placeholder="Ej. P1 a P5" oninput="ejecutarAutosave()">
-                    </div>
-                </div>
-            </div>
-            <div id="seccionPanel2" style="display: none;">
-                <div class="section-title" style="color: #d97706; background: #fffbeb; padding: 4px 8px; border-radius: 4px;">Panel 2</div>
-                <div class="form-group-field">
-                    <label for="detallePanel2">Detalle Panel 2:</label>
-                    <input type="text" id="detallePanel2" placeholder="Ingrese detalles de Panel 2..." oninput="actualizarIdTronaduraAuto()">
-                </div>
-            </div>
 
             <div class="section-title">Tiempos de Postura y Carguío</div>
             <div class="grid-2">
@@ -571,6 +727,61 @@
 
 
         cargarBarMenu(true);
+        document.body.classList.add("anfo-step1-mode");
+
+        // Este acceso es exclusivo de ANFO y usa el menú hamburguesa existente.
+        const menuAnfo = document.querySelector("#dropdownMenu ul");
+        if (menuAnfo && !document.getElementById("menuIngresoDatosAnfo")) {
+            const itemMenuAnfo = document.createElement("li");
+            const enlaceMenuAnfo = document.createElement("a");
+            enlaceMenuAnfo.id = "menuIngresoDatosAnfo";
+            enlaceMenuAnfo.href = "#";
+            enlaceMenuAnfo.textContent = "⚙️ Ingreso / Editar Datos";
+            enlaceMenuAnfo.addEventListener("click", function (evento) {
+                evento.preventDefault();
+                document.getElementById("dropdownMenu").classList.remove("show");
+                abrirModalPersonal();
+            });
+            itemMenuAnfo.appendChild(enlaceMenuAnfo);
+            menuAnfo.insertBefore(itemMenuAnfo, menuAnfo.children[1] || null);
+        }
+
+        function sincronizarBotonesTurnoAnfo() {
+            const turno = document.getElementById("turnoAnfo").value;
+            document.querySelectorAll("[data-turno-anfo]").forEach(boton => {
+                const activo = boton.dataset.turnoAnfo === turno;
+                boton.classList.toggle("activo", activo);
+                boton.setAttribute("aria-pressed", activo ? "true" : "false");
+            });
+        }
+
+        document.querySelectorAll("[data-turno-anfo]").forEach(boton => {
+            boton.addEventListener("click", function () {
+                const selector = document.getElementById("turnoAnfo");
+                selector.value = boton.dataset.turnoAnfo;
+                selector.dispatchEvent(new Event("change", { bubbles: true }));
+            });
+        });
+
+        function sincronizarBotonesConfiguracionAnfo() {
+            document.querySelectorAll("[data-anfo-select]").forEach(boton => {
+                const selector = document.getElementById(boton.dataset.anfoSelect);
+                const activo = Boolean(selector && selector.value === boton.dataset.value);
+                boton.classList.toggle("selected", activo);
+                boton.setAttribute("aria-pressed", activo ? "true" : "false");
+            });
+        }
+
+        document.querySelectorAll("[data-anfo-select]").forEach(boton => {
+            boton.addEventListener("click", function () {
+                const selector = document.getElementById(boton.dataset.anfoSelect);
+                if (!selector) return;
+                selector.value = boton.dataset.value;
+                selector.dispatchEvent(new Event("change", { bubbles: true }));
+                sincronizarBotonesConfiguracionAnfo();
+            });
+        });
+
         let trabajosGuardados = []; 
         let idTrabajoActual = "";
         let idParadaActual = "";
@@ -592,12 +803,40 @@
             }
 
             document.getElementById("turnoAnfo").addEventListener("change", () => {
+                sincronizarBotonesTurnoAnfo();
                 actualizarListasPorTurno();
                 actualizarResumenUnificado();
                 ejecutarAutosave();
             });
 
+            const listaTrabajos = document.getElementById("listaTrabajosAnfo");
+            if (listaTrabajos) {
+                listaTrabajos.addEventListener("click", event => {
+                    const botonEliminar = event.target.closest("[data-eliminar-trabajo]");
+                    if (botonEliminar) {
+                        const select = document.getElementById("selectIdExistente");
+                        select.value = botonEliminar.dataset.eliminarTrabajo;
+                        eliminarIdSeleccionado();
+                        return;
+                    }
+
+                    const tarjeta = event.target.closest("[data-seleccionar-trabajo]");
+                    if (tarjeta) seleccionarTrabajoDesdeTarjeta(tarjeta.dataset.seleccionarTrabajo);
+                });
+            }
+
+            const listaParadas = document.getElementById("listaParadasAnfo");
+            if (listaParadas) {
+                listaParadas.addEventListener("click", event => {
+                    const tarjeta = event.target.closest("[data-seleccionar-parada]");
+                    if (tarjeta) seleccionarParadaDesdeTarjeta(tarjeta.dataset.seleccionarParada);
+                });
+            }
+
             cargarBorradorAutosave();
+            sincronizarBotonesTurnoAnfo();
+            sincronizarBotonesConfiguracionAnfo();
+            cambiarNivelModal();
             actualizarResumenUnificado();
             actualizarSelectIdsTrabajo();
         });
@@ -610,11 +849,15 @@
             document.getElementById("paso4").style.display = "none";
             document.getElementById("paso5").style.display = "none";
             document.getElementById("paso6").style.display = "none";
+            ["paso7", "paso8", "paso9"].forEach(id => { const paso = document.getElementById(id); if (paso) paso.style.display = "none"; });
         }
 
         function irAPaso1() {
+            document.body.classList.remove("anfo-work-mode");
+            document.body.classList.remove("anfo-stop-mode");
             ocultarTodosPasos();
             document.getElementById("paso1").style.display = "block";
+            document.body.classList.add("anfo-step1-mode");
         }
 
         function irAPaso2() {
@@ -623,9 +866,34 @@
                 alert("Por favor seleccione un Turno antes de continuar.");
                 return;
             }
+            abrirConfiguracionPostura();
+        }
+
+        function irAGestionTrabajo() {
+            document.body.classList.remove("anfo-step1-mode");
+            document.body.classList.remove("anfo-stop-mode");
+            document.body.classList.add("anfo-work-mode");
             ocultarTodosPasos();
             document.getElementById("paso2").style.display = "block";
             actualizarSelectIdsTrabajo();
+            actualizarContextoTrabajoAnfo();
+        }
+
+        function abrirConfiguracionPostura() {
+            sincronizarBotonesConfiguracionAnfo();
+            cambiarNivelModal();
+            actualizarIdTronaduraAuto();
+            document.getElementById("modalConfiguracionPostura").style.display = "flex";
+        }
+
+        function cerrarConfiguracionPostura() {
+            document.getElementById("modalConfiguracionPostura").style.display = "none";
+        }
+
+        function guardarConfiguracionPostura() {
+            ejecutarAutosave();
+            cerrarConfiguracionPostura();
+            irAGestionTrabajo();
         }
 
         function crearNuevoIdTrabajo() {
@@ -647,7 +915,11 @@
             ejecutarAutosave();
 
             cargarSelectParadas();
-            document.getElementById("subtituloPaso3").innerText = `ID Trabajo: ${idTrabajoActual}`;
+            const tituloParadas = document.getElementById("etiquetaTrabajoParadas");
+            if (tituloParadas) tituloParadas.textContent = idTrabajoActual;
+            document.body.classList.remove("anfo-work-mode");
+            document.body.classList.remove("anfo-resumen-final-mode");
+            mostrarGestionParadas();
             ocultarTodosPasos();
             document.getElementById("paso3").style.display = "block";
         }
@@ -662,7 +934,11 @@
 
             idTrabajoActual = seleccionado;
             cargarSelectParadas();
-            document.getElementById("subtituloPaso3").innerText = `ID Trabajo: ${idTrabajoActual}`;
+            const tituloParadas = document.getElementById("etiquetaTrabajoParadas");
+            if (tituloParadas) tituloParadas.textContent = idTrabajoActual;
+            document.body.classList.remove("anfo-work-mode");
+            document.body.classList.remove("anfo-resumen-final-mode");
+            mostrarGestionParadas();
             ocultarTodosPasos();
             document.getElementById("paso3").style.display = "block";
         }
@@ -685,58 +961,96 @@
         }
 
         function volverAPaso2() {
+            document.body.classList.remove("anfo-stop-mode");
+            document.body.classList.add("anfo-work-mode");
             ocultarTodosPasos();
             document.getElementById("paso2").style.display = "block";
+            actualizarSelectIdsTrabajo();
+            actualizarContextoTrabajoAnfo();
         }
 
         function volverAPaso3() {
+            mostrarGestionParadas();
             ocultarTodosPasos();
             document.getElementById("paso3").style.display = "block";
             cargarSelectParadas();
+        }
+
+        function mostrarGestionParadas() {
+            document.body.classList.remove("anfo-work-mode");
+            document.body.classList.add("anfo-stop-mode");
+            const etiqueta = document.getElementById("etiquetaTrabajoParadas");
+            if (etiqueta) etiqueta.textContent = idTrabajoActual || "TRABAJO";
         }
 
         /* --- GESTIÓN DE PARADAS (PASO 3) --- */
         function cargarSelectParadas() {
             const select = document.getElementById("selectParadaExistente");
             if (!select) return;
-            select.innerHTML = '<option value="" disabled selected>-- Seleccione una parada guardada --</option>';
-            
+            const seleccionAnterior = select.value;
+            select.replaceChildren(new Option("-- Seleccione una parada guardada --", "", true, true));
+            select.options[0].disabled = true;
+
             let trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
             if (!trabajo) {
                 trabajo = { idTrabajo: idTrabajoActual, paradas: [] };
                 trabajosGuardados.push(trabajo);
             }
 
-            if (trabajo.paradas) {
-                trabajo.paradas.forEach(p => {
-                    select.innerHTML += `<option value="${p.idParada}">${p.idParada} (${p.tiros.length} tiros)</option>`;
-                });
-            }
+            const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+            paradas.forEach(parada => {
+                const tiros = Array.isArray(parada.tiros) ? parada.tiros : [];
+                select.add(new Option(`${parada.idParada} (${tiros.length} tiros)`, parada.idParada));
+            });
+            select.value = paradas.some(parada => parada.idParada === seleccionAnterior) ? seleccionAnterior : "";
+            renderizarTarjetasParadasAnfo();
         }
 
-        function irAPaso4DesdeCrearParada() {
-            const idParadaInput = document.getElementById("idParadaInput").value.trim();
-            if (!idParadaInput) {
-                alert("Ingrese un nombre o código para la Parada.");
+        function renderizarTarjetasParadasAnfo() {
+            const lista = document.getElementById("listaParadasAnfo");
+            if (!lista) return;
+            const select = document.getElementById("selectParadaExistente");
+            const seleccionado = select?.value || "";
+            const trabajo = trabajosGuardados.find(item => item.idTrabajo === idTrabajoActual);
+            const paradas = Array.isArray(trabajo?.paradas) ? trabajo.paradas : [];
+            const contador = document.getElementById("conteoParadasAnfo");
+            if (contador) contador.textContent = String(paradas.length);
+
+            if (!paradas.length) {
+                lista.innerHTML = '<p class="anfo-sin-trabajos">Aún no hay paradas guardadas en este trabajo.</p>';
                 return;
             }
 
-            idParadaActual = idParadaInput;
-            document.getElementById("idParadaInput").value = "";
+            lista.innerHTML = paradas.map(parada => {
+                const id = String(parada.idParada ?? "");
+                const idSeguro = escaparHtmlAnfo(id);
+                const tiros = Array.isArray(parada.tiros) ? parada.tiros : [];
+                const capturados = tiros.filter(Boolean).length;
+                const total = Math.max(capturados, Number(parada.cantidadTiros || parada.totalTiros || tiros.length) || 0);
+                const completa = total > 0 && capturados >= total;
+                const detalle = total === 0
+                    ? "0 tiros · pendiente"
+                    : completa
+                        ? `${total} ${total === 1 ? "tiro" : "tiros"} · completa`
+                        : `${capturados} de ${total} capturados`;
+                const estado = total === 0
+                    ? '<span class="anfo-parada-estado en-curso">● Pendiente</span>'
+                    : completa
+                        ? '<span class="anfo-parada-estado">● OK</span>'
+                        : '<span class="anfo-parada-estado en-curso">● En curso</span>';
+                return `<button type="button" class="anfo-parada-fila" data-seleccionar-parada="${idSeguro}" aria-pressed="${id === seleccionado}">
+                    <span class="anfo-parada-badge">${idSeguro}</span>
+                    <span class="anfo-parada-detalle"><strong>Parada ${idSeguro}</strong><small>${detalle}</small></span>
+                    ${estado}
+                </button>`;
+            }).join("");
+        }
 
-            const trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
-            if (trabajo) {
-                const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
-                if (paradaExistente) {
-                    document.getElementById("cantTirosInput").value = paradaExistente.tiros.length;
-                } else {
-                    document.getElementById("cantTirosInput").value = 3;
-                }
-            }
-
-            document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
-            ocultarTodosPasos();
-            document.getElementById("paso4").style.display = "block";
+        function seleccionarParadaDesdeTarjeta(idParada) {
+            const select = document.getElementById("selectParadaExistente");
+            if (!select) return;
+            select.value = idParada;
+            renderizarTarjetasParadasAnfo();
         }
 
         function seleccionarParadaExistente() {
@@ -752,13 +1066,13 @@
             if (trabajo) {
                 const paradaExistente = trabajo.paradas.find(p => p.idParada === idParadaActual);
                 if (paradaExistente) {
-                    document.getElementById("cantTirosInput").value = paradaExistente.tiros.length;
+                    const cantidadGuardada = Number(paradaExistente.cantidadTiros || paradaExistente.totalTiros || paradaExistente.tiros.length) || 1;
+                    document.getElementById("cantTirosInput").value = Math.min(50, Math.max(1, cantidadGuardada));
                 }
             }
 
             document.getElementById("subtituloPaso4").innerText = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
-            ocultarTodosPasos();
-            document.getElementById("paso4").style.display = "block";
+            abrirModalCantidadTiros();
         }
 
         function eliminarParadaSeleccionada() {
@@ -782,7 +1096,7 @@
         }
 
         function irAResumenFinalDesdeParadas() {
-            mostrarResumenParadasFinal();
+            window.mostrarResumenFinalAnfo();
         }
 
         /* --- ALMACENAMIENTO HISTÓRICO Y PERSISTENTE --- */
@@ -807,10 +1121,89 @@
         function actualizarSelectIdsTrabajo() {
             const select = document.getElementById("selectIdExistente");
             if (!select) return;
-            select.innerHTML = '<option value="" disabled selected>-- Seleccione un ID guardado --</option>';
-            trabajosGuardados.forEach(t => {
-                select.innerHTML += `<option value="${t.idTrabajo}">${t.idTrabajo} (${t.paradas.length} paradas)</option>`;
+            const seleccionadoAnterior = select.value;
+            select.replaceChildren(new Option("-- Seleccione un ID guardado --", "", true, true));
+            select.options[0].disabled = true;
+            (Array.isArray(trabajosGuardados) ? trabajosGuardados : []).forEach(trabajo => {
+                const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+                const tiros = paradas.reduce((total, parada) => total + (Array.isArray(parada.tiros) ? parada.tiros.length : 0), 0);
+                const textoParadas = `${paradas.length} ${paradas.length === 1 ? "parada" : "paradas"}`;
+                select.add(new Option(`${trabajo.idTrabajo} (${textoParadas} · ${tiros} tiros)`, trabajo.idTrabajo));
             });
+
+            if ((trabajosGuardados || []).some(trabajo => trabajo.idTrabajo === seleccionadoAnterior)) {
+                select.value = seleccionadoAnterior;
+            } else {
+                select.value = "";
+            }
+
+            renderizarTarjetasTrabajosAnfo();
+            actualizarSugerenciaTrabajoAnfo();
+        }
+
+        function escaparHtmlAnfo(valor) {
+            return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+            }[caracter]));
+        }
+
+        function renderizarTarjetasTrabajosAnfo() {
+            const lista = document.getElementById("listaTrabajosAnfo");
+            if (!lista) return;
+            const select = document.getElementById("selectIdExistente");
+            const seleccionado = select ? select.value : "";
+            const trabajos = Array.isArray(trabajosGuardados) ? trabajosGuardados : [];
+            const contador = document.getElementById("conteoTrabajosAnfo");
+            if (contador) contador.textContent = String(trabajos.length);
+
+            if (!trabajos.length) {
+                lista.innerHTML = '<p class="anfo-sin-trabajos">Aún no hay trabajos guardados.</p>';
+                return;
+            }
+
+            lista.innerHTML = trabajos.map(trabajo => {
+                const id = String(trabajo.idTrabajo ?? "");
+                const idSeguro = escaparHtmlAnfo(id);
+                const paradas = Array.isArray(trabajo.paradas) ? trabajo.paradas : [];
+                const tiros = paradas.reduce((total, parada) => total + (Array.isArray(parada.tiros) ? parada.tiros.length : 0), 0);
+                const seleccionadoActual = id === seleccionado;
+                const etiquetaParadas = `${paradas.length} ${paradas.length === 1 ? "parada" : "paradas"}`;
+                return `<div class="anfo-trabajo-fila">
+                    <button type="button" class="anfo-trabajo-seleccion" data-seleccionar-trabajo="${idSeguro}" aria-pressed="${seleccionadoActual}">
+                        <span class="anfo-trabajo-radio" aria-hidden="true"></span>
+                        <span class="anfo-trabajo-detalle"><strong>${idSeguro}</strong><small>${etiquetaParadas} · ${tiros} ${tiros === 1 ? "tiro" : "tiros"}</small></span>
+                        <span class="anfo-trabajo-estado${tiros ? "" : " sin-tiros"}">${tiros ? "Con tiros" : "Sin tiros"}</span>
+                    </button>
+                    <button type="button" class="anfo-btn-eliminar-trabajo" data-eliminar-trabajo="${idSeguro}" aria-label="Eliminar el trabajo ${idSeguro}" title="Eliminar">🗑</button>
+                </div>`;
+            }).join("");
+        }
+
+        function seleccionarTrabajoDesdeTarjeta(idTrabajo) {
+            const select = document.getElementById("selectIdExistente");
+            if (!select) return;
+            select.value = idTrabajo;
+            renderizarTarjetasTrabajosAnfo();
+        }
+
+        function actualizarSugerenciaTrabajoAnfo() {
+            const etiqueta = document.getElementById("sugerenciaTrabajoAnfo");
+            if (!etiqueta) return;
+            const numeros = (trabajosGuardados || []).map(trabajo => {
+                const coincidencia = String(trabajo.idTrabajo || "").match(/^TRABAJO-(\d+)$/i);
+                return coincidencia ? Number(coincidencia[1]) : 0;
+            });
+            etiqueta.textContent = `TRABAJO-${String(Math.max(0, ...numeros) + 1).padStart(2, "0")}`;
+        }
+
+        function actualizarContextoTrabajoAnfo() {
+            const turno = document.getElementById("turnoAnfo")?.value || "A";
+            const fecha = document.getElementById("fechaAnfo")?.value || "";
+            const idTronadura = document.getElementById("modalIdTronadura")?.value.trim() || "Sin asignar";
+            const resumenTurno = document.getElementById("resumenTurnoTrabajo");
+            const resumenId = document.getElementById("resumenIdTronaduraTrabajo");
+            if (resumenTurno) resumenTurno.textContent = `${turno} · ${fecha}`;
+            if (resumenId) resumenId.textContent = idTronadura;
         }
 
         /* --- AUTOSAVE & STORAGE --- */
@@ -843,6 +1236,15 @@
                 alturaGeofono: document.getElementById("alturaGeofono") ? document.getElementById("alturaGeofono").value : "",
                 hInicioAmarre: document.getElementById("hInicioAmarre") ? document.getElementById("hInicioAmarre").value : "",
                 hFinAmarre: document.getElementById("hFinAmarre") ? document.getElementById("hFinAmarre").value : "",
+                presionCompresor: document.getElementById("presionCompresor") ? document.getElementById("presionCompresor").value : "",
+                presionPera: document.getElementById("presionPera") ? document.getElementById("presionPera").value : "",
+                diametroTiros: document.getElementById("diametroTiros") ? document.getElementById("diametroTiros").value : "",
+                tiroVod: document.getElementById("tiroVod") ? document.getElementById("tiroVod").value : "",
+                obsPerdidaCarguio: document.getElementById("obsPerdidaCarguio") ? document.getElementById("obsPerdidaCarguio").value : "",
+                tiempoPerdidaCarguio: document.getElementById("tiempoPerdidaCarguio") ? document.getElementById("tiempoPerdidaCarguio").value : "",
+                obsPerdidaAmarre: document.getElementById("obsPerdidaAmarre") ? document.getElementById("obsPerdidaAmarre").value : "",
+                tiempoPerdidaAmarre: document.getElementById("tiempoPerdidaAmarre") ? document.getElementById("tiempoPerdidaAmarre").value : "",
+                obsGenerales: document.getElementById("obsGenerales") ? document.getElementById("obsGenerales").value : "",
                 trabajos: trabajosGuardados
             };
 
@@ -873,11 +1275,10 @@
                 cambiarNivelModal();
                 actualizarIdTronaduraAuto();
                 if (b.supJeJ) document.getElementById("modalSupJeJ").value = b.supJeJ;
-                if (b.obsPerdidaCarguio) document.getElementById("obsPerdidaCarguio").value = b.obsPerdidaCarguio;
-                if (b.tiempoPerdidaCarguio) document.getElementById("tiempoPerdidaCarguio").value = b.tiempoPerdidaCarguio;
-                if (b.obsPerdidaAmarre) document.getElementById("obsPerdidaAmarre").value = b.obsPerdidaAmarre;
-                if (b.tiempoPerdidaAmarre) document.getElementById("tiempoPerdidaAmarre").value = b.tiempoPerdidaAmarre;
-                if (b.obsGenerales) document.getElementById("obsGenerales").value = b.obsGenerales;
+                ["obsPerdidaCarguio", "tiempoPerdidaCarguio", "obsPerdidaAmarre", "tiempoPerdidaAmarre", "obsGenerales", "presionCompresor", "presionPera", "diametroTiros", "tiroVod", "hLlegadaJeJ", "hSalidaJeJ", "hInicioCarguio", "hFinCarguio", "hInicioAmarre", "hFinAmarre", "ubicacionGeofono", "distanciaGeofono", "alturaGeofono"].forEach(id => {
+                    const campo = document.getElementById(id);
+                    if (campo && b[id] !== undefined) campo.value = b[id];
+                });
 
                 if (b.trabajos && Array.isArray(b.trabajos)) {
                     trabajosGuardados = b.trabajos;
@@ -938,31 +1339,61 @@
         }
 
         function actualizarResumenUnificado() {
-            const mina = document.getElementById("modalMina").value || "Esmeralda";
-            const nivel = document.getElementById("modalNivel").value || "NP";
-            const bloque = document.getElementById("modalBloque").value || "Ext Fw";
-            const tronadura = document.getElementById("modalIdTronadura").value || "Sin asignar";
-
+            const encargado = localStorage.getItem("jej_usuario_activo") || "Sin asignar";
             const supJeJ = document.getElementById("modalSupJeJ").value || "Sin asignar";
             const supsDet = Array.from(document.querySelectorAll('#modalPersonal input[name="supervisorDet"]'))
                                 .map(i => i.value).filter(Boolean).join(", ") || "Sin asignar";
             const respsDet = Array.from(document.querySelectorAll('#modalPersonal input[name="responsableDet"]'))
                                 .map(i => i.value).filter(Boolean).join(", ") || "Sin asignar";
-
-            document.getElementById("resumenUnificado").innerHTML = `
-                <strong>Encargado JeJ:</strong> ${localStorage.getItem("jej_usuario_activo") || 'N/A'}<br>
-                <strong>Supervisor JeJ:</strong> ${supJeJ}<br>
-                <strong>Supervisor(es) DET:</strong> ${supsDet}<br>
-                <strong>Responsable(s) DET:</strong> ${respsDet}
-            `;
+            const personas = [
+                { rol: "Encargado JeJ", nombre: encargado },
+                { rol: "Supervisor JeJ", nombre: supJeJ },
+                { rol: "Supervisor(es) DET", nombre: supsDet, det: true },
+                { rol: "Responsable(s) DET", nombre: respsDet, det: true }
+            ];
+            const resumen = document.getElementById("resumenUnificado");
+            resumen.replaceChildren();
+            personas.forEach(persona => {
+                const fila = document.createElement("div");
+                fila.className = "anfo-persona";
+                const avatar = document.createElement("span");
+                avatar.className = "anfo-avatar" + (persona.det ? " det" : "");
+                const iniciales = persona.nombre.split(/\s+/).filter(Boolean).slice(0, 2).map(parte => Array.from(parte)[0]).join("").toUpperCase();
+                avatar.textContent = iniciales || "—";
+                const texto = document.createElement("span");
+                const rol = document.createElement("small");
+                rol.textContent = persona.rol;
+                const nombre = document.createElement("strong");
+                nombre.textContent = persona.nombre;
+                texto.append(rol, nombre);
+                fila.append(avatar, texto);
+                resumen.appendChild(fila);
+            });
+            const completo = personas.every(persona => persona.nombre !== "Sin asignar");
+            const estado = document.getElementById("estadoPersonalAnfo");
+            estado.textContent = completo ? "✓ Completo" : "Pendiente";
+            estado.classList.toggle("incompleto", !completo);
         }
 
         function actualizarListasPorTurno() {
             const turnoSeleccionado = document.getElementById("turnoAnfo").value;
-            let personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}");
+            let personalMap = {};
+            try { personalMap = JSON.parse(localStorage.getItem("jej_personal_map") || "{}"); } catch (error) { console.error("No se pudo leer el personal guardado", error); }
+
+            function nombresDelRol(rolKey, turno) {
+                if (window.JEJUsuarios && typeof window.JEJUsuarios.nombres === "function") {
+                    return window.JEJUsuarios.nombres(rolKey, turno);
+                }
+                const registros = Array.isArray(personalMap[rolKey]) ? personalMap[rolKey] : [];
+                return Array.from(new Set(registros.map(item => typeof item === "object" ? item : { nombre:item, turno:"Ambos" })
+                    .filter(item => item && item.nombre && (!turno || !item.turno || item.turno === "Ambos" || item.turno === turno))
+                    .map(item => String(item.nombre).trim()).filter(Boolean)));
+            }
 
             function poblarGrupo(rolKey, selectorNombre, baseListId) {
                 const inputs = document.querySelectorAll(`input[name="${selectorNombre}"]`);
+                const todosLosNombres = nombresDelRol(rolKey, "");
+                const nombresTurno = nombresDelRol(rolKey, turnoSeleccionado);
                 inputs.forEach((input, index) => {
                     let datalistId = input.getAttribute("list") || baseListId;
                     let datalist = document.getElementById(datalistId);
@@ -975,23 +1406,20 @@
                         document.body.appendChild(datalist);
                     }
 
-                    datalist.innerHTML = "";
-                    let primerNombre = "";
+                    datalist.replaceChildren();
+                    nombresTurno.forEach(nombre => {
+                        const opcion = document.createElement("option");
+                        opcion.value = nombre;
+                        datalist.appendChild(opcion);
+                    });
 
-                    if (personalMap[rolKey] && Array.isArray(personalMap[rolKey])) {
-                        personalMap[rolKey].forEach(item => {
-                            const nombre = typeof item === 'object' ? item.nombre : item;
-                            const turno = typeof item === 'object' ? item.turno : "Ambos";
+                    const valorActual = input.value.trim();
+                    const valorGestionado = todosLosNombres.some(nombre => nombre.toLocaleLowerCase() === valorActual.toLocaleLowerCase());
+                    const valorDisponible = nombresTurno.some(nombre => nombre.toLocaleLowerCase() === valorActual.toLocaleLowerCase());
 
-                            if (!turnoSeleccionado || turno === turnoSeleccionado || turno === "Ambos") {
-                                datalist.innerHTML += `<option value="${nombre}">`;
-                                if (!primerNombre) primerNombre = nombre;
-                            }
-                        });
-                    }
-
-                    if (index === 0 && input && primerNombre && !input.value) {
-                        input.value = primerNombre;
+                    // Al cambiar de turno, sustituir nombres administrados que pertenecían al otro turno.
+                    if (!valorActual || (valorGestionado && !valorDisponible)) {
+                        input.value = nombresTurno[index] || (index === 0 ? nombresTurno[0] || "" : "");
                     }
                 });
             }
@@ -1029,6 +1457,8 @@
             } else {
                 tirosTemporales = [];
             }
+
+            tirosTemporales = tirosTemporales.slice(0, totalTirosParadaActual);
 
             indiceTiroActual = 1;
 
@@ -1075,21 +1505,7 @@
                 btnSig.style.backgroundColor = "#2563eb";
             }
 
-            window.JEJCarguioWizard.mostrarTiro({
-                containerId: "paso5",
-                appearance: "perforacion",
-                cancelText: "Cancelar tiro",
-                context: `Trabajo ${idTrabajoActual} · Parada ${idParadaActual} · Tiro ${numeroTiro} de ${totalTirosParadaActual}`,
-                finishText: numeroTiro === totalTirosParadaActual ? "Finalizar parada ✓" : "Siguiente tiro →",
-                onNext: siguienteTiroWizard,
-                onPrevious: anteriorTiroWizard,
-                onCancel: function () {
-                    tirosTemporales = [];
-                    ocultarTodosPasos();
-                    document.getElementById("paso3").style.display = "block";
-                    cargarSelectParadas();
-                }
-            });
+            mostrarCapturaTiroAnfo();
         }
 
         function guardarDatosTiroActual() {
@@ -1123,45 +1539,7 @@
             tirosTemporales[indiceTiroActual - 1] = datosTiro;
         }
 
-        function siguienteTiroWizard() {
-            guardarDatosTiroActual();
-
-            if (indiceTiroActual < totalTirosParadaActual) {
-                indiceTiroActual++;
-                cargarFormularioTiroWizard(indiceTiroActual);
-            } else {
-                let trabajo = trabajosGuardados.find(t => t.idTrabajo === idTrabajoActual);
-                if (trabajo) {
-                    let paradaIndex = trabajo.paradas.findIndex(p => p.idParada === idParadaActual);
-                    if (paradaIndex >= 0) {
-                        trabajo.paradas[paradaIndex].tiros = [...tirosTemporales];
-                    } else {
-                        trabajo.paradas.push({
-                            idParada: idParadaActual,
-                            tiros: [...tirosTemporales]
-                        });
-                    }
-                }
-
-                ejecutarAutosave();
-                
-                ocultarTodosPasos();
-                document.getElementById("paso3").style.display = "block";
-                cargarSelectParadas();
-            }
-        }
-
-        function anteriorTiroWizard() {
-            guardarDatosTiroActual();
-            if (indiceTiroActual > 1) {
-                indiceTiroActual--;
-                cargarFormularioTiroWizard(indiceTiroActual);
-            } else {
-                ocultarTodosPasos();
-                document.getElementById("paso4").style.display = "block";
-            }
-        }
-
+        // La navegación siguiente/anterior del wizard está definida por el flujo integrado al final del archivo.
       function mostrarResumenParadasFinal() {
             ocultarTodosPasos();
             document.getElementById("paso6").style.display = "block";
@@ -1253,9 +1631,10 @@
             window.location.href = "../index.html";
         }
 
+        // Modal de plantilla: estas funciones globales conectan los botones al asistente compartido.
    function abrirModalPlantillaFinal() {
     window.JEJCarguioWizard.abrirPlantilla({
-        rootId: "modalPlantillaFinal",
+        rootId: "datosPlantillaAdicionales",
         context: "Datos de plantilla · ANFO",
         selectButtons: true,
         onFinish: guardarModalPlantillaFinal,
@@ -1499,19 +1878,6 @@
     alert("Hubo un error al procesar la plantilla. Asegúrate de que plantillaAnfo.xlsx esté accesible.");
 }
 
-function abrirModalPlantillaFinal() {
-    document.getElementById("modalPlantillaFinal").style.display = "flex";
-}
-
-function cerrarModalPlantillaFinal() {
-    document.getElementById("modalPlantillaFinal").style.display = "none";
-}
-
-function guardarModalPlantillaFinal() {
-    ejecutarAutosave();
-    cerrarModalPlantillaFinal();
-    alert("Datos de la plantilla guardados correctamente.");
-}
        }
 
 function cambiarNivelModal() {
@@ -1533,6 +1899,9 @@ function cambiarNivelModal() {
     } else if (nivel === "Panel2") {
         secPanel2.style.display = "block";
     }
+    const filaFase = document.getElementById("anfoFaseRow");
+    if (filaFase) filaFase.style.display = ["NP", "UCL", "Panel2"].includes(nivel) ? "block" : "none";
+    if (typeof sincronizarBotonesConfiguracionAnfo === "function") sincronizarBotonesConfiguracionAnfo();
 }
 
 function actualizarIdTronaduraAuto() {
@@ -1575,6 +1944,562 @@ function actualizarIdTronaduraAuto() {
 
 
 
+        function cantidadTirosActual() {
+            return Math.min(50, Math.max(1, Number(document.getElementById("cantTirosInput").value) || 1));
+        }
+
+        function actualizarCantidadTiros(valor) {
+            const cantidad = Math.min(50, Math.max(1, Number(valor) || 1));
+            document.getElementById("cantidadTirosValor").value = cantidad;
+            document.getElementById("cantTirosInput").value = cantidad;
+            document.querySelectorAll(".anfo-tiros-presets button").forEach(boton => {
+                boton.classList.toggle("activo", Number(boton.dataset.cantidad) === cantidad);
+            });
+        }
+
+        function abrirModalCantidadTiros() {
+            actualizarCantidadTiros(cantidadTirosActual());
+            const modal = document.getElementById("modalCantidadTiros");
+            modal.classList.add("visible");
+            modal.setAttribute("aria-hidden", "false");
+        }
+
+        function ajustarCantidadTiros(delta) {
+            actualizarCantidadTiros(cantidadTirosActual() + delta);
+        }
+
+        function elegirCantidadTiros(cantidad) {
+            actualizarCantidadTiros(cantidad);
+        }
+
+        function continuarDesdeModalCantidadTiros() {
+            cerrarModalCantidadTiros();
+            document.body.classList.remove("anfo-stop-mode");
+            iniciarRegistroTiros();
+        }
+
     </script>
-</body>
+    <script>
+/* Captura ANFO integrada para mantener el flujo en una sola página. */
+(function () {
+    "use strict";
+
+    const camposPorPestana = {
+        medidas: ["tiroLongDiseno", "tiroTaco", "tiroLargoMomento", "tiroTacoReal", "tiroCamaExplosivo"],
+        estado: ["tiroEstado", "tiroIntentosDestape", "tiroAgua", "tiroPosNeg", "tiroNumPera"],
+        producto: ["tiroCeboSup", "tiroAranaSup", "tiroCantCartuchos"],
+        columna: ["tiroCeboInf", "tiroAranaInf", "tiroCantCartuchosInf", "tiroNumRetenedores", "tiroTipoRetenedor"]
+    };
+    const pestanas = ["medidas", "estado", "producto", "columna"];
+    const camposConStepper = new Set([
+        "tiroLongDiseno", "tiroTaco", "tiroLargoMomento", "tiroTacoReal", "tiroIntentosDestape",
+        "tiroNumPera", "tiroCamaExplosivo", "tiroCeboSup", "tiroCantCartuchos", "tiroCeboInf",
+        "tiroCantCartuchosInf", "tiroNumRetenedores"
+    ]);
+    let pestanaActiva = "medidas";
+
+    function valorNumerico(id, respaldo) {
+        const valor = Number(document.getElementById(id)?.value);
+        return Number.isFinite(valor) && valor > 0 ? valor : respaldo;
+    }
+    function valorTexto(id, respaldo) { return document.getElementById(id)?.value || respaldo; }
+    function escaparSvg(valor) {
+        return String(valor).replace(/[&<>"']/g, caracter => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[caracter]));
+    }
+
+    function actualizarDiagramaTiroAnfo() {
+        const diseno = valorNumerico("tiroLongDiseno", 12.9);
+        const tacoReal = Math.min(diseno, valorNumerico("tiroTacoReal", 8));
+        const largoCargado = Math.max(0, diseno - tacoReal);
+        const inicioCarga = 25 + 244 * (tacoReal / diseno);
+        const ceboInferior = valorTexto("tiroCeboInf", "").trim();
+        const retenedor = valorTexto("tiroTipoRetenedor", "Greda");
+        const cantidadRetenedores = valorTexto("tiroNumRetenedores", "1");
+        const ceboSuperior = valorTexto("tiroCeboSup", "150");
+        const ceboY = Math.min(285, inicioCarga + 70);
+
+        document.getElementById("diagramaTiroAnfo").innerHTML = `<svg class="anfo-tiro-diagrama" viewBox="0 0 160 310" role="img" aria-label="Vista del tiro ${indiceTiroActual}: diseño ${diseno} metros, taco real ${tacoReal} metros y carga ANFO ${largoCargado.toFixed(1)} metros">
+            <defs>
+                <pattern id="anfoTacoTrama" width="8" height="8" patternTransform="rotate(42)" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#d7c9a9"/><path d="M0 0V8" stroke="#aa9874" stroke-width="2"/></pattern>
+                <pattern id="anfoCargaPuntos" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#f4a52e"/><circle cx="2" cy="2" r="1" fill="#a9630a"/></pattern>
+            </defs>
+            <text x="80" y="12" text-anchor="middle" font-size="9" font-weight="800" fill="#31538c">TIRO ${indiceTiroActual} · VISTA</text>
+            <text x="10" y="30" font-size="8" fill="#42608e">0</text><text x="10" y="105" font-size="8" fill="#42608e">${(diseno*.33).toFixed(0)}</text><text x="10" y="185" font-size="8" fill="#42608e">${(diseno*.66).toFixed(0)}</text><text x="10" y="270" font-size="8" fill="#42608e">${diseno.toFixed(0)}</text>
+            <rect x="25" y="24" width="46" height="247" rx="7" fill="url(#anfoTacoTrama)" stroke="#52698c" stroke-width="2"/>
+            <rect x="27" y="${inicioCarga}" width="42" height="${Math.max(0,271-inicioCarga)}" fill="url(#anfoCargaPuntos)"/>
+            <line x1="25" y1="${inicioCarga}" x2="71" y2="${inicioCarga}" stroke="#6c4617" stroke-width="5"/>
+            <circle cx="48" cy="${Math.min(260,inicioCarga+19)}" r="8" fill="#fff" stroke="#168fc4" stroke-width="3"/><text x="48" y="${Math.min(263,inicioCarga+22)}" text-anchor="middle" font-size="8" font-weight="900" fill="#12689a">S</text>
+            <text x="79" y="${Math.max(68,inicioCarga*.53)}" font-size="8" font-weight="700" fill="#244477">Taco real</text><text x="79" y="${Math.max(78,inicioCarga*.53+10)}" font-size="8" fill="#52698c">${tacoReal.toFixed(1)} m</text>
+            <text x="79" y="${Math.min(218,inicioCarga+12)}" font-size="8" font-weight="700" fill="#76501c">Retenedor</text><text x="79" y="${Math.min(228,inicioCarga+21)}" font-size="8" fill="#52698c">${escaparSvg(cantidadRetenedores)} · ${escaparSvg(retenedor)}</text>
+            <text x="79" y="${Math.min(246,inicioCarga+40)}" font-size="8" font-weight="700" fill="#244477">Columna ANFO</text><text x="79" y="${Math.min(256,inicioCarga+49)}" font-size="8" fill="#52698c">${largoCargado.toFixed(1)} m</text>
+            <text x="79" y="${ceboY}" font-size="8" font-weight="700" fill="#244477">Cebo inf.</text><text x="79" y="${Math.min(296,ceboY+10)}" font-size="8" fill="#52698c">${ceboInferior ? escaparSvg(ceboInferior+" g") : "sin cebo"}</text>
+            <text x="30" y="${Math.max(45,inicioCarga-6)}" font-size="7" fill="#31538c">${escaparSvg(ceboSuperior)} g</text>
+        </svg>`;
+        document.getElementById("resumenDiagramaTiroAnfo").innerHTML = `Diseño ${diseno.toFixed(1)} m<br>Al cargar ${valorNumerico("tiroLargoMomento",13).toFixed(1)} m`;
+    }
+
+    function actualizarNavegacionTirosAnfo() {
+        const navegacion = document.getElementById("navegacionTirosAnfo");
+        navegacion.replaceChildren();
+        for (let numero = 1; numero <= totalTirosParadaActual; numero++) {
+            const boton = document.createElement("button");
+            const completado = Boolean(tirosTemporales[numero - 1]) && numero !== indiceTiroActual;
+            boton.type = "button";
+            boton.textContent = completado ? "✓" : String(numero);
+            if (completado) boton.classList.add("completo");
+            if (numero === indiceTiroActual) boton.classList.add("actual");
+            boton.setAttribute("aria-label", `Tiro ${numero}${completado ? ", con datos guardados" : ""}`);
+            boton.setAttribute("aria-current", numero === indiceTiroActual ? "step" : "false");
+            boton.addEventListener("click", () => {
+                if (numero === indiceTiroActual) return;
+                guardarDatosTiroActual();
+                indiceTiroActual = numero;
+                cargarFormularioTiroWizard(numero);
+            });
+            navegacion.appendChild(boton);
+        }
+        document.getElementById("badgeCapturaTiroAnfo").textContent = `Tiro ${indiceTiroActual} de ${totalTirosParadaActual}`;
+        document.getElementById("contextoCapturaTiroAnfo").textContent = `PASO 6 DE 8 · PARADA ${idParadaActual || "-"}`;
+        document.getElementById("progresoCapturaTiroAnfo").innerHTML = Array.from({length:8}, (_, i) => `<i class="${i < 5 ? "done" : i === 5 ? "current" : ""}"></i>`).join("");
+    }
+
+    function mostrarPestanaCapturaTiroAnfo(pestana) {
+        pestanaActiva = pestana;
+        document.querySelectorAll("[data-tab-tiro]").forEach(boton => {
+            const seleccionada = boton.dataset.tabTiro === pestana;
+            boton.classList.toggle("activo", seleccionada);
+            boton.setAttribute("aria-selected", seleccionada ? "true" : "false");
+        });
+        const contenedor = document.getElementById("camposCapturaTiroAnfo");
+        contenedor.replaceChildren();
+        camposPorPestana[pestana].forEach(id => {
+            const origen = document.getElementById(id);
+            const grupoOrigen = origen?.closest(".form-group-field");
+            if (!origen || !grupoOrigen) return;
+            const copia = grupoOrigen.cloneNode(true);
+            copia.classList.add("anfo-tiro-campo");
+            copia.querySelectorAll("input, select, textarea").forEach(control => {
+                const idOrigen = control.id;
+                const controlOrigen = grupoOrigen.querySelector(`#${idOrigen}`);
+                if (!controlOrigen) return;
+                if (controlOrigen.tagName === "SELECT") {
+                    const opciones = document.createElement("div");
+                    opciones.className = "anfo-choice-row";
+                    opciones.setAttribute("role", "group");
+                    opciones.setAttribute("aria-label", controlOrigen.closest(".form-group-field").querySelector("label")?.textContent.trim() || "Seleccione una opción");
+                    Array.from(controlOrigen.options).filter(opcion => !opcion.disabled && opcion.value !== "").forEach(opcion => {
+                        const boton = document.createElement("button");
+                        boton.type = "button";
+                        boton.value = opcion.value;
+                        boton.textContent = opcion.textContent.trim();
+                        boton.classList.toggle("selected", opcion.value === controlOrigen.value);
+                        boton.setAttribute("aria-pressed", opcion.value === controlOrigen.value ? "true" : "false");
+                        boton.addEventListener("click", () => {
+                            opciones.querySelectorAll("button").forEach(otro => {
+                                const activa = otro === boton;
+                                otro.classList.toggle("selected", activa);
+                                otro.setAttribute("aria-pressed", activa ? "true" : "false");
+                            });
+                            sincronizarCampoAnfo(boton, controlOrigen);
+                        });
+                        opciones.appendChild(boton);
+                    });
+                    control.replaceWith(opciones);
+                    return;
+                }
+                control.value = controlOrigen.value;
+                control.disabled = controlOrigen.disabled;
+                control.dataset.sourceId = idOrigen;
+                control.removeAttribute("id");
+                control.addEventListener("input", () => sincronizarCampoAnfo(control, controlOrigen));
+                control.addEventListener("change", () => sincronizarCampoAnfo(control, controlOrigen));
+                if (control.tagName === "INPUT" && camposConStepper.has(idOrigen)) {
+                    agregarStepperCapturaTiro(control, controlOrigen, idOrigen);
+                }
+            });
+            contenedor.appendChild(copia);
+        });
+
+        const indice = pestanas.indexOf(pestana);
+        const anterior = document.getElementById("anteriorCapturaTiroAnfo");
+        const siguiente = document.getElementById("siguienteCapturaTiroAnfo");
+        anterior.textContent = indice > 0 ? `‹ ${pestanas[indice - 1] === "producto" ? "Producto" : pestanas[indice - 1] === "columna" ? "Columna" : pestanas[indice - 1] === "estado" ? "Estado" : "Medidas"}` : (indiceTiroActual > 1 ? "‹ Anterior" : "‹ Cantidad");
+        const nombresPestanas = { medidas: "Medidas", estado: "Estado", producto: "Producto", columna: "Columna" };
+        siguiente.textContent = indice < pestanas.length - 1 ? `${nombresPestanas[pestanas[indice + 1]]} ›` : "Guardar tiro ✓";
+        actualizarDiagramaTiroAnfo();
+        actualizarNavegacionTirosAnfo();
+    }
+
+    function agregarStepperCapturaTiro(input, origen, idOrigen) {
+        const grupo = input.closest(".anfo-tiro-campo");
+        if (!grupo || grupo.querySelector(".anfo-tiro-stepper")) return;
+        const step = Number(origen.step) > 0 ? Number(origen.step) : 1;
+        const wrapper = document.createElement("div");
+        wrapper.className = "anfo-tiro-stepper";
+        const menos = document.createElement("button");
+        menos.type = "button";
+        menos.className = "anfo-tiro-stepper-btn";
+        menos.textContent = "−";
+        menos.setAttribute("aria-label", `Disminuir ${origen.closest(".form-group-field")?.querySelector("label")?.textContent.trim() || idOrigen}`);
+        const mas = document.createElement("button");
+        mas.type = "button";
+        mas.className = "anfo-tiro-stepper-btn";
+        mas.textContent = "+";
+        mas.setAttribute("aria-label", `Aumentar ${origen.closest(".form-group-field")?.querySelector("label")?.textContent.trim() || idOrigen}`);
+        const inputParent = input.parentNode;
+        inputParent.insertBefore(wrapper, input);
+        wrapper.append(menos, input, mas);
+
+        const actualizarEstado = () => {
+            const value = Number(input.value);
+            const minimo = Number(origen.min || 0);
+            menos.disabled = input.disabled || (Number.isFinite(value) && value <= minimo);
+            mas.disabled = input.disabled || (origen.max !== "" && Number.isFinite(Number(origen.max)) && value >= Number(origen.max));
+        };
+        const ajustar = delta => {
+            if (input.disabled) return;
+            const actual = input.value === "" ? 0 : Number(input.value);
+            const siguiente = Math.max(Number(origen.min || 0), Math.min(origen.max === "" ? Infinity : Number(origen.max), (Number.isFinite(actual) ? actual : 0) + delta * step));
+            input.value = String(Number(siguiente.toFixed(3)));
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            actualizarEstado();
+        };
+        menos.addEventListener("click", () => ajustar(-1));
+        mas.addEventListener("click", () => ajustar(1));
+        input.addEventListener("input", actualizarEstado);
+        actualizarEstado();
+    }
+
+    function sincronizarCampoAnfo(copia, origen) {
+        origen.value = copia.value;
+        origen.dispatchEvent(new Event("input", { bubbles: true }));
+        origen.dispatchEvent(new Event("change", { bubbles: true }));
+        if (origen.id === "tiroEstado") toggleIntentosDestape();
+        const intentos = document.querySelector("#camposCapturaTiroAnfo [data-source-id='tiroIntentosDestape']");
+        if (intentos) intentos.disabled = document.getElementById("tiroIntentosDestape").disabled;
+        const botonIntentos = intentos?.closest(".anfo-tiro-stepper");
+        if (botonIntentos) botonIntentos.querySelectorAll("button").forEach(boton => { boton.disabled = intentos.disabled; });
+        actualizarDiagramaTiroAnfo();
+    }
+
+    window.mostrarCapturaTiroAnfo = function () {
+        document.getElementById("paso5").style.display = "none";
+        document.body.classList.add("anfo-tiro-captura-activo");
+        const modal = document.getElementById("modalCapturaTiroAnfo");
+        modal.classList.add("visible");
+        modal.setAttribute("aria-hidden", "false");
+        mostrarPestanaCapturaTiroAnfo("medidas");
+    };
+
+    window.cerrarCapturaTiroAnfo = function () {
+        const modal = document.getElementById("modalCapturaTiroAnfo");
+        modal.classList.remove("visible");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("anfo-tiro-captura-activo");
+    };
+
+    document.querySelectorAll("[data-tab-tiro]").forEach(boton => {
+        boton.addEventListener("click", () => mostrarPestanaCapturaTiroAnfo(boton.dataset.tabTiro));
+    });
+    document.getElementById("siguienteCapturaTiroAnfo").addEventListener("click", () => {
+        const indice = pestanas.indexOf(pestanaActiva);
+        if (indice < pestanas.length - 1) {
+            mostrarPestanaCapturaTiroAnfo(pestanas[indice + 1]);
+            return;
+        }
+        if (indiceTiroActual === totalTirosParadaActual) window.cerrarCapturaTiroAnfo();
+        siguienteTiroWizard();
+    });
+    document.getElementById("anteriorCapturaTiroAnfo").addEventListener("click", () => {
+        const indice = pestanas.indexOf(pestanaActiva);
+        if (indice > 0) {
+            mostrarPestanaCapturaTiroAnfo(pestanas[indice - 1]);
+            return;
+        }
+        window.cerrarCapturaTiroAnfo();
+        anteriorTiroWizard();
+    });
+})();
+
+/* Navegación, persistencia y resumen final ANFO integrados. */
+(function () {
+    "use strict";
+    const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    const parar = () => trabajosGuardados.find(trabajo => trabajo.idTrabajo === idTrabajoActual)?.paradas?.find(item => item.idParada === idParadaActual);
+    const cantidadTiros = parada => Math.max(Number(parada?.cantidadTiros || parada?.totalTiros || 0), Array.isArray(parada?.tiros) ? parada.tiros.length : 0, Number(totalTirosParadaActual || 0));
+
+    function guardarParadaActual() {
+        let trabajo = trabajosGuardados.find(item => item.idTrabajo === idTrabajoActual);
+        if (!trabajo) { trabajo = { idTrabajo: idTrabajoActual, paradas: [] }; trabajosGuardados.push(trabajo); }
+        if (!Array.isArray(trabajo.paradas)) trabajo.paradas = [];
+        let parada = trabajo.paradas.find(item => item.idParada === idParadaActual);
+        if (!parada) { parada = { idParada: idParadaActual }; trabajo.paradas.push(parada); }
+        parada.cantidadTiros = totalTirosParadaActual;
+        parada.tiros = [...tirosTemporales];
+        guardarHistoricoTrabajos();
+        ejecutarAutosave();
+    }
+
+    window.mostrarResumenTirosParadaAnfo = function () {
+        const parada = parar();
+        const tiros = Array.isArray(parada?.tiros) ? parada.tiros : [];
+        const total = cantidadTiros(parada);
+        totalTirosParadaActual = total;
+        const capturados = tiros.filter(Boolean).length;
+        const sanos = tiros.filter(tiro => tiro?.estado === "Sano").length;
+        const tapados = tiros.filter(tiro => tiro?.estado === "Tapado").length;
+        const primeroPendiente = Array.from({ length: total }, (_, index) => index + 1).find(numero => !tiros[numero - 1]);
+        const contenedor = document.getElementById("paso7");
+        contenedor.innerHTML = `
+            <div class="anfo-resumen-progreso" aria-label="Progreso del seguimiento">${Array.from({ length: 8 }, (_, i) => `<i class="${i < 6 ? "done" : i === 6 ? "current" : ""}"></i>`).join("")}</div>
+            <header class="anfo-resumen-head"><div><p>PARADA ${escapeHtml(idParadaActual)} · ${escapeHtml(idTrabajoActual)}</p><h2>Tiros de la Parada</h2></div><span class="anfo-resumen-guardado">✓ Guardado</span></header>
+            <section class="anfo-resumen-stats"><div class="anfo-resumen-stat"><strong>${capturados}<span>/${total}</span></strong><small>Capturados</small></div><div class="anfo-resumen-stat sanos"><strong>${sanos}</strong><small>Sanos</small></div><div class="anfo-resumen-stat tapados"><strong>${tapados}</strong><small>Tapados</small></div></section>
+            <div class="anfo-tiros-grid">${Array.from({ length: total }, (_, index) => {
+                const numero = index + 1, tiro = tiros[index];
+                if (!tiro) return `<button type="button" class="anfo-tiro-resumen-card pendiente" data-tiro-resumen="${numero}"><span class="anfo-mini-diagrama"></span><span class="anfo-tiro-resumen-info"><span class="anfo-tiro-resumen-top"><strong>${numero}</strong><small>Pendiente</small></span></span></button>`;
+                const estado = tiro.estado || "Sano", agua = tiro.agua || "Seco", largo = Number(tiro.largoMomento || tiro.longDiseno || 0).toFixed(1);
+                return `<button type="button" class="anfo-tiro-resumen-card ${numero === indiceTiroActual ? "actual" : ""} ${estado === "Tapado" ? "tapado" : ""}" data-tiro-resumen="${numero}"><span class="anfo-mini-diagrama ${estado === "Tapado" ? "tapado" : ""}"></span><span class="anfo-tiro-resumen-info"><span class="anfo-tiro-resumen-top"><strong>${numero}</strong><small>${largo} m</small></span><span class="anfo-tiro-tags"><span class="${estado === "Tapado" ? "tapado" : ""}">${escapeHtml(estado)}</span><span class="${agua === "Agua" ? "agua" : ""}">${escapeHtml(agua)}</span></span></span></button>`;
+            }).join("")}</div>
+            <div class="anfo-tiro-leyenda"><span><i></i>Taco</span><span><i class="carga"></i>Carga ANFO</span><span><i class="edicion"></i>Tiro en edición</span></div>
+            <p class="anfo-resumen-aviso">ⓘ Toque un tiro para corregirlo o complete los pendientes.</p>
+            <footer class="anfo-resumen-actions"><button type="button" class="anfo-resumen-volver" id="volverParadasResumenTiros">‹ Paradas</button><button type="button" class="anfo-resumen-capturar" id="continuarResumenTiros">${primeroPendiente ? `Capturar tiro ${primeroPendiente} ›` : "Tiempos ›"}</button></footer>`;
+        document.body.classList.add("anfo-resumen-tiros-mode");
+        ocultarTodosPasos(); contenedor.style.display = "flex";
+        contenedor.querySelectorAll("[data-tiro-resumen]").forEach(button => button.addEventListener("click", () => abrirTiro(Number(button.dataset.tiroResumen))));
+        document.getElementById("volverParadasResumenTiros").addEventListener("click", () => {
+            document.body.classList.remove("anfo-resumen-tiros-mode"); mostrarGestionParadas(); ocultarTodosPasos(); document.getElementById("paso3").style.display = "block"; cargarSelectParadas();
+        });
+        document.getElementById("continuarResumenTiros").addEventListener("click", () => primeroPendiente ? abrirTiro(primeroPendiente) : abrirDatosPostura("tiempos"));
+    };
+
+    function abrirTiro(numero) {
+        const parada = parar(); if (!parada) return;
+        totalTirosParadaActual = cantidadTiros(parada);
+        tirosTemporales = Array.isArray(parada.tiros) ? [...parada.tiros] : Array(totalTirosParadaActual).fill(null);
+        indiceTiroActual = numero;
+        document.body.classList.remove("anfo-resumen-tiros-mode");
+        ocultarTodosPasos(); document.getElementById("paso5").style.display = "block";
+        cargarFormularioTiroWizard(numero); window.mostrarCapturaTiroAnfo();
+    }
+
+    window.siguienteTiroWizard = function () {
+        guardarDatosTiroActual();
+        guardarParadaActual();
+        window.cerrarCapturaTiroAnfo();
+        window.mostrarResumenTirosParadaAnfo();
+    };
+    window.anteriorTiroWizard = function () {
+        guardarDatosTiroActual();
+        if (indiceTiroActual > 1) {
+            indiceTiroActual--;
+            cargarFormularioTiroWizard(indiceTiroActual);
+            return;
+        }
+        guardarParadaActual();
+        window.cerrarCapturaTiroAnfo();
+        ocultarTodosPasos();
+        document.getElementById("cantTirosInput").value = totalTirosParadaActual;
+        abrirModalCantidadTiros();
+    };
+    window.cerrarModalCantidadTiros = function () {
+        const modal = document.getElementById("modalCantidadTiros");
+        modal.classList.remove("visible");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("anfo-resumen-final-mode", "anfo-work-mode");
+        mostrarGestionParadas();
+        ocultarTodosPasos();
+        document.getElementById("paso3").style.display = "block";
+        if (!parar()) document.getElementById("idParadaInput").value = idParadaActual || "";
+        cargarSelectParadas();
+    };
+    window.crearParadaYAbrirModalTiros = function () {
+        const input = document.getElementById("idParadaInput");
+        const id = input.value.trim();
+        if (!id) {
+            alert("Ingrese un nombre o código para la Parada.");
+            input.focus();
+            return;
+        }
+        idParadaActual = id;
+        const trabajo = trabajosGuardados.find(item => item.idTrabajo === idTrabajoActual);
+        const existente = trabajo?.paradas?.find(parada => parada.idParada === id);
+        const cantidad = existente?.cantidadTiros || existente?.totalTiros || existente?.tiros?.length || 3;
+        document.getElementById("cantTirosInput").value = Math.min(50, Math.max(1, Number(cantidad) || 3));
+        document.getElementById("subtituloPaso4").textContent = `Trabajo: ${idTrabajoActual} | Parada: ${idParadaActual}`;
+        input.value = "";
+        document.body.classList.remove("anfo-stop-mode", "anfo-resumen-final-mode");
+        ocultarTodosPasos();
+        abrirModalCantidadTiros();
+    };
+
+    function fuente(id) { return document.getElementById(id); }
+    function minutos(valor) {
+        if (!valor) return 0;
+        const numeric = String(valor).match(/\d+(?:\.\d+)?/);
+        if (!numeric) return 0;
+        if (String(valor).includes(":")) { const [horas, mins] = String(valor).split(":").map(Number); return (horas || 0) * 60 + (mins || 0); }
+        return Number(numeric[0]) || 0;
+    }
+    function actualizarTotalPerdidas() {
+        const total = minutos(fuente("tiempoPerdidaCarguio")?.value) + minutos(fuente("tiempoPerdidaAmarre")?.value);
+        const target = document.getElementById("anfoPerdidaTotal"); if (target) target.textContent = `⚠ Pérdida total ${total} min. Se descontará del tiempo efectivo.`;
+    }
+    function actualizarTiempoTotal() {
+        const llegada = fuente("hLlegadaJeJ")?.value, salida = fuente("hSalidaJeJ")?.value;
+        const a = llegada && salida ? llegada.split(":").map(Number) : null;
+        let total = "Registra los horarios de la postura. Los tiempos entre eventos se calculan automáticamente.";
+        if (a) { let delta = (Number(salida.split(":")[0]) * 60 + Number(salida.split(":")[1])) - (a[0] * 60 + a[1]); if (delta < 0) delta += 1440; total = `ⓘ Total en postura ${Math.floor(delta / 60)} h ${String(delta % 60).padStart(2, "0")} min. Los tiempos entre eventos se calculan solos.`; }
+        document.getElementById("anfoTiempoTotal").textContent = total;
+    }
+    function actualizarPildoras() {
+        document.querySelectorAll(".anfo-pill-choice").forEach(group => {
+            const selected = fuente(group.querySelector("[data-source]")?.dataset.source)?.value || "No";
+            group.querySelectorAll("button").forEach(button => button.classList.toggle("selected", button.dataset.value === selected));
+        });
+    }
+    function estadoPerdida(tipo, registrar) {
+        const card = document.querySelector(`[data-perdida-card="${tipo}"]`);
+        if (!card) return;
+        const clave = tipo === "carguio" ? "Carguio" : "Amarre";
+        const motivo = fuente(`obsPerdida${clave}`), tiempo = fuente(`tiempoPerdida${clave}`);
+        const detalle = card.querySelector(`[data-perdida-detalle="${tipo}"]`);
+        const sinPerdida = card.querySelector(`[data-perdida-clear="${tipo}"]`);
+        const btnRegistrar = card.querySelector(`[data-perdida-register="${tipo}"]`);
+        detalle.hidden = !registrar;
+        sinPerdida.classList.toggle("active", !registrar);
+        btnRegistrar.classList.toggle("active", registrar);
+        card.classList.toggle("registrando", registrar);
+        if (!registrar) {
+            if (motivo) motivo.value = "";
+            if (tiempo) tiempo.value = "0 min";
+            detalle.querySelectorAll(".anfo-chip-list button").forEach(button => button.classList.remove("selected"));
+        }
+    }
+    function configurarEstadosPerdida() {
+        ["carguio", "amarre"].forEach(tipo => {
+            const clave = tipo === "carguio" ? "Carguio" : "Amarre";
+            const motivo = fuente(`obsPerdida${clave}`)?.value || "";
+            const tiempo = minutos(fuente(`tiempoPerdida${clave}`)?.value);
+            const registrado = Boolean(motivo.trim()) || tiempo > 0;
+            estadoPerdida(tipo, registrado);
+        });
+    }
+    function tiempoEntre(inicioId, finId) {
+        const inicio = fuente(inicioId)?.value, fin = fuente(finId)?.value;
+        if (!inicio || !fin) return 0;
+        const [ih, im] = inicio.split(":").map(Number), [fh, fm] = fin.split(":").map(Number);
+        let total = (fh * 60 + fm) - (ih * 60 + im);
+        return total < 0 ? total + 1440 : total;
+    }
+    function formatearMinutos(total) { return `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, "0")} min`; }
+    window.mostrarResumenFinalAnfo = function () {
+        guardarHistoricoTrabajos(); ejecutarAutosave();
+        const todasParadas = (trabajosGuardados || []).flatMap(trabajo => (trabajo.paradas || []).map(parada => ({ ...parada, trabajo: trabajo.idTrabajo })));
+        const tiros = todasParadas.flatMap(parada => (parada.tiros || []).filter(Boolean).map(tiro => ({ ...tiro, parada: parada.idParada, trabajo: parada.trabajo })));
+        const tapados = tiros.filter(tiro => tiro.estado === "Tapado").length;
+        const sanos = tiros.filter(tiro => tiro.estado === "Sano").length;
+        const filas = todasParadas.map(parada => {
+            const capturados = (parada.tiros || []).filter(Boolean);
+            return { ...parada, total: capturados.length, sanos: capturados.filter(tiro => tiro.estado === "Sano").length, tapados: capturados.filter(tiro => tiro.estado === "Tapado").length, agua: capturados.filter(tiro => tiro.agua === "Agua").length };
+        });
+        const max = Math.max(1, ...filas.map(fila => fila.total));
+        const carguio = tiempoEntre("hInicioCarguio", "hFinCarguio");
+        const amarre = tiempoEntre("hInicioAmarre", "hFinAmarre");
+        const perdida = minutos(fuente("tiempoPerdidaCarguio")?.value) + minutos(fuente("tiempoPerdidaAmarre")?.value);
+        const root = document.getElementById("paso9");
+        root.innerHTML = `
+            <div class="anfo-final-progress" aria-label="Paso 8 de 8">${Array.from({length:8},(_,i)=>`<i class="${i<8?"done":""}"></i>`).join("")}</div>
+            <header class="anfo-final-head"><div><p>ANFO · ${escapeHtml(idTrabajoActual || "SEGUIMIENTO")}</p><h2>Resumen General</h2></div><span>✓ Guardado</span></header>
+            <div class="anfo-final-stats"><article><strong>${trabajosGuardados.length}</strong><small>Trabajos</small></article><article><strong>${todasParadas.length}</strong><small>Paradas</small></article><article><strong>${tiros.length}</strong><small>Tiros</small></article><article class="tapado"><strong>${tapados}</strong><small>Tapados</small></article></div>
+            <section class="anfo-final-chart"><header><strong>■ TIROS POR PARADA</strong><span>${tiros.length ? Math.round(sanos / tiros.length * 100) : 0}% sanos</span></header>
+                ${filas.length ? `<div class="anfo-final-chart-rows">${filas.map(fila=>`<div class="anfo-final-chart-row"><label>${escapeHtml(fila.trabajo)} · ${escapeHtml(fila.idParada)}</label><div class="anfo-final-bars"><span class="total" style="width:${fila.total/max*100}%"><b>${fila.total}</b></span><span class="sanos" style="width:${fila.sanos/max*100}%"><b>${fila.sanos}</b></span><span class="tapados" style="width:${fila.tapados/max*100}%"><b>${fila.tapados}</b></span></div></div>`).join("")}</div>` : `<p class="anfo-final-empty">Aún no hay tiros registrados.</p>`}
+                <footer><span><i class="total"></i>Total</span><span><i class="sanos"></i>Sanos</span><span><i class="tapados"></i>Tapados</span></footer>
+            </section>
+            <section class="anfo-final-times"><span>◷ Carguío <b>${formatearMinutos(carguio)}</b></span><span>Amarre <b>${formatearMinutos(amarre)}</b></span><span>Pérdidas <b>${formatearMinutos(perdida)}</b></span></section>
+            <details class="anfo-final-shot-details"><summary>Ver información de tiros por parada</summary>${filas.map(parada=>`<div class="anfo-final-stop-detail"><strong>${escapeHtml(parada.trabajo)} · ${escapeHtml(parada.idParada)}</strong><div>${(parada.tiros||[]).map((tiro,index)=>tiro?`<article><b>Tiro ${index+1} · ${escapeHtml(tiro.estado||"Sin estado")} · ${escapeHtml(tiro.agua||"Sin agua")}</b><small>Diseño ${escapeHtml(tiro.longDiseno||"—")} m · Taco ${escapeHtml(tiro.taco||"—")} m · Al cargar ${escapeHtml(tiro.largoMomento||"—")} m · Taco real ${escapeHtml(tiro.tacoReal||"—")} m</small><small>ANFO ${escapeHtml(tiro.longCargada||"—")} m · Pera ${escapeHtml(tiro.numPera||"—")} · Cebo sup. ${escapeHtml(tiro.ceboSup||"—")} · Cartuchos ${escapeHtml(tiro.cantCartuchos||"—")} · Retenedores ${escapeHtml(tiro.numRetenedores||"—")} ${escapeHtml(tiro.tipoRetenedor||"")}</small></article>`:`<article class="pending"><b>Tiro ${index+1} · Pendiente</b></article>`).join("")}</div></div>`).join("")}</details>
+            <div class="anfo-final-actions"><button class="save" type="button" id="anfoFinalGuardar">▣<b>Guardar y Salir</b><small>Cierra el seguimiento</small></button><button class="cloud" type="button" id="anfoFinalOneDrive">☁<b>OneDrive</b><small>Subir a la nube</small></button><button class="excel" type="button" id="anfoFinalExcel">▦<b>Generar Excel</b><small>Planilla de terreno</small></button><button class="report" type="button" id="anfoFinalInforme">▤<b>Generar Nota Técnica</b><small>Con diagramas de disparo</small></button></div>
+            <footer class="anfo-final-footer"><button type="button" id="anfoFinalPlantilla">‹ Volver a plantilla</button><button type="button" id="anfoFinalNuevoTrabajo">+ Registrar otro trabajo</button></footer>`;
+        document.body.classList.remove("anfo-resumen-tiros-mode"); document.body.classList.add("anfo-resumen-final-mode"); ocultarTodosPasos(); root.style.display = "flex";
+        document.getElementById("anfoFinalGuardar").onclick = guardarFormularioAnfo;
+        document.getElementById("anfoFinalOneDrive").onclick = () => document.getElementById("btn-subir-onedrive")?.click();
+        document.getElementById("anfoFinalExcel").onclick = guardarFormularioAnfoYExportarExcel;
+        document.getElementById("anfoFinalInforme").onclick = generarInformeTecnicoHTML;
+        document.getElementById("anfoFinalPlantilla").onclick = () => { document.body.classList.remove("anfo-resumen-final-mode"); irAPaso1(); };
+        document.getElementById("anfoFinalNuevoTrabajo").onclick = () => { document.body.classList.remove("anfo-resumen-final-mode"); irAGestionTrabajo(); };
+    };
+    window.abrirDatosPostura = function (tab = "tiempos") {
+        document.body.classList.remove("anfo-resumen-tiros-mode"); ocultarTodosPasos();
+        const page = document.getElementById("paso8"); page.style.display = "flex";
+        document.getElementById("anfoPosturaParada").textContent = idParadaActual || "—";
+        const tabs = ["tiempos", "equipos", "perdidas"];
+        const show = name => {
+            page.querySelectorAll("[data-postura-tab]").forEach(button => { const active = button.dataset.posturaTab === name; button.classList.toggle("active", active); button.setAttribute("aria-selected", String(active)); });
+            page.querySelectorAll("[data-postura-panel]").forEach(panel => panel.hidden = panel.dataset.posturaPanel !== name);
+            const idx = tabs.indexOf(name); document.getElementById("anfoPosturaTitulo").textContent = ["Tiempos de la postura", "Equipos y geófono", "Pérdidas y observaciones"][idx];
+            document.getElementById("anfoPosturaContador").textContent = ["8/17", "14/17", "17/17"][idx];
+            document.getElementById("anfoPosturaAtras").textContent = idx ? `‹ ${["Tiempos", "Equipos"][idx - 1]}` : "‹ Resumen tiros";
+            document.getElementById("anfoPosturaSiguiente").textContent = idx < 2 ? `${["Equipos", "Pérdidas"][idx]} ›` : "Ir al resumen ✓";
+            page.dataset.tab = name;
+            if (name === "perdidas") actualizarTotalPerdidas(); if (name === "tiempos") actualizarTiempoTotal();
+        };
+        page.querySelectorAll("[data-postura-source]").forEach(input => {
+            const original = fuente(input.dataset.posturaSource);
+            let val = original?.value || "";
+            if (input.dataset.posturaSource.startsWith("tiempoPerdida")) val = String(minutos(val));
+            input.value = val;
+            input.oninput = () => {
+                if (original) original.value = input.dataset.posturaSource.startsWith("tiempoPerdida") ? `${input.value || 0} min` : input.value;
+                if (input.dataset.posturaSource.startsWith("tiempoPerdida")) actualizarTotalPerdidas();
+                if (["hLlegadaJeJ", "hSalidaJeJ"].includes(input.dataset.posturaSource)) actualizarTiempoTotal();
+                ejecutarAutosave();
+            };
+        });
+        page.querySelectorAll("[data-source][data-value]").forEach(button => button.onclick = () => {
+            const original = fuente(button.dataset.source); if (original) original.value = button.dataset.value;
+            actualizarPildoras(); ejecutarAutosave();
+        });
+        page.querySelectorAll("[data-equipo-stepper]").forEach(button => button.onclick = () => {
+            const input = page.querySelector(`[data-postura-source="${button.dataset.equipoStepper}"]`);
+            input.value = Math.max(0, Number(input.value || input.placeholder || 0) + Number(button.dataset.delta)).toFixed(1);
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        page.querySelectorAll("[data-perdida-chips]").forEach(group => {
+            const sourceId = group.dataset.perdidaChips === "carguio" ? "obsPerdidaCarguio" : "obsPerdidaAmarre";
+            const current = fuente(sourceId)?.value || "";
+            group.querySelectorAll("button").forEach(button => {
+                button.classList.toggle("selected", current.split(" · ").includes(button.textContent.trim()));
+                button.onclick = () => {
+                    button.classList.toggle("selected");
+                    const chosen = [...group.querySelectorAll("button.selected")].map(item => item.textContent.trim());
+                    if (fuente(sourceId)) fuente(sourceId).value = chosen.join(" · ");
+                    ejecutarAutosave();
+                };
+            });
+        });
+        page.querySelectorAll("[data-stepper]").forEach(button => button.onclick = () => {
+            const input = page.querySelector(`[data-postura-source="${button.dataset.stepper}"]`); input.value = Math.max(0, Number(input.value || 0) + Number(button.dataset.delta)); input.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        page.querySelectorAll("[data-min]").forEach(button => button.onclick = () => {
+            const group = button.closest(".anfo-perdida-tiempo"), input = group.querySelector("input"); input.value = button.dataset.min; input.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        page.querySelectorAll("[data-perdida-clear]").forEach(button => button.onclick = () => {
+            const key = button.dataset.perdidaClear, input = page.querySelector(`[data-postura-source="tiempoPerdida${key === "carguio" ? "Carguio" : "Amarre"}"]`);
+            estadoPerdida(key, false); input.value = 0; input.dispatchEvent(new Event("input", { bubbles: true })); ejecutarAutosave(); actualizarTotalPerdidas();
+        });
+        page.querySelectorAll("[data-perdida-register]").forEach(button => button.onclick = () => { estadoPerdida(button.dataset.perdidaRegister, true); ejecutarAutosave(); });
+        page.querySelectorAll("[data-postura-tab]").forEach(button => button.onclick = () => show(button.dataset.posturaTab));
+        document.getElementById("anfoPosturaAtras").onclick = () => {
+            const idx = tabs.indexOf(page.dataset.tab); if (idx > 0) show(tabs[idx - 1]); else window.mostrarResumenTirosParadaAnfo();
+        };
+        document.getElementById("anfoPosturaSiguiente").onclick = () => {
+            const idx = tabs.indexOf(page.dataset.tab);
+            if (idx < 2) show(tabs[idx + 1]); else window.mostrarResumenFinalAnfo();
+        };
+        actualizarPildoras(); configurarEstadosPerdida(); show(tab);
+    };
+})();
+
+</script>
+    </body>
 </html>

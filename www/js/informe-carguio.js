@@ -80,10 +80,8 @@
         return label && values.length ? { label: label.textContent.replace(/:\s*$/, '').trim(), value: values.join(' / ') } : null;
     }
     function camposPlantilla() {
-        var modal = document.getElementById('modalPlantillaFinal');
         var out = [];
-        if (!modal) return out;
-        modal.querySelectorAll('.form-group-field').forEach(function (g) {
+        document.querySelectorAll('#modalPlantillaFinal .form-group-field, #modalConfiguracionPostura .form-group-field').forEach(function (g) {
             var f = camposDeGrupo(g);
             if (f && !/^H\.|^Hora/i.test(f.label)) out.push([f.label, f.value]);
         });

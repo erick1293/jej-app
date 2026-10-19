@@ -38,7 +38,7 @@
             <button class="btn-primary" onclick="ingresarApp()">Ingresar</button>
         </section>
 
-        <section id="seccionMenu" class="card login-card" style="display: none;">
+        <section id="seccionMenu" class="card login-card process-menu" style="display: none;">
             <div class="user-info-header">
                 <p>Usuario Activo: <strong id="usuarioLogueado">Cargando...</strong></p>
             </div>
@@ -46,17 +46,32 @@
             <h2>Selección de Proceso</h2>
             <p class="subtitle">Seleccione el tipo de seguimiento que desea realizar</p>
 
-            <div class="form-group">
-                <label for="opcionesSelect">Seleccione de archivo:</label>
-               <select id="opcionesSelect" onchange="navegarA(this.value)">
-    <option value="" disabled selected>-- Seleccione una opción --</option>
-    <option value="anfo.html">Seguimiento al carguio con anfo</option>
-    <option value="emulsion.html">Seguimiento al carguio con Emulsion</option>
-    <option value="reduccion.html">Seguimiento a la reduccion secundaria</option>
-    <option value="perforacion.html">Seguimiento al carguio con perforacion</option>
-    <option value="usuarios.html">⚙️ Gestionar Personal (DET / JeJ)</option>
-    <option value="proximamente.html">Proximamente.</option>
-</select>
+            <div class="process-options" aria-label="Opciones de seguimiento">
+                <button class="process-option" type="button" onclick="navegarA('anfo.html')">
+                    <span class="process-icon" aria-hidden="true">▲</span>
+                    <span class="process-copy"><strong>Seguimiento al carguio con anfo</strong></span>
+                    <span class="process-arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="process-option" type="button" onclick="navegarA('emulsion.html')">
+                    <span class="process-icon" aria-hidden="true">◆</span>
+                    <span class="process-copy"><strong>Seguimiento al carguio con Emulsion</strong></span>
+                    <span class="process-arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="process-option" type="button" onclick="navegarA('reduccion.html')">
+                    <span class="process-icon" aria-hidden="true">▼</span>
+                    <span class="process-copy"><strong>Seguimiento a la reduccion secundaria</strong></span>
+                    <span class="process-arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="process-option" type="button" onclick="navegarA('perforacion.html')">
+                    <span class="process-icon" aria-hidden="true">✦</span>
+                    <span class="process-copy"><strong>Seguimiento al carguio con perforacion</strong></span>
+                    <span class="process-arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="process-option" type="button" onclick="navegarA('usuarios.html')">
+                    <span class="process-icon" aria-hidden="true">⚙</span>
+                    <span class="process-copy"><strong>Gestionar Personal (DET / JeJ)</strong></span>
+                    <span class="process-arrow" aria-hidden="true">›</span>
+                </button>
             </div>
         </section>
 

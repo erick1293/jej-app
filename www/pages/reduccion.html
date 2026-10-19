@@ -1,203 +1,294 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seguimiento a la Reducción Secundaria - App JEJ</title>
-<link rel="stylesheet" href="../css/styles.css">
-<style>
-  /* Ajustes locales de Reducción; no modifican la hoja global. */
-  #busca { display:block; width:100%; box-sizing:border-box; margin-bottom:14px; }
-  #lista > .item {
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:12px; margin-bottom:10px; background:#fff;
-    border:1px solid #d6e0f0; border-left:4px solid #3159a5; border-radius:12px;
-    box-shadow:0 8px 18px rgba(13,42,100,.12);
-  }
-  #lista > .item > div:first-child { flex:1; min-width:0; }
-  #lista .acts { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
-  #lista .acts .btn-primary { width:auto; min-width:42px; padding:8px 12px; }
-  #lista .acts .btn-primary:first-child { background-color:#0284c7; }
-  #lista .acts .btn-primary:last-child { color:#991b1b; background:#fee2e2; border:1px solid #fecaca; }
-  @media (max-width:520px) {
-    #lista > .item { align-items:stretch; flex-direction:column; }
-    #lista .acts { display:grid; grid-template-columns:1fr auto; }
-  }
-  /* Asistente de plantilla de Reducción: tarjeta y controles del mismo sistema visual. */
-  #v5 {
-    box-sizing:border-box; width:100%; max-width:760px; margin:18px auto; padding:clamp(16px,3vw,24px);
-    color:#20365f; background:linear-gradient(180deg,#fff 0%,#f1f5fb 100%);
-    border:1px solid #d3deef; border-left:4px solid #24b8e8; border-radius:18px;
-    box-shadow:0 18px 42px rgba(3,17,49,.2),0 2px 7px rgba(17,44,93,.08);
-  }
-  #v5 .wz-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; color:#25477f; font-size:.88rem; }
-  #v5 .wz-top > span { flex:none; white-space:nowrap; }
-  #v5 .bar { width:100%; height:6px; margin:10px 0 16px; overflow:hidden; background:#dce6f4; border-radius:999px; }
-  #v5 .bar > i { display:block; height:100%; background:linear-gradient(90deg,#24b8e8,#4b8cf0); border-radius:inherit; }
-  #v5 > h2 { margin:0 0 12px; color:#142b57; font-size:1.25rem; }
-  #v5 .big { display:block; width:100%; min-height:48px; box-sizing:border-box; padding:10px 12px; }
-  #v5 .jp-opts { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 14px; }
-  #v5 .jp-opt { width:auto; min-height:42px; padding:9px 14px; }
-  #v5 .nav { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:18px; }
-  #v5 .nav .btn-primary { flex:1 1 130px; width:auto; min-width:0; }
-  #v5 .nav .sp { display:none; }
-  @media (max-width:520px) {
-    #v5 { margin:12px auto; padding:16px; }
-    #v5 .wz-top { align-items:flex-start; flex-direction:column; gap:4px; }
-    #v5 .nav .btn-primary { flex-basis:calc(50% - 8px); }
-  }
-</style>
-
-</head>
-<body class="pagina-fondo">
-<main class="card-wide">
-
-  <!-- PASO 1 -->
-  <section class="card wizard-card" id="v1">
-    <h2 style="color:#fff">Paso 1: Datos Generales y Turno</h2>
-    <p class="sub">Ingrese los datos básicos del seguimiento</p>
-    <div class="jej-card">
-      <div class="form-group-field">
-        <label for="fFecha">Fecha:</label>
-        <input type="date" id="fFecha" onchange="P().fecha=this.value;save();renderTb()">
-      </div>
-      <div class="form-group-field">
-        <label for="fTurno">Turno:</label>
-        <select id="fTurno" onchange="P().turno=this.value;save();renderTb()"><option value="A">Turno A</option><option value="B">Turno B</option></select>
-      </div>
-      <div class="section-title"><span>2. Datos de Planilla y Personal</span><button type="button" class="btn-primary" style="width:auto;background-color:#0284c7" onclick="abrirAsistentePlanilla('datos')">⚙️ Ingreso / Editar Datos</button></div>
-      <div class="resumen-box info" id="infoDatos"></div>
-    </div>
-    <div class="grid-2" style="margin-top:25px">
-      <a href="../index.html" class="btn-primary" style="background-color:#64748b;text-decoration:none;text-align:center;width:45%">Volver al Menú</a>
-      <button type="button" class="btn-primary" onclick="ir(2)" style="background-color:#2563eb;width:50%">Siguiente ➜</button>
-    </div>
-  </section>
-
-  <!-- PASO 2 -->
-  <section class="card wizard-card" hidden id="v2">
-    <h3>Paso 2: Gestión de Calle</h3>
-    <p class="sub">Cree una nueva calle o seleccione una ya existente (una planilla por calle quemada)</p>
-    <div class="wizard-card" style="margin-bottom:15px">
-      <div class="form-group-field">
-        <label for="nCalle">➕ CREAR NUEVA CALLE:</label>
-        <input type="text" id="nCalle" placeholder="Ej. 43" autocomplete="off" style="width:100%;margin-bottom:8px;box-sizing:border-box">
-        <button type="button" class="btn-primary" onclick="crearCalle()" style="width:100%;background-color:#16a34a">Crear e Ir a Colpas</button>
-      </div>
-    </div>
-    <div class="wizard-card">
-      <div class="form-group-field">
-        <label for="selCalle">📂 SELECCIONAR CALLE EXISTENTE:</label>
-        <select id="selCalle" style="width:100%;margin-bottom:10px;box-sizing:border-box"></select>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button type="button" class="btn-primary" onclick="usarCalle()" style="background-color:#0284c7;flex:1">Usar Seleccionado ➜</button>
-        <button type="button" class="btn-primary" onclick="elimCalle()" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;flex:1">🗑️ Eliminar</button>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-start;margin-top:25px">
-      <button type="button" class="btn-primary" onclick="ir(1)" style="background-color:#64748b;width:45%">⬅ Volver al Paso 1</button>
-    </div>
-  </section>
-
-  <!-- PASO 3 -->
-  <section class="card wizard-card" hidden id="v3">
-    <h3 id="t3"></h3>
-    <p class="sub">Revise sus registros guardados</p>
-    <input type="search" id="busca" placeholder="🔍  Buscar ID o punto..." oninput="renderLista()">
-    <div class="box wizard-card" id="lista"></div>
-    <button class="btn-primary" onclick="nuevaColpa()" style="margin-bottom:10px">+ Agregar colpa</button>
-    <div class="grid-2" style="margin-bottom:10px">
-      <button class="btn-primary" onclick="ir(2)">+ Registrar Otra Calle</button>
-      <button class="btn-primary" onclick="abrirObs()">📝 Agregar Observación</button>
-    </div>
-    <button class="btn-primary" onclick="abrirAsistentePlanilla('planilla')">📋 Rellenar Datos Faltantes de Planilla (Horarios/Indicadores)</button>
-    <div class="descarga" style="margin-top:14px">
-      <div class="pila" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:10px">
-        <button type="button" class="btn-primary" onclick="descargarExcel()" style="flex:1 1 calc(50% - 10px);min-width:0;background-color:#2563eb">⬇ Descargar Excel</button>
-        <button type="button" class="btn-primary" onclick="informe()" style="flex:1 1 calc(50% - 10px);min-width:0;background-color:#2563eb">⬇ Descargar Informe Técnico</button>
-      </div>
-      <small>Los datos se guardan automáticamente en este dispositivo.</small>
-    </div>
-  </section>
-
-  <!-- PASO 4 -->
-  <section class="card wizard-card wz" hidden id="v4"></section>
-
-  <!-- PASO 5: asistente dato por dato (datos de planilla y personal / horarios e indicadores) -->
-  <section class="card wizard-card wz" hidden id="v5"></section>
-
-  <!-- MODAL PERSONAL / DATOS DE PLANILLA: estructura equivalente al modal de ANFO/Emulsión -->
-  <div class="modal-overlay ov" id="mDatos" role="presentation">
-    <div class="modal-content modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalDatos">
-      <h3 id="tituloModalDatos">⚙️ Ingreso / Editar Datos</h3>
-
-      <div class="section-title">1. Datos de Planilla</div>
-      <div class="grid-2">
-        <div class="form-group-field">
-          <label for="mdSector">Sector:</label>
-          <input id="mdSector" type="text" placeholder="Ej. Esmeralda">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seguimiento a la Reducción Secundaria - App JEJ</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body class="pagina-fondo" data-section="reduccion">
+    <main class="card-wide">
+      <!-- PASO 1: DATOS GENERALES Y TURNO -->
+      <section class="card wizard-card anfo-paso1 rs-paso1" id="v1">
+        <h2>Paso 1: Datos Generales y Turno</h2>
+        <p class="subtitle">Ingrese los datos básicos del seguimiento</p>
+        <div class="anfo-step-card anfo-fecha-turno">
+          <h3 class="anfo-step-label"><i></i> Fecha y turno</h3>
+          <div class="form-group-field">
+            <label for="fFecha">Fecha:</label>
+            <input type="date" id="fFecha" onchange="P().fecha=this.value;save()" />
+          </div>
+          <div class="form-group-field">
+            <label>Turno:</label>
+            <select id="fTurno" class="anfo-select-original" aria-hidden="true" tabindex="-1">
+              <option value="A">Turno A</option>
+              <option value="B">Turno B</option>
+            </select>
+            <div class="anfo-turno-botones" role="group" aria-label="Seleccione el turno">
+              <button type="button" class="anfo-turno-boton" data-turno-reduccion="A" aria-pressed="false">☀ Turno A</button>
+              <button type="button" class="anfo-turno-boton" data-turno-reduccion="B" aria-pressed="false">☾ Turno B</button>
+            </div>
+          </div>
         </div>
-        <div class="form-group-field">
-          <label for="mdGrupo">Grupo:</label>
-          <input id="mdGrupo" type="number" min="0" step="1" placeholder="Ej. 1">
+        <div class="anfo-step-card anfo-personal-card">
+          <div class="anfo-personal-head">
+            <h3 class="anfo-step-label"><i class="cyan"></i> Datos de planilla y personal</h3>
+            <span class="anfo-estado-personal" id="estadoPersonalRS">Cargando…</span>
+          </div>
+          <div class="anfo-resumen-personal" id="infoDatos"></div>
+        </div>
+        <div class="anfo-pie rs-pie">
+          <a href="../index.html" class="btn-primary rs-volver">‹ Volver al Menú</a>
+          <button type="button" class="btn-primary rs-siguiente" onclick="ir(2)">Siguiente ➜</button>
+        </div>
+      </section>
+      <!-- PASO 2: CONFIGURACIÓN DE POSTURA -->
+      <section class="card wizard-card anfo-paso1 rs-config" hidden id="v2">
+        <h2>Paso 2: Configuración de Postura</h2>
+        <section class="anfo-step-card rs-config-card">
+          <h3 class="anfo-step-label"><i></i> 1 · Ubicación y postura</h3>
+          <label class="rs-field-label">Mina</label>
+          <div class="jp-opts rs-chip-group" role="group" aria-label="Seleccione la mina">
+            <button type="button" class="jp-opt rs-mina" data-rs-mina="andesita">andesita</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Diablo Regimiento">Diablo Regimiento</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Diamante">Diamante</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Esmeralda">Esmeralda</button><button type="button" class="jp-opt rs-mina" data-rs-mina="NNM">NNM</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Pacífico Superior">Pacífico Superior</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Pilar Norte">Pilar Norte</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Reservas Norte">Reservas Norte</button><button type="button" class="jp-opt rs-mina" data-rs-mina="TT8">TT8</button>
+          </div>
+          <label class="rs-field-label">Nivel</label>
+          <div class="jp-opts rs-level-group" role="group" aria-label="Seleccione el nivel">
+            <button type="button" class="jp-opt rs-nivel" data-rs-nivel="NP">NP</button><button type="button" class="jp-opt rs-nivel" data-rs-nivel="UCL">UCL</button><button type="button" class="jp-opt rs-nivel" data-rs-nivel="Panel2">Panel 2</button>
+          </div>
+          <label class="rs-field-label">Bloque</label>
+          <div id="rsBloque" class="jp-opts rs-chip-group rs-block-group" role="group" aria-label="Seleccione el bloque">
+            <button type="button" class="jp-opt" data-rs-bloque="B-2" aria-pressed="false">B-2</button><button type="button" class="jp-opt" data-rs-bloque="B-6" aria-pressed="false">B-6</button><button type="button" class="jp-opt" data-rs-bloque="Ext Fw" aria-pressed="false">Ext Fw</button><button type="button" class="jp-opt" data-rs-bloque="DhZ" aria-pressed="false">DhZ</button>
+          </div>
+        </section>
+        <section class="anfo-step-card rs-config-card">
+          <h3 class="anfo-step-label"><i class="cyan"></i> 2 · Detalles del nivel</h3>
+          <div class="rs-level-fields" data-rs-fields="NP" hidden>
+            <div class="rs-field-grid"><label for="rsNumZanja">Núm. Zanja</label><input id="rsNumZanja" class="rs-control" type="text" inputmode="numeric" placeholder="Ej. 49"></div>
+            <div class="rs-field-grid"><label for="rsCalleZanja">Calle(s) Zanja</label><input id="rsCalleZanja" class="rs-control" type="text" placeholder="Ej. 59 · 61"></div>
+          </div>
+          <div class="rs-level-fields" data-rs-fields="UCL" hidden>
+            <div class="rs-field-grid"><label for="rsCalleUcl">Calle UCL</label><input id="rsCalleUcl" class="rs-control" type="text" placeholder="Ej. C41"></div>
+            <div class="rs-field-grid"><label for="rsParadas">Paradas Inicio / Fin</label><input id="rsParadas" class="rs-control" type="text" placeholder="Ej. P1 a P5"></div>
+          </div>
+          <div class="rs-level-fields" data-rs-fields="Panel2" hidden>
+            <div class="rs-field-grid"><label for="rsDetallePanel2">Detalle Panel 2</label><input id="rsDetallePanel2" class="rs-control" type="text" placeholder="Detalle del Panel 2"></div>
+          </div>
+          <div class="rs-field-grid"><label for="rsFase">Fase (Transversal)</label><input id="rsFase" class="rs-control" type="text" placeholder="Ej. Fase 2"></div>
+        </section>
+        <section class="anfo-step-card rs-config-card rs-id-card">
+          <h3 class="anfo-step-label"><i></i> ID de tronadura · Automático</h3>
+          <input id="rsIdTronadura" class="rs-control" type="text" readonly aria-label="ID de tronadura generado automáticamente">
+        </section>
+        <div class="rs-config-actions">
+          <button type="button" class="btn-primary rs-volver" onclick="ir(1)">‹ Volver</button>
+          <button type="button" class="btn-primary rs-aplicar" onclick="guardarConfiguracionPostura()">Guardar y aplicar ✓</button>
+        </div>
+      </section>
+      <!-- PASO 3: GESTIÓN DE ZANJA -->
+      <section class="card wizard-card anfo-trabajo-screen rs-zanja-screen" hidden id="v3">
+        <div class="anfo-contexto-trabajo">
+          <div><small>Turno</small><strong id="rsTurnoZanja">A · --/--/----</strong></div>
+          <div><small>ID Tronadura</small><strong id="rsIdTronaduraZanja">Sin asignar</strong></div>
+        </div>
+        <h2>Gestión de Zanja</h2>
+        <p class="anfo-paso-indicador">Una planilla por zanja quemada</p>
+        <section class="anfo-trabajo-panel anfo-nuevo-trabajo">
+          <h3><i></i> Crear nueva zanja</h3>
+          <label for="nCalle">Número de zanja</label>
+          <input type="text" id="nCalle" placeholder="Ej. 43" autocomplete="off">
+          <p class="anfo-sugerencia-trabajo">Sugerido: <strong id="sugerenciaZanjaRS">ZANJA 1</strong></p>
+          <button type="button" class="anfo-btn-crear" onclick="crearCalle()">＋ Crear e ir a colpas</button>
+        </section>
+        <div class="anfo-separador-trabajo"><span>o continúe una zanja existente</span></div>
+        <section class="anfo-trabajo-panel anfo-existentes">
+          <h3><i></i> Zanjas existentes <span id="conteoZanjasRS" class="anfo-conteo-trabajos">0</span></h3>
+          <div id="listaZanjasRS" class="anfo-lista-trabajos" aria-label="Zanjas registradas"></div>
+        </section>
+        <div class="anfo-acciones-trabajo rs-acciones-zanja">
+          <button type="button" class="anfo-btn-volver" onclick="ir(2)">‹ Volver al Paso 2</button>
+          <button type="button" class="anfo-btn-usar" onclick="usarCalle()">Usar seleccionado ›</button>
+        </div>
+      </section>
+
+      <!-- PASO 4: LISTA DE COLPAS REGISTRADAS -->
+      <section class="card wizard-card anfo-paradas-screen rs-colpas-list-screen" hidden id="v4">
+        <div class="rs-progreso" aria-label="Paso 4 de 7: Colpas de la zanja">
+          <div class="rs-progreso-linea" aria-hidden="true"><i></i><i></i><i></i><i class="activo"></i><i></i><i></i><i></i></div>
+          <p>PASO 4 DE 7 · ZANJA <span id="rsPasoZanjaLista"></span></p>
+        </div>
+        <section class="anfo-trabajo-panel anfo-nuevo-trabajo rs-nueva-zanja-panel">
+          <h3><i></i> Registrar otra zanja</h3>
+          <label for="rsNuevaZanjaDesdeColpas">Número de zanja</label>
+          <input type="text" id="rsNuevaZanjaDesdeColpas" placeholder="Ej. 43" autocomplete="off">
+          <p class="anfo-sugerencia-trabajo">Sugerido: <strong id="rsSugerenciaNuevaZanja">ZANJA 1</strong></p>
+          <button type="button" class="anfo-btn-crear" onclick="crearCalleDesdePanel()">＋ Crear e ir a colpas</button>
+        </section>
+        <h2>Colpas de la zanja</h2>
+        <p class="rs-lista-subtitulo">Revise o edite los tiros registrados</p>
+        <input id="rsBuscarColpa" type="search" placeholder="🔍 Buscar ID o punto..." aria-label="Buscar colpa por ID o punto">
+        <section class="rs-lista-registradas"><header><strong>■ COLPAS REGISTRADAS</strong><span id="rsConteoColpasLista">0</span></header><div id="rsListaRegistrada"></div></section>
+        <nav class="rs-colpas-nav"><button type="button" class="anfo-btn-volver" onclick="ir(3)">‹ Zanjas</button><button type="button" class="anfo-btn-resumen-paradas" onclick="ir(8)">Ver resumen ›</button></nav>
+      </section>
+
+      <!-- PASO 5: PANEL VISUAL DE COLPAS GUARDADAS -->
+      <section class="card wizard-card anfo-paradas-screen rs-colpas-screen" hidden id="v6">
+        <div class="rs-progreso" aria-label="Paso 5 de 7: Colpas de la zanja">
+          <div class="rs-progreso-linea" aria-hidden="true"><i></i><i></i><i></i><i></i><i class="activo"></i><i></i><i></i></div>
+          <p>PASO 5 DE 7 · ZANJA <span id="rsPasoZanja"></span></p>
+        </div>
+        <div class="rs-resumen-head"><h2 id="t3">Colpas de la Zanja</h2><span class="rs-guardado">✓ Guardado</span></div>
+        <div class="rs-resumen-metricas">
+          <div><strong id="rsConteoColpas">0</strong><span>Registradas</span></div>
+          <div><strong id="rsConteoReducidas">0</strong><span>Reducidas</span></div>
+          <div><strong id="rsConteoNoCumplen">0</strong><span>No cumplen</span></div>
+        </div>
+        <section class="rs-resumen-colpas" aria-label="Resumen de colpas">
+          <div id="lista" aria-label="Colpas registradas"></div>
+        </section>
+        <p class="rs-resumen-ayuda">ⓘ Toque una colpa para corregirla o agregue la siguiente.</p>
+        <nav class="rs-colpas-nav" aria-label="Navegación de colpas">
+          <button type="button" class="anfo-btn-volver" onclick="ir(4)">‹ Colpas</button>
+          <button type="button" class="rs-agregar-colpa" onclick="abrirAsistentePlanilla('planilla')">Siguiente ›</button>
+        </nav>
+      </section>
+
+      <!-- PASO 5: CAPTURA POR COLPA -->
+      <section class="card wizard-card wz" hidden id="v5"></section>
+
+      <!-- PASO 6: asistente de Planilla -->
+      <section class="card wizard-card wz" hidden id="v7"></section>
+
+      <!-- PASO 7: RESUMEN GENERAL DE REDUCCIÓN -->
+      <section class="card wizard-card rs-resumen-final" hidden id="v8" aria-live="polite"></section>
+
+      <!-- MODAL PERSONAL / DATOS DE PLANILLA: estructura equivalente al modal de ANFO/Emulsión -->
+      <div class="modal-overlay ov" id="mDatos" role="presentation">
+        <div
+          class="modal-content modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tituloModalDatos"
+        >
+          <h3 id="tituloModalDatos">⚙️ Ingreso / Editar Datos</h3>
+
+          <div class="section-title">1. Datos de Planilla</div>
+          <div class="grid-2">
+            <div class="form-group-field">
+              <label for="mdSector">Sector:</label>
+              <input id="mdSector" type="text" placeholder="Ej. Esmeralda" />
+            </div>
+            <div class="form-group-field">
+              <label for="mdGrupo">Grupo:</label>
+              <input
+                id="mdGrupo"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Ej. 1"
+              />
+            </div>
+          </div>
+
+          <div class="section-title">2. Personal Responsable</div>
+          <div class="form-group-field">
+            <label for="mdEncJEJ">Encargado Seguimiento JeJ (Tú):</label>
+            <input
+              id="mdEncJEJ"
+              type="text"
+              readonly
+              style="background: #f1f5f9; font-weight: bold"
+            />
+          </div>
+          <div class="form-group-field">
+            <label for="mdSupervisorJeJ">Supervisor JeJ:</label>
+            <input
+              id="mdSupervisorJeJ"
+              type="text"
+              list="listaSupJeJ"
+              placeholder="Seleccione o escriba"
+            />
+            <datalist id="listaSupJeJ"></datalist>
+          </div>
+          <div class="form-group-field">
+            <label>Supervisor(es) DET:</label>
+            <div
+              id="mdSupervisoresDET"
+              style="display: flex; flex-direction: column; gap: 8px"
+            ></div>
+            <datalist id="listaSupDET"></datalist>
+            <button
+              type="button"
+              class="btn-primary"
+              style="margin-top: 5px; width: fit-content"
+              onclick="agregarCampoPersonalModal('supervisorDet')"
+            >
+              + Agregar otro Supervisor DET
+            </button>
+          </div>
+          <div class="form-group-field">
+            <label>Responsable(s) Carguío DET:</label>
+            <div
+              id="mdEncDET"
+              style="display: flex; flex-direction: column; gap: 8px"
+            ></div>
+            <datalist id="listaEncDET"></datalist>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              gap: 10px;
+              margin-top: 20px;
+            "
+          >
+            <button
+              type="button"
+              onclick="cerrarDatosModal()"
+              class="btn-primary"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onclick="guardarDatosModal()"
+              class="btn-primary"
+            >
+              Guardar y Aplicar
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="section-title">2. Personal Responsable</div>
-      <div class="form-group-field">
-        <label for="mdEncJEJ">Encargado Seguimiento JeJ (Tú):</label>
-        <input id="mdEncJEJ" type="text" readonly style="background:#f1f5f9;font-weight:bold">
-      </div>
-      <div class="form-group-field">
-        <label for="mdSupervisorJeJ">Supervisor JeJ:</label>
-        <input id="mdSupervisorJeJ" type="text" list="listaSupJeJ" placeholder="Seleccione o escriba">
-        <datalist id="listaSupJeJ"></datalist>
-      </div>
-      <div class="form-group-field">
-        <label>Supervisor(es) DET:</label>
-        <div id="mdSupervisoresDET" style="display:flex;flex-direction:column;gap:8px"></div>
-        <datalist id="listaSupDET"></datalist>
-        <button type="button" class="btn-primary" style="margin-top:5px;width:fit-content" onclick="agregarCampoPersonalModal('supervisorDet')">+ Agregar otro Supervisor DET</button>
-      </div>
-      <div class="form-group-field">
-        <label>Responsable(s) Carguío DET:</label>
-        <div id="mdEncDET" style="display:flex;flex-direction:column;gap:8px"></div>
-        <datalist id="listaEncDET"></datalist>
-        <button type="button" class="btn-primary" style="margin-top:5px;width:fit-content" onclick="agregarEncargadoModal()">+ Agregar otro Responsable DET</button>
+      <!-- MODAL OBS -->
+      <div class="modal-overlay ov" id="mObs">
+        <div class="modal-content modal">
+          <h3>Observaciones</h3>
+          <textarea
+            id="oTxt"
+            rows="6"
+            placeholder="Ej: Personal RS DET realiza carguío con colihue ya que no tienen pegamento"
+          ></textarea>
+          <div class="grid-2" style="margin-top: 16px">
+            <button class="btn-primary" onclick="cerrar('mObs')">
+              Cancelar
+            </button>
+            <button class="btn-primary" onclick="guardarObs()">Guardar</button>
+          </div>
+        </div>
       </div>
 
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
-        <button type="button" onclick="cerrarDatosModal()" class="btn-primary">Cancelar</button>
-        <button type="button" onclick="guardarDatosModal()" class="btn-primary">Guardar y Aplicar</button>
-      </div>
-    </div>
-  </div>
+      <div class="toast" id="toast"></div>
+    </main>
+    <!-- /.rs -->
 
-<!-- MODAL OBS -->
-<div class="modal-overlay ov" id="mObs"><div class="modal-content modal">
-  <h3>Observaciones</h3>
-  <textarea id="oTxt" rows="6" placeholder="Ej: Personal RS DET realiza carguío con colihue ya que no tienen pegamento"></textarea>
-  <div class="grid-2" style="margin-top:16px">
-    <button class="btn-primary" onclick="cerrar('mObs')">Cancelar</button>
-    <button class="btn-primary" onclick="guardarObs()">Guardar</button>
-  </div>
-</div></div>
-
-<div class="toast" id="toast"></div>
-
-</main><!-- /.rs -->
-
-  <script src="../js/onedrive-integration.js"></script>
-  <script src="../js/components.js"></script>
-  <script src="../js/informe-base.js"></script>
-  <script src="../js/informe-reduccion.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/usuarios.js"></script>
-  <script src="../js/reduccion.js"></script>
-</body>
+    <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js" integrity="sha384-PARf28kmic36Ve+O3DnUerRXFtOQ7ZDqRDGpLcbljly5/N39T2OV3kt3QsWOKeAX" crossorigin="anonymous"></script>
+    <script src="../js/onedrive-integration.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/informe-base.js"></script>
+    <script src="../js/informe-reduccion.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/usuarios.js"></script>
+    <script src="../js/reduccion.js"></script>
+  </body>
 </html>
-
-
-
-
