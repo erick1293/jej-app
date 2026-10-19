@@ -8,10 +8,10 @@
   </head>
   <body class="pagina-fondo" data-section="reduccion">
     <main class="card-wide">
-      <!-- PASO 1: DATOS GENERALES Y TURNO -->
-      <section class="card wizard-card anfo-paso1 rs-paso1" id="v1">
-        <h2>Paso 1: Datos Generales y Turno</h2>
+        <h2 style="color:white">Paso 1: Datos Generales y Turno</h2>
         <p class="subtitle">Ingrese los datos básicos del seguimiento</p>
+      <section class="card wizard-card anfo-paso1 anfo-reduccion-paso1" id="v1">
+        
         <div class="anfo-step-card anfo-fecha-turno">
           <h3 class="anfo-step-label"><i></i> Fecha y turno</h3>
           <div class="form-group-field">
@@ -37,55 +37,55 @@
           </div>
           <div class="anfo-resumen-personal" id="infoDatos"></div>
         </div>
-        <div class="anfo-pie rs-pie">
-          <a href="../index.html" class="btn-primary rs-volver">‹ Volver al Menú</a>
-          <button type="button" class="btn-primary rs-siguiente" onclick="ir(2)">Siguiente ➜</button>
+        <div class="anfo-pie anfo-reduccion-pie">
+          <a href="../index.html" class="btn-primary anfo-reduccion-volver">‹ Volver al Menú</a>
+          <button type="button" class="btn-primary anfo-reduccion-siguiente" onclick="ir(2)">Siguiente ➜</button>
         </div>
       </section>
       <!-- PASO 2: CONFIGURACIÓN DE POSTURA -->
-      <section class="card wizard-card anfo-paso1 rs-config" hidden id="v2">
+      <section class="card wizard-card anfo-paso1 anfo-reduccion-config" hidden id="v2">
         <h2>Paso 2: Configuración de Postura</h2>
-        <section class="anfo-step-card rs-config-card">
+        <section class="anfo-step-card anfo-reduccion-config-card">
           <h3 class="anfo-step-label"><i></i> 1 · Ubicación y postura</h3>
-          <label class="rs-field-label">Mina</label>
-          <div class="jp-opts rs-chip-group" role="group" aria-label="Seleccione la mina">
-            <button type="button" class="jp-opt rs-mina" data-rs-mina="andesita">andesita</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Diablo Regimiento">Diablo Regimiento</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Diamante">Diamante</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Esmeralda">Esmeralda</button><button type="button" class="jp-opt rs-mina" data-rs-mina="NNM">NNM</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Pacífico Superior">Pacífico Superior</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Pilar Norte">Pilar Norte</button><button type="button" class="jp-opt rs-mina" data-rs-mina="Reservas Norte">Reservas Norte</button><button type="button" class="jp-opt rs-mina" data-rs-mina="TT8">TT8</button>
+          <label class="anfo-reduccion-field-label">Mina</label>
+          <div class="anfo-opciones anfo-reduccion-chip-group" role="group" aria-label="Seleccione la mina">
+            <button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="andesita">andesita</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="Diablo Regimiento">Diablo Regimiento</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="Diamante">Diamante</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="Esmeralda">Esmeralda</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="NNM">NNM</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="Pacífico Superior">Pacífico Superior</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="Pilar Norte">Pilar Norte</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="Reservas Norte">Reservas Norte</button><button type="button" class="anfo-opcion anfo-reduccion-mina" data-rs-mina="TT8">TT8</button>
           </div>
-          <label class="rs-field-label">Nivel</label>
-          <div class="jp-opts rs-level-group" role="group" aria-label="Seleccione el nivel">
-            <button type="button" class="jp-opt rs-nivel" data-rs-nivel="NP">NP</button><button type="button" class="jp-opt rs-nivel" data-rs-nivel="UCL">UCL</button><button type="button" class="jp-opt rs-nivel" data-rs-nivel="Panel2">Panel 2</button>
+          <label class="anfo-reduccion-field-label">Nivel</label>
+          <div class="anfo-opciones anfo-reduccion-level-group" role="group" aria-label="Seleccione el nivel">
+            <button type="button" class="anfo-opcion anfo-reduccion-nivel" data-rs-nivel="NP">NP</button><button type="button" class="anfo-opcion anfo-reduccion-nivel" data-rs-nivel="UCL">UCL</button><button type="button" class="anfo-opcion anfo-reduccion-nivel" data-rs-nivel="Panel2">Panel 2</button>
           </div>
-          <label class="rs-field-label">Bloque</label>
-          <div id="rsBloque" class="jp-opts rs-chip-group rs-block-group" role="group" aria-label="Seleccione el bloque">
-            <button type="button" class="jp-opt" data-rs-bloque="B-2" aria-pressed="false">B-2</button><button type="button" class="jp-opt" data-rs-bloque="B-6" aria-pressed="false">B-6</button><button type="button" class="jp-opt" data-rs-bloque="Ext Fw" aria-pressed="false">Ext Fw</button><button type="button" class="jp-opt" data-rs-bloque="DhZ" aria-pressed="false">DhZ</button>
+          <label class="anfo-reduccion-field-label">Bloque</label>
+          <div id="rsBloque" class="anfo-opciones anfo-reduccion-chip-group anfo-reduccion-block-group" role="group" aria-label="Seleccione el bloque">
+            <button type="button" class="anfo-opcion" data-rs-bloque="B-2" aria-pressed="false">B-2</button><button type="button" class="anfo-opcion" data-rs-bloque="B-6" aria-pressed="false">B-6</button><button type="button" class="anfo-opcion" data-rs-bloque="Ext Fw" aria-pressed="false">Ext Fw</button><button type="button" class="anfo-opcion" data-rs-bloque="DhZ" aria-pressed="false">DhZ</button>
           </div>
         </section>
-        <section class="anfo-step-card rs-config-card">
+        <section class="anfo-step-card anfo-reduccion-config-card">
           <h3 class="anfo-step-label"><i class="cyan"></i> 2 · Detalles del nivel</h3>
-          <div class="rs-level-fields" data-rs-fields="NP" hidden>
-            <div class="rs-field-grid"><label for="rsNumZanja">Núm. Zanja</label><input id="rsNumZanja" class="rs-control" type="text" inputmode="numeric" placeholder="Ej. 49"></div>
-            <div class="rs-field-grid"><label for="rsCalleZanja">Calle(s) Zanja</label><input id="rsCalleZanja" class="rs-control" type="text" placeholder="Ej. 59 · 61"></div>
+          <div class="anfo-reduccion-level-fields" data-rs-fields="NP" hidden>
+            <div class="anfo-reduccion-field-grid"><label for="rsNumZanja">Núm. Zanja</label><input id="rsNumZanja" class="anfo-reduccion-control" type="text" inputmode="numeric" placeholder="Ej. 49"></div>
+            <div class="anfo-reduccion-field-grid"><label for="rsCalleZanja">Calle(s) Zanja</label><input id="rsCalleZanja" class="anfo-reduccion-control" type="text" placeholder="Ej. 59 · 61"></div>
           </div>
-          <div class="rs-level-fields" data-rs-fields="UCL" hidden>
-            <div class="rs-field-grid"><label for="rsCalleUcl">Calle UCL</label><input id="rsCalleUcl" class="rs-control" type="text" placeholder="Ej. C41"></div>
-            <div class="rs-field-grid"><label for="rsParadas">Paradas Inicio / Fin</label><input id="rsParadas" class="rs-control" type="text" placeholder="Ej. P1 a P5"></div>
+          <div class="anfo-reduccion-level-fields" data-rs-fields="UCL" hidden>
+            <div class="anfo-reduccion-field-grid"><label for="rsCalleUcl">Calle UCL</label><input id="rsCalleUcl" class="anfo-reduccion-control" type="text" placeholder="Ej. C41"></div>
+            <div class="anfo-reduccion-field-grid"><label for="rsParadas">Paradas Inicio / Fin</label><input id="rsParadas" class="anfo-reduccion-control" type="text" placeholder="Ej. P1 a P5"></div>
           </div>
-          <div class="rs-level-fields" data-rs-fields="Panel2" hidden>
-            <div class="rs-field-grid"><label for="rsDetallePanel2">Detalle Panel 2</label><input id="rsDetallePanel2" class="rs-control" type="text" placeholder="Detalle del Panel 2"></div>
+          <div class="anfo-reduccion-level-fields" data-rs-fields="Panel2" hidden>
+            <div class="anfo-reduccion-field-grid"><label for="rsDetallePanel2">Detalle Panel 2</label><input id="rsDetallePanel2" class="anfo-reduccion-control" type="text" placeholder="Detalle del Panel 2"></div>
           </div>
-          <div class="rs-field-grid"><label for="rsFase">Fase (Transversal)</label><input id="rsFase" class="rs-control" type="text" placeholder="Ej. Fase 2"></div>
+          <div class="anfo-reduccion-field-grid"><label for="rsFase">Fase (Transversal)</label><input id="rsFase" class="anfo-reduccion-control" type="text" placeholder="Ej. Fase 2"></div>
         </section>
-        <section class="anfo-step-card rs-config-card rs-id-card">
+        <section class="anfo-step-card anfo-reduccion-config-card anfo-reduccion-id-card">
           <h3 class="anfo-step-label"><i></i> ID de tronadura · Automático</h3>
-          <input id="rsIdTronadura" class="rs-control" type="text" readonly aria-label="ID de tronadura generado automáticamente">
+          <input id="rsIdTronadura" class="anfo-reduccion-control" type="text" readonly aria-label="ID de tronadura generado automáticamente">
         </section>
-        <div class="rs-config-actions">
-          <button type="button" class="btn-primary rs-volver" onclick="ir(1)">‹ Volver</button>
-          <button type="button" class="btn-primary rs-aplicar" onclick="guardarConfiguracionPostura()">Guardar y aplicar ✓</button>
+        <div class="anfo-reduccion-config-actions">
+          <button type="button" class="btn-primary anfo-reduccion-volver" onclick="ir(1)">‹ Volver</button>
+          <button type="button" class="btn-primary anfo-reduccion-aplicar" onclick="guardarConfiguracionPostura()">Guardar y aplicar ✓</button>
         </div>
       </section>
       <!-- PASO 3: GESTIÓN DE ZANJA -->
-      <section class="card wizard-card anfo-trabajo-screen rs-zanja-screen" hidden id="v3">
+      <section class="card wizard-card anfo-trabajo-screen anfo-reduccion-zanja-screen" hidden id="v3">
         <div class="anfo-contexto-trabajo">
           <div><small>Turno</small><strong id="rsTurnoZanja">A · --/--/----</strong></div>
           <div><small>ID Tronadura</small><strong id="rsIdTronaduraZanja">Sin asignar</strong></div>
@@ -104,19 +104,19 @@
           <h3><i></i> Zanjas existentes <span id="conteoZanjasRS" class="anfo-conteo-trabajos">0</span></h3>
           <div id="listaZanjasRS" class="anfo-lista-trabajos" aria-label="Zanjas registradas"></div>
         </section>
-        <div class="anfo-acciones-trabajo rs-acciones-zanja">
+        <div class="anfo-acciones-trabajo anfo-reduccion-acciones-zanja">
           <button type="button" class="anfo-btn-volver" onclick="ir(2)">‹ Volver al Paso 2</button>
           <button type="button" class="anfo-btn-usar" onclick="usarCalle()">Usar seleccionado ›</button>
         </div>
       </section>
 
       <!-- PASO 4: LISTA DE COLPAS REGISTRADAS -->
-      <section class="card wizard-card anfo-paradas-screen rs-colpas-list-screen" hidden id="v4">
-        <div class="rs-progreso" aria-label="Paso 4 de 7: Colpas de la zanja">
-          <div class="rs-progreso-linea" aria-hidden="true"><i></i><i></i><i></i><i class="activo"></i><i></i><i></i><i></i></div>
+      <section class="card wizard-card anfo-paradas-screen anfo-reduccion-colpas-list-screen" hidden id="v4">
+        <div class="anfo-reduccion-progreso" aria-label="Paso 4 de 7: Colpas de la zanja">
+          <div class="anfo-reduccion-progreso-linea" aria-hidden="true"><i></i><i></i><i></i><i class="activo"></i><i></i><i></i><i></i></div>
           <p>PASO 4 DE 7 · ZANJA <span id="rsPasoZanjaLista"></span></p>
         </div>
-        <section class="anfo-trabajo-panel anfo-nuevo-trabajo rs-nueva-zanja-panel">
+        <section class="anfo-trabajo-panel anfo-nuevo-trabajo anfo-reduccion-nueva-zanja-panel">
           <h3><i></i> Registrar otra zanja</h3>
           <label for="rsNuevaZanjaDesdeColpas">Número de zanja</label>
           <input type="text" id="rsNuevaZanjaDesdeColpas" placeholder="Ej. 43" autocomplete="off">
@@ -124,31 +124,31 @@
           <button type="button" class="anfo-btn-crear" onclick="crearCalleDesdePanel()">＋ Crear e ir a colpas</button>
         </section>
         <h2>Colpas de la zanja</h2>
-        <p class="rs-lista-subtitulo">Revise o edite los tiros registrados</p>
+        <p class="anfo-reduccion-lista-subtitulo">Revise o edite los tiros registrados</p>
         <input id="rsBuscarColpa" type="search" placeholder="🔍 Buscar ID o punto..." aria-label="Buscar colpa por ID o punto">
-        <section class="rs-lista-registradas"><header><strong>■ COLPAS REGISTRADAS</strong><span id="rsConteoColpasLista">0</span></header><div id="rsListaRegistrada"></div></section>
-        <nav class="rs-colpas-nav"><button type="button" class="anfo-btn-volver" onclick="ir(3)">‹ Zanjas</button><button type="button" class="anfo-btn-resumen-paradas" onclick="ir(8)">Ver resumen ›</button></nav>
+        <section class="anfo-reduccion-lista-registradas"><header><strong>■ COLPAS REGISTRADAS</strong><span id="rsConteoColpasLista">0</span></header><div id="rsListaRegistrada"></div></section>
+        <nav class="anfo-reduccion-colpas-nav"><button type="button" class="anfo-btn-volver" onclick="ir(3)">‹ Zanjas</button><button type="button" class="anfo-btn-resumen-paradas" onclick="ir(8)">Ver resumen ›</button></nav>
       </section>
 
       <!-- PASO 5: PANEL VISUAL DE COLPAS GUARDADAS -->
-      <section class="card wizard-card anfo-paradas-screen rs-colpas-screen" hidden id="v6">
-        <div class="rs-progreso" aria-label="Paso 5 de 7: Colpas de la zanja">
-          <div class="rs-progreso-linea" aria-hidden="true"><i></i><i></i><i></i><i></i><i class="activo"></i><i></i><i></i></div>
+      <section class="card wizard-card anfo-paradas-screen anfo-reduccion-colpas-screen" hidden id="v6">
+        <div class="anfo-reduccion-progreso" aria-label="Paso 5 de 7: Colpas de la zanja">
+          <div class="anfo-reduccion-progreso-linea" aria-hidden="true"><i></i><i></i><i></i><i></i><i class="activo"></i><i></i><i></i></div>
           <p>PASO 5 DE 7 · ZANJA <span id="rsPasoZanja"></span></p>
         </div>
-        <div class="rs-resumen-head"><h2 id="t3">Colpas de la Zanja</h2><span class="rs-guardado">✓ Guardado</span></div>
-        <div class="rs-resumen-metricas">
+        <div class="anfo-reduccion-resumen-head"><h2 id="t3">Colpas de la Zanja</h2><span class="anfo-reduccion-guardado">✓ Guardado</span></div>
+        <div class="anfo-reduccion-resumen-metricas">
           <div><strong id="rsConteoColpas">0</strong><span>Registradas</span></div>
           <div><strong id="rsConteoReducidas">0</strong><span>Reducidas</span></div>
           <div><strong id="rsConteoNoCumplen">0</strong><span>No cumplen</span></div>
         </div>
-        <section class="rs-resumen-colpas" aria-label="Resumen de colpas">
+        <section class="anfo-reduccion-resumen-colpas" aria-label="Resumen de colpas">
           <div id="lista" aria-label="Colpas registradas"></div>
         </section>
-        <p class="rs-resumen-ayuda">ⓘ Toque una colpa para corregirla o agregue la siguiente.</p>
-        <nav class="rs-colpas-nav" aria-label="Navegación de colpas">
+        <p class="anfo-reduccion-resumen-ayuda">ⓘ Toque una colpa para corregirla o agregue la siguiente.</p>
+        <nav class="anfo-reduccion-colpas-nav" aria-label="Navegación de colpas">
           <button type="button" class="anfo-btn-volver" onclick="ir(4)">‹ Colpas</button>
-          <button type="button" class="rs-agregar-colpa" onclick="abrirAsistentePlanilla('planilla')">Siguiente ›</button>
+          <button type="button" class="anfo-reduccion-agregar-colpa" onclick="abrirAsistentePlanilla('planilla')">Siguiente ›</button>
         </nav>
       </section>
 
@@ -159,7 +159,7 @@
       <section class="card wizard-card wz" hidden id="v7"></section>
 
       <!-- PASO 7: RESUMEN GENERAL DE REDUCCIÓN -->
-      <section class="card wizard-card rs-resumen-final" hidden id="v8" aria-live="polite"></section>
+      <section class="card wizard-card anfo-reduccion-resumen-final" hidden id="v8" aria-live="polite"></section>
 
       <!-- MODAL PERSONAL / DATOS DE PLANILLA: estructura equivalente al modal de ANFO/Emulsión -->
       <div class="modal-overlay ov" id="mDatos" role="presentation">

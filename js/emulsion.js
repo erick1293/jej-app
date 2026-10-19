@@ -530,6 +530,7 @@
             if (!select) return;
             select.value = idTrabajo;
             renderizarTarjetasTrabajosEmulsion();
+            window.usarTrabajoSeleccionadoEmulsion();
         }
 
         function actualizarSugerenciaTrabajoEmulsion() {

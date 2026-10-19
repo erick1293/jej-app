@@ -500,18 +500,18 @@
     // Barra superior eliminada: la selección de planilla y las descargas ya no se muestran aquí.
     host = $(host);
     host.innerHTML = '';
-    host.classList.remove('jp-toolbar');
+    host.classList.remove('anfo-perforacion-toolbar');
     host.hidden = true;
   }
 
   /* ---------- Campo de formulario ---------- */
   // def: {k,label,type:text|date|time|select|calc, list, cls}
   function campo(def, obj, onInput, calcFn) {
-    var wrap = el('div', { class: 'jp-campo form-group-field' + (def.cls || '') });
+    var wrap = el('div', { class: 'anfo-perforacion-campo form-group-field' + (def.cls || '') });
     wrap.appendChild(el('label', { text: def.label }));
     var inp;
     if (def.type === 'calc') {
-      inp = el('output', { class: 'jp-calc', 'data-calc': def.k, text: calcFn ? calcFn() : '' });
+      inp = el('output', { class: 'anfo-perforacion-calc', 'data-calc': def.k, text: calcFn ? calcFn() : '' });
     } else if (def.type === 'select') {
       inp = el('select'); opciones(inp, J.LISTAS[def.list], obj[def.k]);
       inp.addEventListener('change', function () { obj[def.k] = inp.value; onInput && onInput(def.k); });
@@ -902,20 +902,20 @@
   function alCambiarPlanilla() { ui.vista = 'datos'; ui.asist = null; ui.tiro = null; ui.aviso = ''; ui.parada = ''; ui.busca = ''; ui.nuevaParada = false; render(); }
 
   /* ---------- Piezas de formulario ---------- */
-  function mf(label, ctrl, cls) { return el('div', { class: 'jp-mf form-group-field' + (cls || '') }, [el('label', { text: label }), ctrl]); }
+  function mf(label, ctrl, cls) { return el('div', { class: 'anfo-perforacion-mf form-group-field' + (cls || '') }, [el('label', { text: label }), ctrl]); }
   function txt(o, k, ph, cls, list, on) {
-    var i = el('input', { type: 'text', class: 'jp-in' + (cls || ''), placeholder: ph || '', value: o[k] || '' });
+    var i = el('input', { type: 'text', class: 'anfo-perforacion-in' + (cls || ''), placeholder: ph || '', value: o[k] || '' });
     if (list) i.setAttribute('list', list);
     i.addEventListener('input', function () { o[k] = i.value; if (on) on(); });
     return i;
   }
   function hora(o, k, on) {
-    var i = el('input', { type: 'time', class: 'jp-in', value: o[k] || '' });
+    var i = el('input', { type: 'time', class: 'anfo-perforacion-in', value: o[k] || '' });
     i.addEventListener('input', function () { o[k] = i.value; if (on) on(); });
     return i;
   }
   function sel(o, k, lista, ph, on) {
-    var s = el('select', { class: 'jp-in' });
+    var s = el('select', { class: 'anfo-perforacion-in' });
     U.opciones(s, J.LISTAS[lista], o[k]); s.options[0].textContent = ph || '';
     s.addEventListener('change', function () { o[k] = s.value; if (on) on(); });
     return s;
@@ -963,17 +963,17 @@ var rolPersonal = {
     function pintar(enfocarUltimo) {
       box.innerHTML = '';
       vals.forEach(function (v, i) {
-        var inp = el('input', { type: 'text', class: 'jp-in', placeholder: 'Seleccione o escriba...', value: v, list: dl.id });
+        var inp = el('input', { type: 'text', class: 'anfo-perforacion-in', placeholder: 'Seleccione o escriba...', value: v, list: dl.id });
         inp.addEventListener('input', function () { vals[i] = inp.value; sync(); });
-        var fila = el('div', { class: 'jp-multi' }, [inp]);
-        if (vals.length > 1) fila.appendChild(el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { vals.splice(i, 1); sync(); pintar(); } }));
+        var fila = el('div', { class: 'anfo-perforacion-multi' }, [inp]);
+        if (vals.length > 1) fila.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-x', title: 'Quitar', text: '×', onclick: function () { vals.splice(i, 1); sync(); pintar(); } }));
         box.appendChild(fila);
         if (enfocarUltimo && i === vals.length - 1) setTimeout(function () { try { inp.focus(); } catch (e) { /* sin foco */ } }, 0);
       });
-      box.appendChild(el('button', { type: 'button', class: 'jp-chip', text: '+ ' + textoAdd, onclick: function () { vals.push(''); pintar(true); } }));
+      box.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-chip', text: '+ ' + textoAdd, onclick: function () { vals.push(''); pintar(true); } }));
     }
     pintar();
-    host.appendChild(el('div', { class: 'jp-mf form-group-field full' }, [el('label', { text: label }), dl, box]));
+    host.appendChild(el('div', { class: 'anfo-perforacion-mf form-group-field full' }, [el('label', { text: label }), dl, box]));
   }
 
   /* ---------- Ventana modal ---------- */
@@ -985,7 +985,7 @@ var rolPersonal = {
     if (estiloPersonal) encabezado.setAttribute('style', 'margin-top:0;border-bottom:2px solid #e2e8f0;padding-bottom:8px');
     m.appendChild(encabezado);
     armar(m);
-    var acciones = el('div', { class: 'jp-modal-acc' + (estiloPersonal ? ' modal-personal-acciones' : '') });
+    var acciones = el('div', { class: 'anfo-perforacion-modal-acc' + (estiloPersonal ? ' modal-personal-acciones' : '') });
     if (estiloPersonal) acciones.setAttribute('style', 'display:flex;justify-content:flex-end;gap:10px;margin-top:20px');
     var cancelar = el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: cerrar });
     var guardar = el('button', { type: 'button', class: 'btn-primary', text: textoGuardar || 'Guardar y Aplicar', onclick: function () { if (onGuardar() !== false) cerrar(); } });
@@ -1106,19 +1106,19 @@ var rolPersonal = {
   // Varios nombres en un mismo dato (se guardan separados por " / ")
   function multiPaso(q, s, d) {
     var vals = partes(d[s.k]); if (!vals.length) vals = [''];
-    var dl = datalist(s.k, true), box = el('div', { class: 'jp-q-multi' });
+    var dl = datalist(s.k, true), box = el('div', { class: 'anfo-perforacion-q-multi' });
     function sync() { d[s.k] = vals.map(function (x) { return x.trim(); }).filter(Boolean).join(' / '); }
     function pintar(enfocar) {
       box.innerHTML = '';
       vals.forEach(function (v, i) {
         var inp = el('input', { type: 'text', placeholder: 'Seleccione o escriba...', value: v, list: dl.id, 'aria-label': s.label + ' ' + (i + 1) });
         inp.addEventListener('input', function () { vals[i] = inp.value; sync(); });
-        var fila = el('div', { class: 'jp-multi' }, [inp]);
-        if (vals.length > 1) fila.appendChild(el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { vals.splice(i, 1); sync(); pintar(); } }));
+        var fila = el('div', { class: 'anfo-perforacion-multi' }, [inp]);
+        if (vals.length > 1) fila.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-x', title: 'Quitar', text: '×', onclick: function () { vals.splice(i, 1); sync(); pintar(); } }));
         box.appendChild(fila);
         if ((enfocar && i === vals.length - 1) || (!enfocar && i === 0 && !v)) setTimeout(function () { try { inp.focus(); } catch (e) { /* sin foco */ } }, 0);
       });
-      box.appendChild(el('div', { style: 'text-align:center' }, [el('button', { type: 'button', class: 'jp-chip', text: '+ ' + s.add, onclick: function () { vals.push(''); pintar(true); } })]));
+      box.appendChild(el('div', { style: 'text-align:center' }, [el('button', { type: 'button', class: 'anfo-perforacion-chip', text: '+ ' + s.add, onclick: function () { vals.push(''); pintar(true); } })]));
     }
     pintar();
     q.appendChild(dl); q.appendChild(box);
@@ -1127,14 +1127,14 @@ var rolPersonal = {
   // Lista de pérdidas operacionales (observación + tiempo hh:mm)
   function perdidasPaso(q, a) {
     var perd = a.perd;
-    q.appendChild(el('p', { class: 'jp-q-ayuda', text: 'Observación y tiempo (hh:mm). Si escribes solo minutos, por ejemplo 90, se convierte a 01:30.' }));
+    q.appendChild(el('p', { class: 'anfo-perforacion-q-ayuda', text: 'Observación y tiempo (hh:mm). Si escribes solo minutos, por ejemplo 90, se convierte a 01:30.' }));
     var dl = el('datalist', { id: 'dl-problemas' });
     J.LISTAS.problemas.forEach(function (v) { dl.appendChild(el('option', { value: v })); });
-    var caja = el('div', { class: 'jp-perd' }), total = el('div', { class: 'jp-perd-total' });
+    var caja = el('div', { class: 'anfo-perforacion-perd' }), total = el('div', { class: 'anfo-perforacion-perd-total' });
     function actualizarTotal() { total.textContent = 'Total pérdida operacional: ' + J.fmtHM(J.totalPerdidas({ perdidas: perd })); }
     function pintar() {
       caja.innerHTML = '';
-      caja.appendChild(el('div', { class: 'jp-perd-head' }, [el('span', { text: 'Observación' }), el('span', { text: 'Tiempo', style: 'text-align:center' }), el('span')]));
+      caja.appendChild(el('div', { class: 'anfo-perforacion-perd-head' }, [el('span', { text: 'Observación' }), el('span', { text: 'Tiempo', style: 'text-align:center' }), el('span')]));
       perd.forEach(function (x, i) {
         var dd = el('input', { type: 'text', list: 'dl-problemas', value: x.desc || '', placeholder: 'Describe la pérdida', 'aria-label': 'Observación de la pérdida' });
         var tt = el('input', { type: 'text', class: 't', value: x.tiempo || '', placeholder: 'hh:mm', maxlength: 5, inputmode: 'numeric', 'aria-label': 'Tiempo perdido (hh:mm)' });
@@ -1145,40 +1145,40 @@ var rolPersonal = {
           if (v === null) { tt.value = ''; x.tiempo = ''; } else { tt.value = v; x.tiempo = v; }
           actualizarTotal();
         });
-        var del = el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { perd.splice(i, 1); if (!perd.length) perd.push({ desc: '', tiempo: '' }); pintar(); } });
-        caja.appendChild(el('div', { class: 'jp-perd-fila' }, [dd, tt, del]));
+        var del = el('button', { type: 'button', class: 'anfo-perforacion-x', title: 'Quitar', text: '×', onclick: function () { perd.splice(i, 1); if (!perd.length) perd.push({ desc: '', tiempo: '' }); pintar(); } });
+        caja.appendChild(el('div', { class: 'anfo-perforacion-perd-fila' }, [dd, tt, del]));
       });
-      caja.appendChild(el('div', { class: 'jp-perd-pie' }, [el('button', { type: 'button', class: 'btn-primary', text: '＋ Agregar pérdida', onclick: function () { perd.push({ desc: '', tiempo: '' }); pintar(); } })]));
+      caja.appendChild(el('div', { class: 'anfo-perforacion-perd-pie' }, [el('button', { type: 'button', class: 'btn-primary', text: '＋ Agregar pérdida', onclick: function () { perd.push({ desc: '', tiempo: '' }); pintar(); } })]));
       caja.appendChild(total);
       actualizarTotal();
     }
     pintar();
-    q.appendChild(dl); q.appendChild(el('div', { class: 'jp-q-perd' }, [caja]));
+    q.appendChild(dl); q.appendChild(el('div', { class: 'anfo-perforacion-q-perd' }, [caja]));
   }
 
   function asistenteVista(host, p) {
     var a = ui.asist, ps = a.pasos, d = a.d;
     if (a.i > ps.length - 1) a.i = ps.length - 1;
     var s = ps[a.i], ultimo = a.i >= ps.length - 1;
-    var q = el('div', { class: 'jp-q wizard-card', style: 'border-left-color:#' + s.bg });
+    var q = el('div', { class: 'anfo-perforacion-q wizard-card', style: 'border-left-color:#' + s.bg });
 
     var salto = el('select', { 'aria-label': 'Ir a otro dato' });
     ps.forEach(function (x, i) { var o = el('option', { value: String(i), text: (i + 1) + '. ' + x.label }); if (i === a.i) o.selected = true; salto.appendChild(o); });
     salto.addEventListener('change', function () { a.i = +salto.value; a.err = ''; render(); });
-    q.appendChild(el('div', { class: 'jp-q-top' }, [el('b', { text: s.grupo }), el('span', { text: 'Dato ' + (a.i + 1) + ' de ' + ps.length }), salto]));
-    q.appendChild(el('div', { class: 'jp-q-barra' }, [el('i', { style: 'width:' + Math.round((a.i + 1) / ps.length * 100) + '%' })]));
+    q.appendChild(el('div', { class: 'anfo-perforacion-q-top' }, [el('b', { text: s.grupo }), el('span', { text: 'Dato ' + (a.i + 1) + ' de ' + ps.length }), salto]));
+    q.appendChild(el('div', { class: 'anfo-perforacion-q-barra' }, [el('i', { style: 'width:' + Math.round((a.i + 1) / ps.length * 100) + '%' })]));
     q.appendChild(el('h3', { text: s.label }));
 
     var calcBox = null, inp = null;
     function actualizarCalc() { if (calcBox && s.calc) calcBox.textContent = s.calc(d); }
 
     if (s.type === 'select') {
-      var opts = el('div', { class: 'jp-opts' });
+      var opts = el('div', { class: 'anfo-perforacion-opts' });
       J.LISTAS[s.list].forEach(function (v) {
-        opts.appendChild(el('button', { type: 'button', class: 'jp-opt' + (d[s.k] === v ? ' sel' : ''), text: v, onclick: function () { d[s.k] = v; asistenteAvanzar(); } }));
+        opts.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-opt' + (d[s.k] === v ? ' sel' : ''), text: v, onclick: function () { d[s.k] = v; asistenteAvanzar(); } }));
       });
       if (d[s.k] && J.LISTAS[s.list].indexOf(d[s.k]) < 0) {
-        opts.appendChild(el('button', { type: 'button', class: 'jp-opt sel', text: d[s.k], onclick: function () { asistenteAvanzar(); } }));
+        opts.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-opt sel', text: d[s.k], onclick: function () { asistenteAvanzar(); } }));
       }
       q.appendChild(opts);
     } else if (s.type === 'multi') {
@@ -1192,7 +1192,7 @@ var rolPersonal = {
       i2.addEventListener('input', function () { d[s.k2] = i2.value; });
       i1.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); i2.focus(); } });
       i2.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); asistenteAvanzar(); } });
-      q.appendChild(el('div', { class: 'jp-q-input' }, [i1, el('span', { class: 'u', text: 'y' }), i2]));
+      q.appendChild(el('div', { class: 'anfo-perforacion-q-input' }, [i1, el('span', { class: 'u', text: 'y' }), i2]));
       inp = i1;
     } else {
       inp = el('input', { type: s.type === 'time' ? 'time' : 'text', value: d[s.k] || '', placeholder: s.ph || '', 'aria-label': s.label });
@@ -1200,22 +1200,22 @@ var rolPersonal = {
       if (s.dl) { var dlx = datalist(s.dl, false); q.appendChild(dlx); inp.setAttribute('list', dlx.id); }
       inp.addEventListener('input', function () { d[s.k] = inp.value; a.err = ''; actualizarCalc(); });
       inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); asistenteAvanzar(); } });
-      q.appendChild(el('div', { class: 'jp-q-input' }, [inp, s.unit ? el('span', { class: 'u', text: s.unit }) : null]));
+      q.appendChild(el('div', { class: 'anfo-perforacion-q-input' }, [inp, s.unit ? el('span', { class: 'u', text: s.unit }) : null]));
       if (s.type === 'time') {
-        q.appendChild(el('div', { style: 'text-align:center' }, [el('button', { type: 'button', class: 'jp-chip', text: 'Ahora', title: 'Poner la hora actual', onclick: function () {
+        q.appendChild(el('div', { style: 'text-align:center' }, [el('button', { type: 'button', class: 'anfo-perforacion-chip', text: 'Ahora', title: 'Poner la hora actual', onclick: function () {
           inp.value = horaActual(); d[s.k] = inp.value; actualizarCalc();
         } })]));
       }
     }
-    if (s.calc) { calcBox = el('div', { class: 'jp-q-calc', text: s.calc(d) }); q.appendChild(calcBox); }
-    if (a.err) q.appendChild(el('div', { class: 'jp-q-error', text: a.err }));
+    if (s.calc) { calcBox = el('div', { class: 'anfo-perforacion-q-calc', text: s.calc(d) }); q.appendChild(calcBox); }
+    if (a.err) q.appendChild(el('div', { class: 'anfo-perforacion-q-error', text: a.err }));
 
-    var acc = el('div', { class: 'jp-q-acciones grid-2' }, [
+    var acc = el('div', { class: 'anfo-perforacion-q-acciones grid-2' }, [
       el('button', { type: 'button', class: 'btn-primary', text: '← Anterior', disabled: a.i === 0 ? 'disabled' : null, onclick: asistenteRetroceder }),
       el('button', { type: 'button', class: 'btn-primary', text: 'Omitir', onclick: function () { a.err = ''; if (ultimo) asistenteGuardar(); else { a.i++; render(); } } }),
       el('button', { type: 'button', class: 'btn-primary', text: ultimo ? '✔ Guardar datos' : 'Siguiente →', onclick: asistenteAvanzar }),
       ultimo ? null : el('button', { type: 'button', class: 'btn-primary', text: 'Guardar y salir', onclick: asistenteGuardar }),
-      el('span', { class: 'jp-sep' }),
+      el('span', { class: 'anfo-perforacion-sep' }),
       el('button', { type: 'button', class: 'btn-primary', text: 'Cancelar', onclick: function () { if (confirm('¿Cancelar? Se descartan los cambios hechos en este asistente.')) asistenteCerrar(); } })
     ]);
     q.appendChild(acc);
@@ -1223,7 +1223,7 @@ var rolPersonal = {
     // Lo ya ingresado
     var llenos = ps.filter(function (x) { return x.type !== 'perd' && x !== s && (d[x.k] || (x.k2 && d[x.k2])); });
     if (llenos.length) {
-      q.appendChild(el('div', { class: 'jp-q-resumen' }, llenos.map(function (x) {
+      q.appendChild(el('div', { class: 'anfo-perforacion-q-resumen' }, llenos.map(function (x) {
         var v = x.k2 ? [d[x.k], d[x.k2]].filter(Boolean).join(' y ') : d[x.k];
         return el('span', { text: x.label + ': ' + v });
       })));
@@ -1265,14 +1265,14 @@ var rolPersonal = {
       function pintar(enfocar) {
         box.innerHTML = '';
         obs.forEach(function (v, i) {
-          var inp = el('input', { type: 'text', class: 'jp-in', value: v, placeholder: 'Observación ' + (i + 1) });
+          var inp = el('input', { type: 'text', class: 'anfo-perforacion-in', value: v, placeholder: 'Observación ' + (i + 1) });
           inp.addEventListener('input', function () { obs[i] = inp.value; });
-          var fila = el('div', { class: 'jp-multi' }, [inp]);
-          if (obs.length > 1) fila.appendChild(el('button', { type: 'button', class: 'jp-x', title: 'Quitar', text: '×', onclick: function () { obs.splice(i, 1); pintar(); } }));
+          var fila = el('div', { class: 'anfo-perforacion-multi' }, [inp]);
+          if (obs.length > 1) fila.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-x', title: 'Quitar', text: '×', onclick: function () { obs.splice(i, 1); pintar(); } }));
           box.appendChild(fila);
           if (enfocar && i === obs.length - 1) setTimeout(function () { try { inp.focus(); } catch (e) { /* sin foco */ } }, 0);
         });
-        box.appendChild(el('button', { type: 'button', class: 'jp-chip', text: '+ Agregar otra observación', onclick: function () { obs.push(''); pintar(true); } }));
+        box.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-chip', text: '+ Agregar otra observación', onclick: function () { obs.push(''); pintar(true); } }));
       }
       pintar();
       m.appendChild(el('div', { style: 'margin-top:14px' }, [box]));
@@ -1402,7 +1402,7 @@ var rolPersonal = {
     ]));
 
     var inp = el('input', { type:'text', placeholder:'Ej. TRABAJO-01', 'aria-label':'Nombre o ID del trabajo', autocomplete:'off' });
-    var err = el('div', { class:'jp-q-error' });
+    var err = el('div', { class:'anfo-perforacion-q-error' });
     function crear() {
       var n=inp.value.trim(); if(!n){err.textContent='Escribe un nombre para el trabajo.';return;}
       var ya=p.trabajos.filter(function(t){return t.toLowerCase()===n.toLowerCase();})[0];
@@ -1447,13 +1447,13 @@ var rolPersonal = {
 
   /* ---------- Descargas (reemplaza al antiguo «Guardar Registro Completo») ---------- */
   function bloqueDescarga(p) {
-    var s = el('select', { class: 'jp-in', 'aria-label': 'Referencia del abatimiento' }, [
+    var s = el('select', { class: 'anfo-perforacion-in', 'aria-label': 'Referencia del abatimiento' }, [
       el('option', { value: 'horizontal', text: 'horizontal' }), el('option', { value: 'vertical', text: 'vertical' })]);
     s.value = p.refAbat || 'horizontal';
     s.addEventListener('change', function () { p.refAbat = s.value; J.store.touch(); });
-    return el('div', { class: 'jp-descarga' }, [
-      el('label', { class: 'jp-lbl', style: 'margin-top:4px', text: 'Abatimiento de los diagramas de disparo, medido desde la:' }), s,
-      el('div', { class: 'jp-pila', style: 'margin-top:12px' }, [
+    return el('div', { class: 'anfo-perforacion-descarga' }, [
+      el('label', { class: 'anfo-perforacion-lbl', style: 'margin-top:4px', text: 'Abatimiento de los diagramas de disparo, medido desde la:' }), s,
+      el('div', { class: 'anfo-perforacion-pila', style: 'margin-top:12px' }, [
         el('button', { type: 'button', class: 'btn-primary', text: '⬇ Descargar Excel', onclick: function () { J.store.saveNow(); J.excel.download(P()); } }),
         el('button', { type: 'button', class: 'btn-primary', text: '⬇ Descargar Informe Técnico', onclick: function () { J.store.saveNow(); J.informe.abrir(P()); } })
       ]),
@@ -1476,7 +1476,7 @@ var rolPersonal = {
       el('h3',null,[el('i'),document.createTextNode(' Crear nueva parada')]),
       el('label',{text:'ID de parada'})
     ]);
-    var np=el('input',{type:'text',placeholder:'Ej. P1 o PARADA 1',value:sugerirParada(p),'aria-label':'Número de parada'}), e1=el('div',{class:'jp-q-error'});
+    var np=el('input',{type:'text',placeholder:'Ej. P1 o PARADA 1',value:sugerirParada(p),'aria-label':'Número de parada'}), e1=el('div',{class:'anfo-perforacion-q-error'});
     function crearParada(){
       var v=np.value.trim();if(!v){e1.textContent='Escribe el número o nombre de la parada.';return;}
       ui.parada=v;ui.nuevaParada=false;
@@ -1580,25 +1580,25 @@ var rolPersonal = {
     var t = ui.tiro, row = t.row, cs = camposTiro(row);
     if (t.i > cs.length - 1) t.i = cs.length - 1;
     var c = cs[t.i], prev = filaAnterior(p, row);
-    var q = el('div', { class: 'jp-q wizard-card', style: 'border-left-color:#' + c.bg });
+    var q = el('div', { class: 'anfo-perforacion-q wizard-card', style: 'border-left-color:#' + c.bg });
 
     var salto = el('select', { 'aria-label': 'Ir a otro dato' });
     cs.forEach(function (x, i) { var o = el('option', { value: String(i), text: (i + 1) + '. ' + x.label }); if (i === t.i) o.selected = true; salto.appendChild(o); });
     salto.addEventListener('change', function () { t.i = +salto.value; t.err = ''; render(); });
-    q.appendChild(el('div', { class: 'jp-q-top' }, [el('b', { text: nombreTiro(row) }), el('span', { text: 'Dato ' + (t.i + 1) + ' de ' + cs.length }), salto]));
-    q.appendChild(el('div', { class: 'jp-q-barra' }, [el('i', { style: 'width:' + Math.round((t.i + 1) / cs.length * 100) + '%' })]));
+    q.appendChild(el('div', { class: 'anfo-perforacion-q-top' }, [el('b', { text: nombreTiro(row) }), el('span', { text: 'Dato ' + (t.i + 1) + ' de ' + cs.length }), salto]));
+    q.appendChild(el('div', { class: 'anfo-perforacion-q-barra' }, [el('i', { style: 'width:' + Math.round((t.i + 1) / cs.length * 100) + '%' })]));
     q.appendChild(el('h3', { text: c.label }));
-    if (c.k === 'problema') q.appendChild(el('p', { class: 'jp-q-ayuda', text: 'Si no hubo problemas, toca «Sin problemas».' }));
-    if (c.k === 'alturaBarra') q.appendChild(el('p', { class: 'jp-q-ayuda', text: 'Se pregunta porque el problema fue barra pegada.' }));
+    if (c.k === 'problema') q.appendChild(el('p', { class: 'anfo-perforacion-q-ayuda', text: 'Si no hubo problemas, toca «Sin problemas».' }));
+    if (c.k === 'alturaBarra') q.appendChild(el('p', { class: 'anfo-perforacion-q-ayuda', text: 'Se pregunta porque el problema fue barra pegada.' }));
 
     var calcBox = null, ct = calcTexto(c, row);
     function actualizarCalc() { if (calcBox) calcBox.textContent = calcTexto(c, row); }
     var inp = null;
 
     if (c.type === 'select') {
-      var opts = el('div', { class: 'jp-opts' });
+      var opts = el('div', { class: 'anfo-perforacion-opts' });
       J.LISTAS[c.list].forEach(function (v) {
-        opts.appendChild(el('button', { type: 'button', class: 'jp-opt' + (row[c.k] === v ? ' sel' : ''), text: v, onclick: function () {
+        opts.appendChild(el('button', { type: 'button', class: 'anfo-perforacion-opt' + (row[c.k] === v ? ' sel' : ''), text: v, onclick: function () {
           row[c.k] = v;
           if (c.k === 'problema' && v !== 'Barra Pegada') row.alturaBarra = '';
           J.store.touch(); avanzar(p);
@@ -1622,32 +1622,32 @@ var rolPersonal = {
           inp,
           el('button',{type:'button',class:'anfo-tiro-stepper-btn',text:'+',title:'Aumentar', 'aria-label':'Aumentar '+c.label,onclick:function(){ajustar(1);}})
         ]);
-        q.appendChild(el('div',{class:'jp-q-input'},[stepper,c.unit?el('span',{class:'u',text:c.unit}):null]));
+        q.appendChild(el('div',{class:'anfo-perforacion-q-input'},[stepper,c.unit?el('span',{class:'u',text:c.unit}):null]));
       } else {
         inp = el('input', { type: c.type === 'time' ? 'time' : 'text', value: row[c.k] || '', 'aria-label': c.label });
         inp.addEventListener('input', function () { row[c.k] = inp.value; t.err = ''; J.store.touch(); actualizarCalc(); });
         inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); avanzar(p); } });
-        q.appendChild(el('div', { class: 'jp-q-input' }, [inp, c.unit ? el('span', { class: 'u', text: c.unit }) : null]));
+        q.appendChild(el('div', { class: 'anfo-perforacion-q-input' }, [inp, c.unit ? el('span', { class: 'u', text: c.unit }) : null]));
       }
     }
-    if (ct !== null) { calcBox = el('div', { class: 'jp-q-calc', text: ct }); q.appendChild(calcBox); }
-    if (t.err) q.appendChild(el('div', { class: 'jp-q-error', text: t.err }));
+    if (ct !== null) { calcBox = el('div', { class: 'anfo-perforacion-q-calc', text: ct }); q.appendChild(calcBox); }
+    if (t.err) q.appendChild(el('div', { class: 'anfo-perforacion-q-error', text: t.err }));
 
     // Atajo: repetir el valor del tiro anterior de la misma parada
     var pv = prev ? (c.k === 'hIni' ? prev.hFin : prev[c.k]) : '';
     if (pv && !row[c.k] && c.k !== 'tiro') {
-      q.appendChild(el('div', { style: 'margin-top:6px;text-align:center' }, [el('button', { type: 'button', class: 'jp-chip',
+      q.appendChild(el('div', { style: 'margin-top:6px;text-align:center' }, [el('button', { type: 'button', class: 'anfo-perforacion-chip',
         text: (c.k === 'hIni' ? 'Usar hora de término del tiro anterior: ' : 'Usar el del tiro anterior: ') + pv,
         onclick: function () { row[c.k] = pv; J.store.touch(); render(); } })]));
     }
 
-    var acc = el('div', { class: 'jp-q-acciones grid-2' }, [
+    var acc = el('div', { class: 'anfo-perforacion-q-acciones grid-2' }, [
       el('button', { type: 'button', class: 'btn-primary', text: '← Anterior', disabled: t.i === 0 ? 'disabled' : null, onclick: retroceder }),
       el('button', { type: 'button', class: 'btn-primary', text: c.k === 'problema' ? 'Sin problemas' : 'Omitir', onclick: function () {
         row[c.k] = ''; if (c.k === 'problema') row.alturaBarra = ''; J.store.touch(); avanzar(p);
       } }),
       el('button', { type: 'button', class: 'btn-primary', text: t.i >= cs.length - 1 ? '✔ Guardar tiro' : 'Siguiente →', onclick: function () { avanzar(p); } }),
-      el('span', { class: 'jp-sep' }),
+      el('span', { class: 'anfo-perforacion-sep' }),
       el('button', { type: 'button', class: 'btn-primary', text: t.nuevo ? 'Cancelar tiro' : 'Cerrar', onclick: function () { if (t.nuevo) { if (confirm('¿Cancelar este tiro? Se descartan los datos ingresados.')) cancelarTiro(p); } else { terminarTiro(p); } } })
     ]);
     q.appendChild(acc);
@@ -1655,7 +1655,7 @@ var rolPersonal = {
     // Lo ya ingresado en este tiro
     var llenos = cs.filter(function (x) { return row[x.k] !== '' && x.k !== c.k; });
     if (llenos.length) {
-      q.appendChild(el('div', { class: 'jp-q-resumen' }, llenos.map(function (x) {
+      q.appendChild(el('div', { class: 'anfo-perforacion-q-resumen' }, llenos.map(function (x) {
         return el('span', { text: x.label.replace(/ \[.*\]$/, '') + ': ' + row[x.k] });
       })));
     }
@@ -1666,12 +1666,12 @@ var rolPersonal = {
   function vistaParada(host, p) {
     vistaParadaTiros(host,p); return;
     if (ui.tiro) { preguntaTiro(host, p); return; }
-    var t = p.trabajoActual, par = ui.parada, filas = tirosDe(p, t, par), card = el('div', { class: 'jp-card card-wide' });
-    card.appendChild(el('h2', { class: 'jp-card-t', text: '📍 Parada: ' + par }));
-    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Trabajo: ' + t + ' · Cada tiro se registra dato por dato. Enter o «Siguiente» avanza; en las listas basta con tocar la opción.' }));
-    if (ui.aviso) card.appendChild(el('div', { class: 'jp-aviso', text: ui.aviso }));
+    var t = p.trabajoActual, par = ui.parada, filas = tirosDe(p, t, par), card = el('div', { class: 'anfo-perforacion-card card-wide' });
+    card.appendChild(el('h2', { class: 'anfo-perforacion-card-t', text: '📍 Parada: ' + par }));
+    card.appendChild(el('p', { class: 'anfo-perforacion-card-sub', text: 'Trabajo: ' + t + ' · Cada tiro se registra dato por dato. Enter o «Siguiente» avanza; en las listas basta con tocar la opción.' }));
+    if (ui.aviso) card.appendChild(el('div', { class: 'anfo-perforacion-aviso', text: ui.aviso }));
     if (!filas.length) {
-      card.appendChild(el('div', { class: 'jp-vacio', text: 'Aún no hay tiros en esta parada. Toca «Agregar tiro».' }));
+      card.appendChild(el('div', { class: 'anfo-perforacion-vacio', text: 'Aún no hay tiros en esta parada. Toca «Agregar tiro».' }));
     } else {
       var tb = el('tbody'), mDis = 0, mPerf = 0, sc = 0, nc = 0;
       filas.forEach(function (r) {
@@ -1683,8 +1683,8 @@ var rolPersonal = {
           el('td', { text: r.mDiseno && r.mPerf ? Math.round(J.calc.cumpl(r) * 100) + '%' : '—' }),
           el('td', { text: r.abat ? r.abat + '°' : '—' }), el('td', { text: r.estado || '—' }), el('td', { text: r.problema || '—' }),
           el('td', null, [el('div', { class: 'acc' }, [
-            el('button', { type: 'button', class: 'jp-link', text: 'Configurar tiro', onclick: function () { editarTiro(p, r); } }),
-            el('button', { type: 'button', class: 'jp-x', title: 'Eliminar tiro', text: '×', onclick: function () {
+            el('button', { type: 'button', class: 'anfo-perforacion-link', text: 'Configurar tiro', onclick: function () { editarTiro(p, r); } }),
+            el('button', { type: 'button', class: 'anfo-perforacion-x', title: 'Eliminar tiro', text: '×', onclick: function () {
               if (confirm('¿Eliminar ' + nombreTiro(r) + '?')) {
                 p.filas.splice(p.filas.indexOf(r), 1); J.store.touch(); ui.aviso = '';
                 if (!tirosDe(p, t, par).length) ui.vista = 'resumen';
@@ -1695,7 +1695,7 @@ var rolPersonal = {
         ]));
       });
       var tf = el('tfoot', null, [el('tr', null, [el('td', { text: 'Total' }), el('td', { text: J.fmt(mDis, 1) }), el('td', { text: J.fmt(mPerf, 1) }), el('td', { text: pctTxt(nc ? sc / nc : NaN) }), el('td', { colspan: '4' })])]);
-      card.appendChild(el('div', { class: 'jp-scroll sin-scroll' }, [el('table', { class: 'jp-tabla-simple jp-tabla-tiros' }, [
+      card.appendChild(el('div', { class: 'anfo-perforacion-scroll sin-scroll' }, [el('table', { class: 'anfo-perforacion-tabla-simple anfo-perforacion-tabla-tiros' }, [
         el('thead', null, [el('tr', null, ['Tiro', 'Diseño [m]', 'Perforado [m]', 'Cumpl.', 'Abat.', 'Estado', 'Problema', ''].map(function (x) { return el('th', { text: x }); }))]),
         tb, tf])]));
     }
@@ -1789,18 +1789,18 @@ var rolPersonal = {
     page.appendChild(el('footer',{class:'anfo-final-footer'},[el('button',{type:'button',text:'‹ Volver a postura',onclick:function(){abrirPostura(p,'tiempos');}}),el('button',{type:'button',text:'+ Registrar otro trabajo',onclick:function(){ir('id');}})]));host.appendChild(page);
   }
   /*
-    var R = J.resumen(p), card = el('div', { class: 'jp-card card-wide' });
-    card.appendChild(el('h2', { class: 'jp-card-t', text: 'Paso 3: Datos Faltantes y Descarga' }));
-    card.appendChild(el('p', { class: 'jp-card-sub', text: 'Complete los datos de la plantilla y descargue su registro.' }));
-    card.appendChild(el('div', { class: 'jp-kpis' }, [
+    var R = J.resumen(p), card = el('div', { class: 'anfo-perforacion-card card-wide' });
+    card.appendChild(el('h2', { class: 'anfo-perforacion-card-t', text: 'Paso 3: Datos Faltantes y Descarga' }));
+    card.appendChild(el('p', { class: 'anfo-perforacion-card-sub', text: 'Complete los datos de la plantilla y descargue su registro.' }));
+    card.appendChild(el('div', { class: 'anfo-perforacion-kpis' }, [
       [R.nTiros, 'tiros registrados'], [p.trabajos.length, 'ID(s) de trabajo'], [R.paradas.length, 'paradas'],
       [J.fmt(R.mDis, 1) + ' m', 'metros de diseño'], [J.fmt(R.mPerf, 1) + ' m', 'metros perforados'],
       [pctTxt(R.cumplProm), 'cumplimiento prom. carga de diseño'],
       [J.fmtHM(R.tPerf), 'tiempo en perforación'], [J.fmtHM(R.tPerdidas), 'pérdida operacional total']
-    ].map(function (k) { return el('div', { class: 'jp-kpi' }, [el('b', { text: String(k[0]) }), el('span', { text: k[1] })]); })));
+    ].map(function (k) { return el('div', { class: 'anfo-perforacion-kpi' }, [el('b', { text: String(k[0]) }), el('span', { text: k[1] })]); })));
     var ok = plantillaCompleta(p);
-    card.appendChild(el('div', { class: 'jp-panel wizard-card' }, [
-      el('div', { class: 'jp-panel-t', text: ok ? '✅ DATOS DE PLANTILLA COMPLETOS' : '⚠️ FALTAN DATOS DE PLANTILLA' }),
+    card.appendChild(el('div', { class: 'anfo-perforacion-panel wizard-card' }, [
+      el('div', { class: 'anfo-perforacion-panel-t', text: ok ? '✅ DATOS DE PLANTILLA COMPLETOS' : '⚠️ FALTAN DATOS DE PLANTILLA' }),
       el('button', { type: 'button', class: 'btn-primary', style: 'margin-top:8px', text: (ok ? '✏️ Editar' : '📋 Rellenar') + ' Datos de Plantilla (Horarios/Operación)', onclick: function () { abrirAsistente('plantilla'); } })
     ]));
     card.appendChild(bloqueDescarga(p));
