@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="con-hero">
+    <style>
+        #jejStartupSplash{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;background:#0b1c43;opacity:1;transition:opacity .35s ease}
+        #jejStartupSplash img{display:block;width:min(100vw,540px);height:auto;max-height:94vh;max-height:94dvh;object-fit:contain}
+        #jejStartupSplash.oculto{opacity:0;pointer-events:none}
+    </style>
+    <div id="jejStartupSplash" aria-label="Cargando aplicación"><img src="img/pantalla%20de%20inicio.png" alt="JEJ Ingeniería Consciente"></div>
+    <script>(()=>{const splash=document.getElementById('jejStartupSplash');const inicio=Date.now();let oculto=false;const cerrar=()=>{if(oculto)return;oculto=true;setTimeout(()=>{splash.classList.add('oculto');setTimeout(()=>splash.remove(),400)},Math.max(0,700-(Date.now()-inicio)))};window.addEventListener('load',cerrar,{once:true});setTimeout(cerrar,3500)})();</script>
 
     <!-- BANNER DE BIENVENIDA -->
     <section class="hero" id="hero">

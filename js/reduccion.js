@@ -648,13 +648,16 @@
   const LT=String.fromCharCode(60);           // "<" armado por código para no romper el script de la página
   const tag=(n,attr)=>LT+n+(attr?' '+attr:'')+'>';
   const ctag=n=>LT+'/'+n+'>';
-  function descargarExcel(){
+  async function descargarExcel(){
     const p=P();if(!p.calles.length){toast('No hay calles para exportar');return}
     const html=tag('html','xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"')
       +tag('head')+tag('meta','charset="UTF-8"')+ctag('head')+tag('body')+todoHTML()+ctag('body')+ctag('html');
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'}));
-    a.download='RS_'+p.sector+'_'+p.fecha+'_Turno'+p.turno+'.xls';a.click();
+    const nombre='RS_'+p.sector+'_'+p.fecha+'_Turno'+p.turno+'.xls';
+    const blob=new Blob([String.fromCharCode(65279)+html],{type:'application/vnd.ms-excel'});
+    try{
+      if(window.JEJArchivo&&typeof window.JEJArchivo.guardar==='function') await window.JEJArchivo.guardar(nombre,blob,blob.type);
+      else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nombre;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2500);}
+    }catch(error){console.error('Error al exportar Excel de reducción:',error);alert('No se pudo guardar el archivo. '+(error&&error.message||''));}
   }
   function informe(){
     const p=P();if(!p.calles.length){toast('No hay calles para el informe');return}

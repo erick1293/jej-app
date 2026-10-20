@@ -11,15 +11,15 @@
     <main id="anfoMain" class="card-wide">
       <div id="toolbar"></div>
 
-      <section class="jp-paso card-wide" id="paso"></section>
+      <section class="anfo-perforacion-paso card-wide" id="paso"></section>
     </main>
 
     <!-- Librería para generar el Excel (.xlsx) -->
     <!-- Estructura base del modal: su contenido específico se completa desde JavaScript. -->
     <template id="plantillaModalJej">
-      <div class="jp-ov modal-overlay" data-modal-overlay>
+      <div class="anfo-perforacion-ov modal-overlay" data-modal-overlay>
         <section
-          class="jp-modal modal-content"
+          class="anfo-perforacion-modal modal-content"
           role="dialog"
           aria-modal="true"
           data-modal-content
@@ -40,13 +40,11 @@
     <script src="../js/vendor/exceljs.min.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
-    <script
-      src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"
-      integrity="sha384-PARf28kmic36Ve+O3DnUerRXFtOQ7ZDqRDGpLcbljly5/N39T2OV3kt3QsWOKeAX"
-      crossorigin="anonymous"
-    ></script>
+    <script src="../js/msal-browser.js"></script>
     <script src="../js/onedrive-integration.js"></script>
 
+    <script src="../js/capacitor-plugins.js"></script>
+    <script src="../js/archivo-movil.js"></script>
     <script src="../js/perforacion.js"></script>
     <script>
       if (typeof cargarBarMenu === "function") cargarBarMenu(true); // true = está en una subcarpeta (pages/)

@@ -630,7 +630,7 @@
             alert("Observaciones guardadas localmente.");
         }
 
-        function agregarCampoModal(contenedorId, nameInput) {
+        function agregarCampoModal(contenedorId, nameInput, actualizar = true) {
             const contenedor = document.getElementById(contenedorId);
             const div = document.createElement("div");
             div.style.display = "flex";
@@ -645,7 +645,7 @@
                 <button type="button" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button>
             `;
             contenedor.appendChild(div);
-            actualizarListasPorTurno();
+            if (actualizar) actualizarListasPorTurno();
         }
 
         function actualizarResumenUnificado() {
@@ -696,6 +696,17 @@
                     .filter(item => item && item.nombre && (!turno || !item.turno || item.turno === "Ambos" || item.turno === turno))
                     .map(item => String(item.nombre).trim()).filter(Boolean)));
             }
+
+            function asegurarCampos(rolKey, selectorNombre, contenedorId) {
+                const requeridos = nombresDelRol(rolKey, turnoSeleccionado).length;
+                let campos = document.getElementsByName(selectorNombre).length;
+                while (campos < requeridos) {
+                    agregarCampoModal(contenedorId, selectorNombre, false);
+                    campos++;
+                }
+            }
+            asegurarCampos("supervisorDet", "supervisorDet", "contenedorSupDetModal");
+            asegurarCampos("responsableDet", "responsableDet", "contenedorRespDetModal");
 
             function poblarGrupo(rolKey, selectorNombre, baseListId) {
                 const inputs = document.querySelectorAll(`input[name="${selectorNombre}"]`);
@@ -1268,6 +1279,23 @@
                     const m = /^(\d{1,2}):(\d{2})$/.exec(String(v || "").trim());
                     return m ? (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) / 1440 : (v || "");
                 };
+                const duracionExcel = (inicio, fin) => {
+                    const a = /^(\d{1,2}):(\d{2})$/.exec(String(inicio || "").trim());
+                    const b = /^(\d{1,2}):(\d{2})$/.exec(String(fin || "").trim());
+                    if (!a || !b) return "";
+                    let minutos = (Number(b[1]) * 60 + Number(b[2])) - (Number(a[1]) * 60 + Number(a[2]));
+                    if (minutos < 0) minutos += 1440;
+                    return minutos / 1440;
+                };
+                const duracionLibreExcel = (valor) => {
+                    const texto = String(valor || "").trim().toLowerCase();
+                    if (!texto) return "";
+                    const hm = /^(\d{1,2}):(\d{2})$/.exec(texto);
+                    if (hm) return (Number(hm[1]) * 60 + Number(hm[2])) / 1440;
+                    const h = /(\d+(?:[.,]\d+)?)\s*h/.exec(texto), m = /(\d+(?:[.,]\d+)?)\s*(?:m|min)/.exec(texto);
+                    const total = h || m ? (h ? parseFloat(h[1].replace(',', '.')) * 60 : 0) + (m ? parseFloat(m[1].replace(',', '.')) : 0) : parseFloat(texto.replace(',', '.'));
+                    return Number.isFinite(total) ? total / 1440 : "";
+                };
                 const fechaExcel = (v) => {
                     const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(v || "").trim());
                     return m ? new Date(Date.UTC(+m[3], +m[2] - 1, +m[1])) : (v || "");
@@ -1297,6 +1325,11 @@
                 asignarValorCelda('H8', horaExcel(val("hInicioCarguio")));
                 asignarValorCelda('H9', horaExcel(val("hFinCarguio")));
                 asignarValorCelda('H10', horaExcel(val("hSalidaPyT")));
+                ['H5','H6','H7','H8','H9','H10'].forEach(celda => { worksheet.getCell(celda).numFmt = 'hh:mm'; });
+                asignarValorCelda('H11', duracionExcel(val("hLlegadaPyT"), val("hSalidaPyT")));
+                asignarValorCelda('H12', duracionExcel(val("hInicioCarguio"), val("hFinCarguio")));
+                worksheet.getCell('H11').numFmt = '[h]:mm';
+                worksheet.getCell('H12').numFmt = '[h]:mm';
                 asignarValorCelda('H13', numONada(val("diametroTiros")));
                 asignarValorCelda('H14', val("tiroVod"));
 
@@ -1322,12 +1355,16 @@
                 // Amarre: inicio (U5), fin (X5); AA5 es fórmula de la plantilla
                 asignarValorCelda('U5', horaExcel(val("hInicioAmarre")));
                 asignarValorCelda('X5', horaExcel(val("hFinAmarre")));
+                worksheet.getCell('U5').numFmt = 'hh:mm';
+                worksheet.getCell('X5').numFmt = 'hh:mm';
 
                 // Pérdidas operacionales (texto en T7 / T12, tiempo en AC7 / AC12)
                 asignarValorCelda('T7', val("obsPerdidaCarguio"));
-                asignarValorCelda('AC7', horaExcel(val("tiempoPerdidaCarguio")));
+                asignarValorCelda('AC7', duracionLibreExcel(val("tiempoPerdidaCarguio")));
+                worksheet.getCell('AC7').numFmt = '[h]:mm';
                 asignarValorCelda('T12', val("obsPerdidaAmarre"));
-                asignarValorCelda('AC12', horaExcel(val("tiempoPerdidaAmarre")));
+                asignarValorCelda('AC12', duracionLibreExcel(val("tiempoPerdidaAmarre")));
+                worksheet.getCell('AC12').numFmt = '[h]:mm';
 
                 // =========================
                 // TABLA DE TIROS DE EMULSIÓN (DESDE LA FILA 17)
@@ -1425,15 +1462,20 @@
                 });
 
                 const nombreArchivo = `Seguimiento_Emulsion_Turno_${document.getElementById("turnoEmulsion").value}_${Date.now()}.xlsx`;
-                const enlace = document.createElement('a');
-                enlace.href = URL.createObjectURL(blob);
-                enlace.download = nombreArchivo;
-                document.body.appendChild(enlace);
-                enlace.click();
-                document.body.removeChild(enlace);
-                URL.revokeObjectURL(enlace.href);
-
-                alert("¡Archivo Excel de Emulsión generado con éxito manteniendo la nueva estructura!");
+                if (window.JEJArchivo && typeof window.JEJArchivo.guardar === 'function') {
+                    await window.JEJArchivo.guardar(nombreArchivo, blob, blob.type);
+                } else {
+                    const enlace = document.createElement('a');
+                    enlace.href = URL.createObjectURL(blob);
+                    enlace.download = nombreArchivo;
+                    document.body.appendChild(enlace);
+                    enlace.click();
+                    document.body.removeChild(enlace);
+                    setTimeout(() => URL.revokeObjectURL(enlace.href), 2500);
+                }
+                alert(window.JEJArchivo && window.JEJArchivo.esNativo()
+                    ? "Archivo Excel de Emulsión generado. Usa el menú de Android para guardarlo o compartirlo."
+                    : "¡Archivo Excel de Emulsión generado con éxito manteniendo la nueva estructura!");
 
             } catch (error) {
                 console.error("Error al generar el Excel:", error);

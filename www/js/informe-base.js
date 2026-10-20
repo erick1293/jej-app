@@ -161,6 +161,10 @@
     }
 
     function abrir(html, nombreArchivo) {
+        if (root.JEJArchivo && typeof root.JEJArchivo.abrirInforme === 'function') {
+            root.JEJArchivo.abrirInforme(html, nombreArchivo || 'Informe técnico');
+            return;
+        }
         var w = root.open('', '_blank');
         if (!w) {
             var a = document.createElement('a');

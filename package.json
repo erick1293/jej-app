@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "sync": "node scripts/copiar-www.js && npx cap sync android"
+    "sync": "node scripts/bundle-capacitor.js && node scripts/copiar-www.js && npx cap sync android"
   },
   "repository": {
     "type": "git",
@@ -20,8 +20,14 @@
   },
   "homepage": "https://github.com/erick1293/jej-app#readme",
   "dependencies": {
+    "@azure/msal-browser": "^2.35.0",
     "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
-    "@capacitor/core": "^8.5.3"
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/share": "^8.0.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

@@ -452,10 +452,13 @@
     var wb = build(EJS, p);
     return wb.xlsx.writeBuffer().then(function (buf) {
       var blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      if (root.JEJArchivo && typeof root.JEJArchivo.guardar === 'function') {
+        return root.JEJArchivo.guardar(nombreArchivo(p), blob, blob.type);
+      }
       var a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = nombreArchivo(p);
       document.body.appendChild(a); a.click();
-      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2500);
     });
   }
 
@@ -700,7 +703,47 @@
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || ''); return m ? m[3] + '-' + m[2] + '-' + m[1] : (f || '—');
   }
 
-  var cssHref = new URL('../css/styles.css', window.location.href).href;
+  var estilosInforme = [
+    ':root{--ink:#142b54;--muted:#627697;--line:#d9e1ed;--navy:#10265b;--blue:#315ba8;--cyan:#22b8e8;--green:#159b62;--paper:#fff;--bg:#e9eef6}',
+    '*{box-sizing:border-box}',
+    'html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
+    '.jej-acciones-cabecera{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px max(12px,env(safe-area-inset-left));background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 8px #10265b18;color:var(--muted);font-size:12px}',
+    '.jej-acciones-cabecera button{min-height:40px;padding:8px 14px;border:0;border-radius:9px;background:linear-gradient(#20c981,#0b985c);color:#fff;font:inherit;font-weight:800;cursor:pointer}',
+    '.card-wide{width:min(1100px,calc(100% - 24px));max-width:1100px;margin:16px auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 20px #10265b18;overflow:hidden}',
+    '.card-wide>.wizard-card:first-child{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin:0;padding:22px 26px;color:#fff;background:linear-gradient(135deg,#183872,#0c1d48);border:0;border-bottom:4px solid var(--cyan);border-radius:0}',
+    '.card-wide>.wizard-card:first-child .emp{margin:0 0 7px;color:#cfdef6;font-size:11px;letter-spacing:.03em}',
+    '.card-wide>.wizard-card:first-child h1{margin:0;font-size:clamp(21px,4vw,30px);line-height:1.15}',
+    '.card-wide>.wizard-card:first-child .id{margin-top:7px;color:#dce8fa;font-size:13px}',
+    '.card-wide>.wizard-card:first-child .der{text-align:right;color:#dce8fa;font-size:12px;white-space:nowrap}',
+    '.card-wide>.wizard-card:first-child .der b{display:block;color:#fff;font-size:20px}',
+    '.resumen-box{margin:0;padding:18px 24px 22px;background:#fff;color:var(--ink);font-size:12px;line-height:1.5}',
+    '.resumen-box h2{margin:21px 0 9px;padding:0 0 5px;border:0;border-bottom:2px solid #dce6f4;color:#193b78;font-size:15px;line-height:1.25;break-after:avoid}',
+    '.resumen-box h2:first-child{margin-top:0}',
+    '.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}',
+    '.resumen-box>.grid-2>div:not(.item-parada-card){min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#f7f9fc;overflow-wrap:anywhere}',
+    '.resumen-box>.grid-2>div:not(.item-parada-card)>span{display:block;margin-bottom:2px;color:var(--muted);font-size:10px}',
+    '.resumen-box>.grid-2>div:not(.item-parada-card)>b{font-size:12px}',
+    '.item-parada-card{display:grid;align-content:center;gap:3px;min-width:0;margin:0;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#f7f9fc;overflow-wrap:anywhere;break-inside:avoid}',
+    '.item-parada-card>b{color:#173875;font-size:17px;line-height:1.15}',
+    '.item-parada-card>span{color:var(--muted);font-size:10px}',
+    '.item-parada-card.ok>b{color:#078449}.item-parada-card.mal>b{color:#c33d45}',
+    '.resumen-box table{display:block;width:100%;max-width:100%;margin:7px 0 14px;overflow-x:auto;border-collapse:collapse;font-size:10px;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}',
+    '.resumen-box th,.resumen-box td{padding:6px 7px;border:1px solid var(--line);text-align:center;white-space:nowrap}',
+    '.resumen-box th{background:#eaf0f8;color:#193b78;font-weight:800}',
+    '.resumen-box tbody tr:nth-child(even) td{background:#f7f9fc}.resumen-box tfoot td{background:#fff4d8;font-weight:800}',
+    '.resumen-box td.l,.resumen-box th.l{text-align:left;white-space:normal;min-width:130px}',
+    '.resumen-box .wizard-card{margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:#f8fafd;break-inside:avoid}',
+    '.resumen-box .wizard-card h3{margin:0 0 8px;color:#193b78;font-size:13px}',
+    '.resumen-box figure{min-width:0;margin:0;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}',
+    '.resumen-box figure svg{display:block;width:100%;height:auto}',
+    '.resumen-box figcaption{margin-top:5px;color:var(--muted);font-size:10px;text-align:center}',
+    '.resumen-box .nota{margin:7px 0 0;padding:8px 10px;border:1px dashed #74bfe2;border-radius:8px;background:#edf8ff;color:#315b80;font-size:10px;overflow-wrap:anywhere}',
+    '.resumen-box ul{padding-left:22px}.resumen-box li{margin:5px 0;overflow-wrap:anywhere}',
+    '.section-title{display:flex;justify-content:space-between;gap:10px;padding:10px 24px;border-top:1px solid var(--line);background:#f7f9fc;color:var(--muted);font-size:10px}',
+    '@media(max-width:640px){.jej-acciones-cabecera{padding:8px 10px;font-size:10px}.jej-acciones-cabecera button{min-height:38px;padding:7px 10px;font-size:11px}.card-wide{width:calc(100% - 16px);margin:8px auto;border-radius:11px}.card-wide>.wizard-card:first-child{align-items:flex-start;flex-direction:column;gap:10px;padding:16px}.card-wide>.wizard-card:first-child .der{text-align:left}.resumen-box{padding:14px 12px 18px}.resumen-box h2{margin-top:17px}.grid-2{gap:6px}.resumen-box>.grid-2>div:not(.item-parada-card){padding:7px}.item-parada-card{padding:8px}.item-parada-card>b{font-size:15px}.section-title{flex-direction:column;padding:9px 12px}}',
+    '@page{size:A4 landscape;margin:10mm}',
+    '@media print{html,body{background:#fff}.jej-acciones-cabecera{display:none}.card-wide{width:100%;max-width:none;margin:0;border:0;border-radius:0;box-shadow:none;overflow:visible}.card-wide>.wizard-card:first-child{print-color-adjust:exact}.resumen-box{padding:8px 4px}.resumen-box table{display:table;overflow:visible;font-size:8px}.resumen-box th,.resumen-box td{padding:3px 4px;white-space:normal;overflow-wrap:anywhere}.resumen-box>.grid-2>div,.item-parada-card,.resumen-box .wizard-card{break-inside:avoid}.section-title{padding:8px 4px}}'
+  ].join('\n');
 
   function agrupar(p) {
     var g = {}, orden = [];
@@ -766,7 +809,7 @@
 
     /* ---- Registro por tiro ---- */
     if (filas.length) {
-      B.push('<h2>Registro por tiro</h2><div class=""><table><thead><tr>' + (multi ? '<th>Trabajo</th>' : '') + '<th>Parada</th><th>Tiro</th><th>Diseño [m]</th><th>Taco [m]</th><th>Perforado [m]</th><th>Cumpl. carga</th><th>Abat. [°]</th><th>Rot. [°]</th><th>Sentido</th><th>Estado</th><th>Agua</th><th>Entub. [m]</th><th>Problema</th><th>T. perf. [min]</th></tr></thead><tbody>' +
+      B.push('<h2>Registro por tiro</h2><div class="tabla-ancha"><table><thead><tr>' + (multi ? '<th>Trabajo</th>' : '') + '<th>Parada</th><th>Tiro</th><th>Diseño [m]</th><th>Taco [m]</th><th>Perforado [m]</th><th>Cumpl. carga</th><th>Abat. [°]</th><th>Rot. [°]</th><th>Sentido</th><th>Estado</th><th>Agua</th><th>Entub. [m]</th><th>Problema</th><th>T. perf. [min]</th></tr></thead><tbody>' +
         filas.map(function (r) {
           var t = J.calc.tTiro(r), prob = r.problema ? esc(r.problema) + (r.alturaBarra ? ' (' + esc(r.alturaBarra) + ' m)' : '') : '—';
           return '<tr>' + (multi ? '<td>' + dash(r.trabajo) + '</td>' : '') + '<td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td><td>' + dash(r.mDiseno) + '</td><td>' + dash(r.taco) + '</td><td>' + dash(r.mPerf) + '</td><td>' +
@@ -777,7 +820,7 @@
       /* ---- Parámetros operacionales ---- */
       var keys = ['pPerc', 'pRot', 'pAv', 'pAgua', 'pComp', 'golpes', 'rpm', 'vAv', 'caudal', 'hIni', 'hFin'];
       if (filas.some(function (r) { return keys.some(function (k) { return r[k] !== ''; }); })) {
-        B.push('<h2>Parámetros de perforación</h2><div class=""><table><thead><tr><th>Parada</th><th>Tiro</th><th>P. percusión [bar]</th><th>P. rotación [bar]</th><th>P. avance [bar]</th><th>P. agua [bar]</th><th>P. compresor aceite [bar]</th><th>Golpes/min</th><th>RPM</th><th>Vel. avance</th><th>Caudal agua [m³/min]</th><th>Inicio</th><th>Término</th></tr></thead><tbody>' +
+        B.push('<h2>Parámetros de perforación</h2><div class="tabla-ancha"><table><thead><tr><th>Parada</th><th>Tiro</th><th>P. percusión [bar]</th><th>P. rotación [bar]</th><th>P. avance [bar]</th><th>P. agua [bar]</th><th>P. compresor aceite [bar]</th><th>Golpes/min</th><th>RPM</th><th>Vel. avance</th><th>Caudal agua [m³/min]</th><th>Inicio</th><th>Término</th></tr></thead><tbody>' +
           filas.map(function (r) {
             return '<tr><td>' + dash(r.parada) + '</td><td><b>' + dash(r.tiro) + '</b></td>' + ['pPerc', 'pRot', 'pAv', 'pAgua', 'pComp', 'golpes', 'rpm', 'vAv', 'caudal', 'hIni', 'hFin'].map(function (k) { return '<td>' + dash(r[k]) + '</td>'; }).join('') + '</tr>';
           }).join('') + '</tbody></table></div>');
@@ -828,7 +871,7 @@
     var titulo = 'Informe técnico ' + (h.idTronadura || 'perforación') + (h.fecha ? ' · ' + h.fecha : '');
     var LT = '<';
     return LT + '!DOCTYPE html>' + LT + 'html lang="es">' + LT + 'head>' + LT + 'meta charset="UTF-8">' + LT + 'meta name="viewport" content="width=device-width, initial-scale=1">' +
-      LT + 'title>' + esc(titulo) + LT + '/title>' + LT + 'link rel="stylesheet" href="' + esc(cssHref) + '">' + LT + '/head>' + LT + 'body>' +
+      LT + 'title>' + esc(titulo) + LT + '/title>' + LT + 'style>' + estilosInforme + LT + '/style>' + LT + '/head>' + LT + 'body>' +
       LT + 'div class="jej-acciones-cabecera">' + LT + 'span>Para guardar el informe: Imprimir → Destino «Guardar como PDF».' + LT + '/span>' + LT + 'button type="button" class="btn-primary" onclick="window.print()">Imprimir / Guardar PDF' + LT + '/button>' + LT + '/div>' +
       LT + 'div class="card-wide">' + B.join('') + LT + '/div>' + LT + '/body>' + LT + '/html>';
   }
@@ -849,6 +892,10 @@
   // Abre el informe en una pestaña nueva y lanza la impresión (Guardar como PDF)
   function abrir(p) {
     var html = documento(p);
+    if (root.JEJArchivo && typeof root.JEJArchivo.abrirInforme === 'function') {
+      root.JEJArchivo.abrirInforme(html, nombreArchivo(p));
+      return;
+    }
     var w = window.open('', '_blank');
     if (!w) {
       descargarHtml(p, html);
