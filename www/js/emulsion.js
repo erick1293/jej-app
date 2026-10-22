@@ -21,6 +21,24 @@
             item.appendChild(enlace);
             menuEmulsion.insertBefore(item, menuEmulsion.children[1] || null);
         }
+        function agregarAccionesMenuEmulsion() {
+            const menu = document.querySelector("#dropdownMenu ul");
+            if (!menu) return;
+            const cerrar = () => document.getElementById("dropdownMenu")?.classList.remove("show");
+            const acciones = [
+                ["menuExcelEmulsion", "⬇ Descargar Excel", () => guardarFormularioEmulsionYExportarExcel()],
+                ["menuPlanillaEmulsion", "📋 Datos faltantes de planilla", () => window.abrirDatosPlantillaEmulsion("tiempos")],
+                ["menuInformeEmulsion", "📄 Ver informe técnico", () => generarInformeTecnicoHTML()]
+            ];
+            acciones.forEach(([id, texto, ejecutar]) => {
+                if (document.getElementById(id)) return;
+                const item = document.createElement("li"), enlace = document.createElement("a");
+                enlace.id = id; enlace.href = "#"; enlace.textContent = texto;
+                enlace.addEventListener("click", evento => { evento.preventDefault(); cerrar(); ejecutar(); });
+                item.appendChild(enlace); menu.appendChild(item);
+            });
+        }
+        agregarAccionesMenuEmulsion();
         function sincronizarBotonesTurnoEmulsion() {
             const turno = document.getElementById("turnoEmulsion").value;
             document.querySelectorAll("[data-turno-emulsion]").forEach(boton => {

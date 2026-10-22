@@ -757,6 +757,24 @@
             itemMenuAnfo.appendChild(enlaceMenuAnfo);
             menuAnfo.insertBefore(itemMenuAnfo, menuAnfo.children[1] || null);
         }
+        function agregarAccionesMenuAnfo() {
+            const menu = document.querySelector("#dropdownMenu ul");
+            if (!menu) return;
+            const cerrar = () => document.getElementById("dropdownMenu")?.classList.remove("show");
+            const acciones = [
+                ["menuExcelAnfo", "⬇ Descargar Excel", () => guardarFormularioAnfoYExportarExcel()],
+                ["menuPlanillaAnfo", "📋 Datos faltantes de planilla", () => window.abrirDatosPostura("tiempos")],
+                ["menuInformeAnfo", "📄 Ver informe técnico", () => generarInformeTecnicoHTML()]
+            ];
+            acciones.forEach(([id, texto, ejecutar]) => {
+                if (document.getElementById(id)) return;
+                const item = document.createElement("li"), enlace = document.createElement("a");
+                enlace.id = id; enlace.href = "#"; enlace.textContent = texto;
+                enlace.addEventListener("click", evento => { evento.preventDefault(); cerrar(); ejecutar(); });
+                item.appendChild(enlace); menu.appendChild(item);
+            });
+        }
+        agregarAccionesMenuAnfo();
 
         function sincronizarBotonesTurnoAnfo() {
             const turno = document.getElementById("turnoAnfo").value;
@@ -816,6 +834,7 @@
 
             document.getElementById("turnoAnfo").addEventListener("change", () => {
                 sincronizarBotonesTurnoAnfo();
+                limpiarAsignacionPersonalTemporal();
                 actualizarListasPorTurno();
                 actualizarResumenUnificado();
                 ejecutarAutosave();
@@ -1226,6 +1245,8 @@
             
            const borrador = {
                 turno: document.getElementById("turnoAnfo")?.value || "A",
+                personalFecha: document.getElementById("fechaAnfo")?.value || "",
+                personalTurno: document.getElementById("turnoAnfo")?.value || "A",
                 supJeJ: document.getElementById("modalSupJeJ")?.value || "",
                 supervisorDet: Array.from(document.querySelectorAll('#modalPersonal input[name="supervisorDet"]')).map(input => input.value.trim()).filter(Boolean),
                 responsableDet: Array.from(document.querySelectorAll('#modalPersonal input[name="responsableDet"]')).map(input => input.value.trim()).filter(Boolean),
@@ -1286,14 +1307,17 @@
                 if (b.mina) document.getElementById("modalMina").value = b.mina;
                 if (b.nivel) document.getElementById("modalNivel").value = b.nivel;
                 if (b.bloque) document.getElementById("modalBloque").value = b.bloque;
+                const mismaAsignacionDiaria = b.personalFecha === (document.getElementById("fechaAnfo")?.value || "") &&
+                    b.personalTurno === (document.getElementById("turnoAnfo")?.value || "A");
                 ["numZanja", "calleZanja", "faseZanja", "calleUcl", "paradasInicioFin", "detallePanel2"].forEach(id => {
                     const campo = document.getElementById(id);
                     if (campo && b[id] !== undefined) campo.value = b[id];
                 });
                 cambiarNivelModal();
                 actualizarIdTronaduraAuto();
+                limpiarAsignacionPersonalTemporal();
                 actualizarListasPorTurno();
-                if (b.supJeJ !== undefined) document.getElementById("modalSupJeJ").value = b.supJeJ;
+                if (mismaAsignacionDiaria && b.supJeJ !== undefined) document.getElementById("modalSupJeJ").value = b.supJeJ;
                 function restaurarGrupoPersonal(name, containerId, valores) {
                     if (!Array.isArray(valores)) return;
                     const contenedor = document.getElementById(containerId);
@@ -1302,8 +1326,10 @@
                     const inputs = Array.from(document.querySelectorAll(`#modalPersonal input[name="${name}"]`));
                     valores.forEach((valor, index) => { if (inputs[index]) inputs[index].value = valor; });
                 }
-                restaurarGrupoPersonal("supervisorDet", "contenedorSupDetModal", b.supervisorDet);
-                restaurarGrupoPersonal("responsableDet", "contenedorRespDetModal", b.responsableDet);
+                if (mismaAsignacionDiaria) {
+                    restaurarGrupoPersonal("supervisorDet", "contenedorSupDetModal", b.supervisorDet);
+                    restaurarGrupoPersonal("responsableDet", "contenedorRespDetModal", b.responsableDet);
+                }
                 ["obsPerdidaCarguio", "tiempoPerdidaCarguio", "obsPerdidaAmarre", "tiempoPerdidaAmarre", "obsGenerales", "presionCompresor", "presionPera", "diametroTiros", "tiroVod", "hLlegadaJeJ", "hSalidaJeJ", "hLlegadaPyT", "hSalidaPyT", "hInicioCarguio", "hFinCarguio", "hInicioAmarre", "hFinAmarre", "ubicacionGeofono", "distanciaGeofono", "alturaGeofono"].forEach(id => {
                     const campo = document.getElementById(id);
                     if (campo && b[id] !== undefined) campo.value = b[id];
@@ -1402,6 +1428,17 @@
             const estado = document.getElementById("estadoPersonalAnfo");
             estado.textContent = completo ? "✓ Completo" : "Pendiente";
             estado.classList.toggle("incompleto", !completo);
+        }
+
+        function limpiarAsignacionPersonalTemporal() {
+            const supJeJ = document.getElementById("modalSupJeJ");
+            if (supJeJ) supJeJ.value = "";
+            ["contenedorSupDetModal", "contenedorRespDetModal"].forEach(id => {
+                const contenedor = document.getElementById(id);
+                if (!contenedor) return;
+                while (contenedor.children.length > 1) contenedor.lastElementChild.remove();
+                contenedor.querySelectorAll("input").forEach(input => { input.value = ""; });
+            });
         }
 
         function actualizarListasPorTurno() {

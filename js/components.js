@@ -60,10 +60,6 @@ document.addEventListener("click", function (e) {
 
 /* ---------- Procesos (menú lateral y buscador) ---------- */
 const JEJ_PROCESOS = [
-    { t: "Seguimiento al carguío con ANFO", p: "anfo.html" },
-    { t: "Seguimiento al carguío con Emulsión", p: "emulsion.html" },
-    { t: "Seguimiento a la reducción secundaria", p: "reduccion.html" },
-    { t: "Seguimiento a la perforación", p: "perforacion.html" },
     { t: "Gestionar Personal (DET / JeJ)", p: "usuarios.html" }
 ];
 

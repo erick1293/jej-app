@@ -236,6 +236,13 @@
     filaVaciaPerf: filaVaciaPerf
   };
   load();
+  var planillaActiva = store.current();
+  var fechaActual = new Date();
+  var fechaUso = fechaActual.getFullYear() + '-' + ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' + ('0' + fechaActual.getDate()).slice(-2);
+  if (planillaActiva && planillaActiva.header.fecha !== fechaUso) {
+    planillaActiva.header.fecha = fechaUso;
+    save();
+  }
 
   root.JEJ = {
     LISTAS: LISTAS, COLS: COLS, store: store, calc: calc,
@@ -981,9 +988,19 @@
     var supJej = nombresUsuarios('supervisorJeJ', h.turno);
     var supDet = nombresUsuarios('supervisorDet', h.turno);
     var perforistas = nombresUsuarios('responsableDet', h.turno);
-    if (!h.supJej && supJej.length) { h.supJej = supJej[0]; cambio = true; }
-    if (!partes(h.supDet).length && supDet.length) { h.supDet = supDet.join(' / '); cambio = true; }
-    if (!partes(h.perforistaDet).length && perforistas.length) { h.perforistaDet = perforistas.join(' / '); cambio = true; }
+    function sincronizar(valor, disponibles, multiple) {
+      var actuales = (multiple ? partes(valor) : [valor]).map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+      var vigentes = actuales.filter(function (nombre) {
+        return disponibles.some(function (opcion) { return opcion.toLocaleLowerCase() === nombre.toLocaleLowerCase(); });
+      });
+      if (!vigentes.length) vigentes = disponibles.slice();
+      var resultado = multiple ? vigentes.join(' / ') : (vigentes[0] || '');
+      if (resultado !== (valor || '')) { cambio = true; return resultado; }
+      return valor || '';
+    }
+    h.supJej = sincronizar(h.supJej, supJej, false);
+    h.supDet = sincronizar(h.supDet, supDet, true);
+    h.perforistaDet = sincronizar(h.perforistaDet, perforistas, true);
     return cambio;
   }
   var dlN = 0;
@@ -1890,11 +1907,25 @@ var rolPersonal = {
   render();
   function agregarIngresoMenu() {
     var menu = document.querySelector('#dropdownMenu ul');
-    if (!menu || menu.querySelector('[data-perforacion-ingreso]')) return;
-    var li = document.createElement('li'), a = document.createElement('a');
-    a.href = '#'; a.dataset.perforacionIngreso = '1'; a.textContent = '⚙️ Ingreso / Editar Datos';
-    a.addEventListener('click', function (e) { e.preventDefault(); var dd = document.getElementById('dropdownMenu'); if (dd) dd.classList.remove('show'); abrirAsistente('postura'); });
-    li.appendChild(a); menu.insertBefore(li, menu.children[1] || null);
+    if (!menu) return;
+    if (!menu.querySelector('[data-perforacion-ingreso]')) {
+      var li = document.createElement('li'), a = document.createElement('a');
+      a.href = '#'; a.dataset.perforacionIngreso = '1'; a.textContent = '⚙️ Ingreso / Editar Datos';
+      a.addEventListener('click', function (e) { e.preventDefault(); var dd = document.getElementById('dropdownMenu'); if (dd) dd.classList.remove('show'); abrirAsistente('postura'); });
+      li.appendChild(a); menu.insertBefore(li, menu.children[1] || null);
+    }
+    var acciones = [
+      ['menuExcelPerforacion', '⬇ Descargar Excel', function () { J.store.saveNow(); J.excel.download(P()); }],
+      ['menuPlanillaPerforacion', '📋 Datos faltantes de planilla', function () { abrirAsistente('plantilla'); }],
+      ['menuInformePerforacion', '📄 Ver informe técnico', function () { J.store.saveNow(); J.informe.abrir(P()); }]
+    ];
+    acciones.forEach(function (accion) {
+      if (document.getElementById(accion[0])) return;
+      var item = document.createElement('li'), enlace = document.createElement('a');
+      enlace.id = accion[0]; enlace.href = '#'; enlace.textContent = accion[1];
+      enlace.addEventListener('click', function (e) { e.preventDefault(); var dd = document.getElementById('dropdownMenu'); if (dd) dd.classList.remove('show'); accion[2](); });
+      item.appendChild(enlace); menu.appendChild(item);
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', agregarIngresoMenu); else agregarIngresoMenu();
   window.addEventListener('beforeunload', function () { J.store.saveNow(); });

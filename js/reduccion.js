@@ -87,6 +87,7 @@
   const P=()=>S.pl.find(p=>p.id===S.act)||S.pl[0];
   const C=()=>P().calles.find(c=>c.id===P().calleAct);
   const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+  if(P().fecha!==hoy()){P().fecha=hoy();save()}
   const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const $=id=>document.getElementById(id);
   const num=v=>parseFloat(String(v).replace(',','.'))||0;
@@ -114,15 +115,17 @@
     ['v1','v2','v3','v4','v5','v6','v7','v8'].forEach((id,i)=>$(id).hidden=V!==i+1);
     if(V===1){
       const p=P();$('fFecha').value=p.fecha;$('fTurno').value=p.turno;
-      if(completarPersonalPlanilla(p)||actualizarPersonalPorTurno(p))save();
+      const personalCompleto=completarPersonalPlanilla(p);
+      const personalActualizado=actualizarPersonalPorTurno(p);
+      if(personalCompleto||personalActualizado)save();
       sincronizarTurnoRS();
       const personal=[
-        ['Encargado Seguimiento JeJ',localStorage.getItem('jej_usuario_activo')||p.encJEJ||'',false],
-        ['Supervisor JeJ',p.supervisorJeJ||'',false],
-        ...(p.supervisorDet||[]).filter(Boolean).map(nombre=>['Supervisor(es) DET',nombre,true]),
-        ...((p.encDETActivo||((p.encDET||[]).filter(Boolean)[0]))?[['Responsable(s) Carguío DET',p.encDETActivo||p.encDET.filter(Boolean)[0],true]]:[])
-      ].filter(([,nombre])=>nombre);
-      const completos=personal.length>=4&&Boolean(p.sector)&&Boolean(p.grupo);
+        ['Encargado Seguimiento JeJ',localStorage.getItem('jej_usuario_activo')||p.encJEJ||'Sin asignar',false],
+        ['Supervisor JeJ',p.supervisorJeJ||'Sin asignar',false],
+        ['Supervisor(es) DET',(p.supervisorDet||[]).filter(Boolean).join(', ')||'Sin asignar',true],
+        ['Responsable(s) DET',p.encDETActivo||(p.encDET||[]).filter(Boolean)[0]||'Sin asignar',true]
+      ];
+      const completos=personal.every(([,nombre])=>nombre&&nombre!=='Sin asignar')&&Boolean(p.sector)&&Boolean(p.grupo);
       $('estadoPersonalRS').textContent=completos?'✓ Completo':'Datos pendientes';
       $('estadoPersonalRS').classList.toggle('incompleto',!completos);
       $('infoDatos').innerHTML=personal.length?personal.map(([rol,nombre,det])=>{
@@ -266,6 +269,7 @@
   }
   function abrirDatosModal(){
     const p=P();
+    if(actualizarPersonalPorTurno(p))save();
     $('mdSector').value=p.sector||'';
     $('mdGrupo').value=p.grupo??'';
     cargarDatalistPersonalRS('listaSupJeJ','supervisorJeJ',p.turno);
@@ -276,7 +280,7 @@
     $('mdSupervisorJeJ').value=p.supervisorJeJ||'';
     pintarPersonalModal('mdSupervisoresDET','supervisorDet',p.supervisorDet&&p.supervisorDet.length?p.supervisorDet:['']);
     const responsablesTurno=nombresPersonalRS('responsableDet',p.turno);
-    const responsableElegido=p.encDETActivo||responsablesTurno.find(nombre=>(p.encDET||[]).some(actual=>String(actual).trim().toLocaleLowerCase()===nombre.toLocaleLowerCase()))||responsablesTurno[0]||(p.encDET||[]).find(Boolean)||'';
+    const responsableElegido=p.encDETActivo||responsablesTurno[0]||'';
     pintarEncargadosModal([responsableElegido]);
     $('mDatos').style.display='flex';
   }
@@ -296,26 +300,18 @@
   }
   function actualizarPersonalPorTurno(p){
     let cambio=false;
-    const ajustar=(valor,rol,multiple)=>{
-      const actual=(multiple?(valor||[]):[valor]).map(x=>String(x||'').trim()).filter(Boolean);
-      const todos=nombresPersonalRS(rol,'');
-      const disponibles=nombresPersonalRS(rol,p.turno);
-      const validos=actual.filter(nombre=>!todos.some(x=>x.toLocaleLowerCase()===nombre.toLocaleLowerCase())||disponibles.some(x=>x.toLocaleLowerCase()===nombre.toLocaleLowerCase()));
-      const resultado=validos.length?validos:(actual.length?disponibles:disponibles.slice(0,1));
-      const final=multiple?(resultado.length?resultado:['']):(resultado[0]||'');
-      if(JSON.stringify(valor)!==JSON.stringify(final)){cambio=true;return final}
-      return valor;
-    };
-    p.supervisorJeJ=ajustar(p.supervisorJeJ,'supervisorJeJ',false);
-    p.supervisorDet=ajustar(p.supervisorDet,'supervisorDet',true);
+    const supervisorJeJ=nombresPersonalRS('supervisorJeJ',p.turno);
+    const supervisoresDET=nombresPersonalRS('supervisorDet',p.turno);
+    const responsablesDET=nombresPersonalRS('responsableDet',p.turno);
+    const supervisorJeJActual=supervisorJeJ[0]||'';
+    const supervisoresActuales=supervisoresDET.length?supervisoresDET:[''];
+    const responsablesActuales=responsablesDET.length?responsablesDET:[''];
+    if(p.supervisorJeJ!==supervisorJeJActual){p.supervisorJeJ=supervisorJeJActual;cambio=true;}
+    if(JSON.stringify(p.supervisorDet)!==JSON.stringify(supervisoresActuales)){p.supervisorDet=supervisoresActuales;cambio=true;}
+    if(JSON.stringify(p.encDET)!==JSON.stringify(responsablesActuales)){p.encDET=responsablesActuales;cambio=true;}
     const disponiblesResponsable=nombresPersonalRS('responsableDet',p.turno);
-    const responsablesRegistrados=nombresPersonalRS('responsableDet','');
     let responsableActivo=String(p.encDETActivo||'').trim();
-    if(!responsableActivo){
-      responsableActivo=(p.encDET||[]).map(nombre=>String(nombre||'').trim()).find(nombre=>disponiblesResponsable.some(opcion=>opcion.toLocaleLowerCase()===nombre.toLocaleLowerCase()))||disponiblesResponsable[0]||(p.encDET||[]).map(nombre=>String(nombre||'').trim()).find(Boolean)||'';
-    }else if(responsablesRegistrados.some(nombre=>nombre.toLocaleLowerCase()===responsableActivo.toLocaleLowerCase())&&!disponiblesResponsable.some(nombre=>nombre.toLocaleLowerCase()===responsableActivo.toLocaleLowerCase())){
-      responsableActivo=disponiblesResponsable[0]||'';
-    }
+    if(!disponiblesResponsable.some(nombre=>nombre.toLocaleLowerCase()===responsableActivo.toLocaleLowerCase()))responsableActivo=disponiblesResponsable[0]||'';
     if(p.encDETActivo!==responsableActivo){p.encDETActivo=responsableActivo;cambio=true;}
     return cambio;
   }

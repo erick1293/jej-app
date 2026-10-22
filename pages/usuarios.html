@@ -5,241 +5,236 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión de Personal - App JEJ</title>
     <link rel="stylesheet" href="../css/styles.css" />
-    <style></style>
+    <style>
+      body.pagina-fondo > main.card-wide { max-width: 900px; }
+      .personal-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:18px; }
+      .personal-heading h2 { margin:0 0 5px; }
+      .personal-heading .subtitle { margin:0; }
+      .personal-total { flex:0 0 auto; padding:7px 11px; border-radius:999px; color:#244779; background:#e8f1ff; font-size:12px; font-weight:800; }
+      .personal-table-wrap { container-type:inline-size; overflow-x:hidden; border:1px solid #d5e0f0; border-radius:12px; background:#fff; }
+      .personal-table { width:100%; min-width:700px; table-layout:auto; border-collapse:collapse; color:#19345f; font-size:13px; }
+      .personal-table th { padding:12px 14px; color:#fff; background:#17366f; text-align:left; font-size:11px; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+      .personal-table td { padding:12px 14px; border-top:1px solid #e0e8f3; vertical-align:middle; }
+      .personal-table th:nth-child(1), .personal-table td:nth-child(1) { min-width:185px; }
+      .personal-table th:nth-child(2), .personal-table td:nth-child(2) { min-width:85px; }
+      .personal-table th:nth-child(3), .personal-table td:nth-child(3) { min-width:95px; }
+      .personal-table th:nth-child(4), .personal-table td:nth-child(4) { min-width:105px; }
+      .personal-table th:nth-child(5), .personal-table td:nth-child(5) { min-width:135px; }
+      .personal-table td:nth-child(2), .personal-table td:nth-child(3) { white-space:nowrap; }
+      .personal-table tbody tr:nth-child(even) { background:#f5f8fd; }
+      .personal-table tbody tr:hover { background:#edf6ff; }
+      .personal-role { display:inline-flex; align-items:center; gap:7px; font-weight:750; }
+      .personal-role i { width:8px; height:8px; border-radius:50%; background:#22b9e8; }
+      .personal-name { font-weight:750; color:#19345f; }
+      .personal-last { color:#597092; }
+      .personal-shift { display:inline-flex!important; align-items:center; justify-content:center; width:max-content; max-width:100%; padding:5px 9px!important; border-radius:999px!important; white-space:nowrap!important; line-height:1.1; font-size:11px!important; font-weight:850!important; }
+      .personal-shift.turno-a { color:#1c56a5!important; background:#e2efff!important; }
+      .personal-shift.turno-b { color:#ad2639!important; background:#ffe5e8!important; }
+      .personal-shift.turno-ambos { color:#08794e!important; background:#dff7eb!important; }
+      .personal-actions { display:flex; justify-content:flex-end; gap:7px; white-space:nowrap; }
+      .personal-action { min-height:34px; padding:6px 11px; border:0; border-radius:8px; color:#fff; font:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+      .personal-action.edit { background:#315ca8; }
+      .personal-action.delete { background:#e25562; }
+      .personal-action:hover { filter:brightness(.94); }
+      .personal-empty { padding:28px 16px; color:#657a9a; text-align:center; }
+      .personal-empty strong { display:block; margin-bottom:5px; color:#244779; }
+      .personal-footer { display:flex; gap:10px; margin-top:14px; }
+      .personal-footer .btn-primary { flex:1; min-height:44px; text-decoration:none; display:flex; align-items:center; justify-content:center; }
+      .personal-add { background:linear-gradient(180deg,#23c581,#009c63)!important; }
+      .personal-back { background:#1c315b!important; }
+      .personal-modal { padding:12px; }
+      .personal-modal .modal-content { max-width:510px; padding:0; overflow:hidden; border-radius:18px; }
+      .personal-modal-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:18px 20px 14px; color:#fff; background:linear-gradient(115deg,#17366f,#24549b); }
+      .personal-modal-head h3 { margin:0 0 4px; color:#fff; }
+      .personal-modal-head p { margin:0; color:#c9d9f4; font-size:12px; }
+      .personal-modal-close { width:34px; height:34px; border:1px solid rgba(255,255,255,.28); border-radius:9px; color:#fff; background:rgba(255,255,255,.12); font-size:20px; cursor:pointer; }
+      .personal-modal-form { padding:17px 20px 20px; }
+      .personal-name-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .personal-modal-form .form-group-field { margin-bottom:12px; }
+      .personal-modal-actions { display:flex; gap:9px; margin-top:6px; }
+      .personal-modal-actions button { flex:1; min-height:42px; }
+      .personal-save { background:linear-gradient(180deg,#23c581,#009c63)!important; }
+      .personal-cancel { background:#1c315b!important; }
+      @container (max-width:680px) {
+        .personal-table { min-width:0; width:100%; display:block; table-layout:auto; }
+        .personal-table thead { display:none; }
+        .personal-table tbody { display:block; width:100%; }
+        .personal-table tr { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1fr) max-content max-content; grid-template-areas:"cargo cargo cargo cargo" "nombre apellido turno acciones"; align-items:center; gap:4px 8px; padding:9px 11px; border-top:1px solid #e0e8f3; }
+        .personal-table td, .personal-table td:nth-child(n) { display:block; min-width:0; padding:2px 0; border:0; font-size:11px; line-height:1.2; }
+        .personal-table td::before { display:none; }
+        .personal-table td:nth-child(1) { grid-area:cargo; }
+        .personal-table td:nth-child(2) { grid-area:nombre; }
+        .personal-table td:nth-child(3) { grid-area:apellido; }
+        .personal-table td:nth-child(4) { grid-area:turno; justify-self:center; }
+        .personal-table td:nth-child(5) { grid-area:acciones; }
+        .personal-role { gap:5px; font-size:11px; line-height:1.15; }
+        .personal-shift { padding:4px 7px!important; font-size:10px!important; }
+        .personal-actions { justify-content:flex-end; gap:4px; }
+        .personal-action { min-height:29px; padding:4px 6px; font-size:10px; }
+      }
+      @container (max-width:390px) {
+        .personal-table { min-width:0; }
+        .personal-table tr { grid-template-columns:minmax(0,1fr) max-content; grid-template-areas:"cargo cargo" "nombre apellido" "turno acciones"; gap:5px 9px; padding:9px; }
+        .personal-table td:nth-child(4) { justify-self:start; }
+        .personal-actions { justify-content:flex-end; }
+      }
+      @media(max-width:700px) {
+        .personal-heading { align-items:center; }
+        .personal-footer { flex-direction:column; }
+        .personal-modal { align-items:flex-end; padding:8px; }
+        .personal-modal .modal-content { max-height:88vh; border-radius:18px 18px 12px 12px; }
+        .personal-name-grid { grid-template-columns:1fr; gap:0; }
+      }
+    </style>
   </head>
   <body class="pagina-fondo">
     <main class="card-wide">
-      <h2>Gestión de Personal DET / JeJ</h2>
-      <p class="subtitle">
-        Registra y administra los supervisores y encargados por turno para
-        autocompletar formularios
-      </p>
-
-      <form id="formPersonal" onsubmit="guardarPersonal(event)">
-        <div class="form-group-field">
-          <label for="tipoPersonal">Rol del Personal:</label>
-          <select id="tipoPersonal" required>
-            <option value="" disabled selected>-- Seleccione Rol --</option>
-            <option value="supervisorJeJ">
-              Supervisor JeJ (Ingeniero Líder P&T)
-            </option>
-            <option value="supervisorDet">
-              Supervisor DET / Jefe de Turno DET
-            </option>
-            <option value="responsableDet">
-              Responsable Carguío DET / Encargado DET
-            </option>
-          </select>
+      <header class="personal-heading">
+        <div>
+          <h2>Gestión de Personal</h2>
+          <p class="subtitle">Supervisores y responsables por turno</p>
         </div>
+        <span id="personalTotal" class="personal-total">0 personas</span>
+      </header>
 
-        <div class="form-group-field">
-          <label for="turnoPersonal">Asociar a Turno:</label>
-          <select id="turnoPersonal" required>
-            <option value="" disabled selected>-- Seleccione Turno --</option>
-            <option value="A">Turno A</option>
-            <option value="B">Turno B</option>
-            <option value="Ambos">Ambos Turnos</option>
-          </select>
+      <section class="listado-personal" aria-labelledby="tituloListadoPersonal">
+        <h3 id="tituloListadoPersonal">Personal registrado en turnos</h3>
+        <div class="personal-table-wrap">
+          <table class="personal-table">
+            <thead><tr><th>Cargo</th><th>Nombre</th><th>Apellido</th><th>Turno</th><th style="text-align:right">Acciones</th></tr></thead>
+            <tbody id="contenedorLista"></tbody>
+          </table>
+          <div id="personalVacio" class="personal-empty" hidden><strong>Sin personal registrado</strong>Agrega supervisores y responsables para que aparezcan en los módulos de trabajo.</div>
         </div>
+      </section>
 
-        <div class="form-group-field">
-          <label for="nombrePersonal">Nombre Completo:</label>
-          <input
-            type="text"
-            id="nombrePersonal"
-            placeholder=""
-            required
-            autocomplete="off"
-          />
-        </div>
-
-        <button
-          type="submit"
-          class="btn-primary"
-          style="width: 100%; background-color: #16a34a"
-        >
-          + Agregar / Actualizar Personal
-        </button>
-      </form>
-
-      <div class="listado-personal">
-        <h3>Personal Registrado en Turnos</h3>
-        <div id="contenedorLista">Cargando datos...</div>
-      </div>
-
-      <div style="margin-top: 20px; text-align: center">
-        <a
-          href="../index.html"
-          class="btn-primary"
-          style="
-            background-color: #64748b;
-            text-decoration: none;
-            display: inline-block;
-            padding: 10px 20px;
-          "
-          >Volver al Menú Principal</a
-        >
-      </div>
+      <footer class="personal-footer">
+        <button type="button" class="btn-primary personal-add" onclick="abrirModalPersonal()">＋ Agregar personal</button>
+        <a href="../index.html" class="btn-primary personal-back">‹ Menú principal</a>
+      </footer>
     </main>
+
+    <div id="modalPersonalCrud" class="modal-overlay personal-modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalPersonal">
+      <section class="modal-content">
+        <header class="personal-modal-head">
+          <div><h3 id="tituloModalPersonal">Agregar personal</h3><p>Asigna un cargo y turno para completar las planillas.</p></div>
+          <button type="button" class="personal-modal-close" aria-label="Cerrar" onclick="cerrarModalPersonalCrud()">×</button>
+        </header>
+        <form id="formPersonal" class="personal-modal-form" onsubmit="guardarPersonal(event)">
+          <div class="form-group-field">
+            <label for="tipoPersonal">Cargo</label>
+            <select id="tipoPersonal" required>
+              <option value="" disabled selected>Seleccione el cargo</option>
+              <option value="supervisorJeJ">Supervisor JeJ</option>
+              <option value="supervisorDet">Supervisor(es) DET</option>
+              <option value="responsableDet">Responsable(s) Carguío DET</option>
+            </select>
+          </div>
+          <div class="personal-name-grid">
+            <div class="form-group-field"><label for="nombrePersonal">Nombre</label><input id="nombrePersonal" type="text" placeholder="Nombre" required autocomplete="given-name" /></div>
+            <div class="form-group-field"><label for="apellidoPersonal">Apellido</label><input id="apellidoPersonal" type="text" placeholder="Apellido(s)" required autocomplete="family-name" /></div>
+          </div>
+          <div class="form-group-field">
+            <label for="turnoPersonal">Turno asignado</label>
+            <select id="turnoPersonal" required>
+              <option value="" disabled selected>Seleccione el turno</option>
+              <option value="A">Turno A</option><option value="B">Turno B</option><option value="Ambos">Ambos turnos</option>
+            </select>
+          </div>
+          <div class="personal-modal-actions">
+            <button id="btnCancelarEdicion" type="button" class="btn-primary personal-cancel" onclick="cerrarModalPersonalCrud()">Cancelar</button>
+            <button id="btnGuardarPersonal" type="submit" class="btn-primary personal-save">＋ Agregar personal</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
     <script src="../js/components.js"></script>
     <script src="../js/app.js"></script>
+    <script src="../js/usuarios.js"></script>
     <script>
-      if (typeof cargarBarMenu === "function") {
-        cargarBarMenu(true);
+      let personalEnEdicion = null;
+      if (typeof cargarBarMenu === "function") cargarBarMenu(true);
+      document.addEventListener("DOMContentLoaded", mostrarListadoPersonal);
+      document.getElementById("modalPersonalCrud").addEventListener("click", evento => { if (evento.target.id === "modalPersonalCrud") cerrarModalPersonalCrud(); });
+      document.addEventListener("keydown", evento => { if (evento.key === "Escape") cerrarModalPersonalCrud(); });
+
+      function abrirModalPersonal() {
+        cancelarEdicionPersonal();
+        document.getElementById("tituloModalPersonal").textContent = "Agregar personal";
+        const modal = document.getElementById("modalPersonalCrud"); modal.style.display = "flex";
+        setTimeout(() => document.getElementById("tipoPersonal").focus(), 40);
       }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        precargarPersonalPorDefecto();
-        mostrarListadoPersonal();
-        cargarSupervisoresJeJEnModal();
-      });
-
-      // Carga automática inicial y aseguramiento de llaves obligatorias
-      function precargarPersonalPorDefecto() {
-        let personalMap = JSON.parse(
-          localStorage.getItem("jej_personal_map") || "{}",
-        );
-
-        // Si el objeto está totalmente vacío, inicializamos todo
-        if (Object.keys(personalMap).length === 0) {
-          personalMap = {
-            supervisorJeJ: [
-              { nombre: "Hector Flores", turno: "A" },
-              { nombre: "Hector Flores", turno: "B" },
-            ],
-            supervisorDet: [
-              { nombre: "Carlos Castro", turno: "A" },
-              { nombre: "Nicolas Valdovino", turno: "A" },
-              { nombre: "Carlos Castro", turno: "B" },
-              { nombre: "Nicolas Valdovino", turno: "B" },
-            ],
-            responsableDet: [
-              { nombre: "Andres Bugeño", turno: "A" },
-              { nombre: "Sergio Guerrero", turno: "A" },
-              { nombre: "Milton", turno: "B" },
-              { nombre: "Patricio Vera", turno: "B" },
-            ],
-          };
-        } else {
-          // Si ya existe el mapa pero le falta la clave de supervisorJeJ, la inyectamos por defecto
-          if (!personalMap["supervisorJeJ"]) {
-            personalMap["supervisorJeJ"] = [
-              { nombre: "Hector Flores", turno: "A" },
-              { nombre: "Hector Flores", turno: "B" },
-            ];
-          }
-        }
-
-        localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
+      function cerrarModalPersonalCrud() {
+        document.getElementById("modalPersonalCrud").style.display = "none";
+        cancelarEdicionPersonal();
       }
-
-      function guardarPersonal(e) {
-        e.preventDefault();
+      function guardarPersonal(evento) {
+        evento.preventDefault();
         const rol = document.getElementById("tipoPersonal").value;
         const turno = document.getElementById("turnoPersonal").value;
         const nombre = document.getElementById("nombrePersonal").value.trim();
-
-        if (!rol || !turno || !nombre) return;
-
-        let personalMap = JSON.parse(
-          localStorage.getItem("jej_personal_map") || "{}",
-        );
-        if (!personalMap[rol]) personalMap[rol] = [];
-
-        const existe = personalMap[rol].some(
-          (p) =>
-            p.nombre.toLowerCase() === nombre.toLowerCase() &&
-            p.turno === turno,
-        );
-
-        if (!existe) {
-          personalMap[rol].push({ nombre, turno });
-          localStorage.setItem("jej_personal_map", JSON.stringify(personalMap));
-          alert("Personal registrado con éxito.");
-          document.getElementById("nombrePersonal").value = "";
-          mostrarListadoPersonal();
-          cargarSupervisoresJeJEnModal();
-        } else {
-          alert("Este nombre ya se encuentra asignado a este rol y turno.");
-        }
+        const apellido = document.getElementById("apellidoPersonal").value.trim();
+        const nombreCompleto = [nombre, apellido].filter(Boolean).join(" ");
+        if (!rol || !turno || !nombre || !apellido) return;
+        const mapa = JEJUsuarios.inicializar();
+        const editando = personalEnEdicion;
+        const repetido = mapa[rol].some((persona, indice) => {
+          if (editando && rol === editando.rol && indice === editando.indice) return false;
+          return persona.nombre.toLocaleLowerCase() === nombreCompleto.toLocaleLowerCase() && persona.turno === turno;
+        });
+        if (repetido) { alert("Este nombre ya está asignado a ese cargo y turno."); return; }
+        if (editando) mapa[editando.rol].splice(editando.indice, 1);
+        mapa[rol].push({ nombre: nombreCompleto, turno });
+        JEJUsuarios.guardar(mapa);
+        cerrarModalPersonalCrud(); mostrarListadoPersonal();
       }
-
-      function eliminarPersonal(rol, nombre, turno) {
-        if (confirm(`¿Desea eliminar a "${nombre}" del turno ${turno}?`)) {
-          let personalMap = JSON.parse(
-            localStorage.getItem("jej_personal_map") || "{}",
-          );
-          if (personalMap[rol]) {
-            personalMap[rol] = personalMap[rol].filter(
-              (p) => !(p.nombre === nombre && p.turno === turno),
-            );
-            if (personalMap[rol].length === 0) delete personalMap[rol];
-            localStorage.setItem(
-              "jej_personal_map",
-              JSON.stringify(personalMap),
-            );
-            mostrarListadoPersonal();
-            cargarSupervisoresJeJEnModal();
-          }
-        }
+      function editarPersonal(rol, indice) {
+        const persona = JEJUsuarios.inicializar()[rol][indice]; if (!persona) return;
+        personalEnEdicion = { rol, indice };
+        const partes = persona.nombre.trim().split(/\s+/);
+        document.getElementById("tipoPersonal").value = rol;
+        document.getElementById("turnoPersonal").value = persona.turno;
+        document.getElementById("nombrePersonal").value = partes.shift() || "";
+        document.getElementById("apellidoPersonal").value = partes.join(" ");
+        document.getElementById("tituloModalPersonal").textContent = "Editar personal";
+        document.getElementById("btnGuardarPersonal").textContent = "✓ Guardar cambios";
+        document.getElementById("modalPersonalCrud").style.display = "flex";
+        document.getElementById("nombrePersonal").focus();
       }
-
-      function obtenerEtiquetaRol(rolKey) {
-        const etiquetas = {
-          supervisorJeJ: "Supervisor JeJ",
-          supervisorDet: "Supervisor DET",
-          responsableDet: "Responsable DET",
-        };
-        return etiquetas[rolKey] || rolKey;
+      function cancelarEdicionPersonal() {
+        personalEnEdicion = null;
+        document.getElementById("formPersonal").reset();
+        document.getElementById("btnGuardarPersonal").textContent = "＋ Agregar personal";
       }
-
-      function cargarSupervisoresJeJEnModal() {
-        let personalMap = JSON.parse(
-          localStorage.getItem("jej_personal_map") || "{}",
-        );
-        let listaJeJ = personalMap["supervisorJeJ"] || [];
-
-        const datalist = document.getElementById("listaSupJeJ");
-        if (datalist) {
-          datalist.innerHTML = "";
-          listaJeJ.forEach((item) => {
-            datalist.innerHTML += `<option value="${item.nombre}">Turno: ${item.turno}</option>`;
-          });
-        }
+      function eliminarPersonal(rol, indice) {
+        const mapa = JEJUsuarios.inicializar(), persona = mapa[rol] && mapa[rol][indice];
+        if (!persona || !confirm(`¿Deseas quitar a ${persona.nombre} de ${persona.turno === "Ambos" ? "ambos turnos" : `turno ${persona.turno}`}?`)) return;
+        mapa[rol].splice(indice, 1); JEJUsuarios.guardar(mapa);
+        if (personalEnEdicion && personalEnEdicion.rol === rol) cerrarModalPersonalCrud();
+        mostrarListadoPersonal();
       }
-
       function mostrarListadoPersonal() {
-        const contenedor = document.getElementById("contenedorLista");
-        let personalMap = JSON.parse(
-          localStorage.getItem("jej_personal_map") || "{}",
-        );
-
-        contenedor.innerHTML = "";
-        let hayRegistros = false;
-
-        for (let rol in personalMap) {
-          personalMap[rol].forEach((item) => {
-            hayRegistros = true;
-            const turnoLabel =
-              item.turno === "Ambos" ? "Turno A y B" : `Turno ${item.turno}`;
-            contenedor.innerHTML += `
-                        <div class="item-pers">
-                            <div>
-                                <span class="badge-rol">${obtenerEtiquetaRol(rol)}</span>
-                                <strong>${item.nombre}</strong>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="badge-turno">${turnoLabel}</span>
-                                <button type="button" class="btn-delete" onclick="eliminarPersonal('${rol}', '${item.nombre}', '${item.turno}')">Quitar</button>
-                            </div>
-                        </div>`;
-          });
-        }
-
-        if (!hayRegistros) {
-          contenedor.innerHTML =
-            "<p style='color: #64748b; font-size: 13px;'>No hay personal asignado a ningún turno.</p>";
-        }
+        const tbody = document.getElementById("contenedorLista");
+        const vacio = document.getElementById("personalVacio");
+        const etiquetas = { supervisorJeJ:"Supervisor JeJ", supervisorDet:"Supervisor(es) DET", responsableDet:"Responsable(s) Carguío DET" };
+        const mapa = JEJUsuarios.inicializar(); tbody.replaceChildren();
+        let cantidad = 0;
+        Object.keys(etiquetas).forEach(rol => mapa[rol].forEach((persona, indice) => {
+          cantidad++;
+          const tr = document.createElement("tr");
+          const cargo = document.createElement("td"); cargo.dataset.label = "Cargo";
+          const cargoTag = document.createElement("span"); cargoTag.className = "personal-role"; const punto = document.createElement("i"); cargoTag.append(punto, document.createTextNode(etiquetas[rol])); cargo.appendChild(cargoTag);
+          const partes = persona.nombre.trim().split(/\s+/); const primerNombre = partes.shift() || ""; const apellido = partes.join(" ");
+          const nombre = document.createElement("td"); nombre.dataset.label = "Nombre"; nombre.className = "personal-name"; nombre.textContent = primerNombre;
+          const ap = document.createElement("td"); ap.dataset.label = "Apellido"; ap.className = "personal-last"; ap.textContent = apellido;
+          const tdTurno = document.createElement("td"); tdTurno.dataset.label = "Turno"; const turno = document.createElement("span"); turno.className = `badge-turno personal-shift ${persona.turno === "A" ? "turno-a" : persona.turno === "B" ? "turno-b" : "turno-ambos"}`; turno.textContent = persona.turno === "Ambos" ? "Turnos A y B" : `Turno ${persona.turno}`; tdTurno.appendChild(turno);
+          const tdAcciones = document.createElement("td"); tdAcciones.dataset.label = "Acciones"; const acciones = document.createElement("div"); acciones.className = "personal-actions";
+          const editar = document.createElement("button"); editar.type = "button"; editar.className = "personal-action edit"; editar.textContent = "Editar"; editar.onclick = () => editarPersonal(rol, indice);
+          const borrar = document.createElement("button"); borrar.type = "button"; borrar.className = "personal-action delete"; borrar.textContent = "Quitar"; borrar.onclick = () => eliminarPersonal(rol, indice);
+          acciones.append(editar, borrar); tdAcciones.appendChild(acciones); tr.append(cargo, nombre, ap, tdTurno, tdAcciones); tbody.appendChild(tr);
+        }));
+        vacio.hidden = cantidad > 0; document.getElementById("personalTotal").textContent = `${cantidad} ${cantidad === 1 ? "persona" : "personas"}`;
       }
     </script>
   </body>

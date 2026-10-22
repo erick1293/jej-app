@@ -757,6 +757,24 @@
             itemMenuAnfo.appendChild(enlaceMenuAnfo);
             menuAnfo.insertBefore(itemMenuAnfo, menuAnfo.children[1] || null);
         }
+        function agregarAccionesMenuAnfo() {
+            const menu = document.querySelector("#dropdownMenu ul");
+            if (!menu) return;
+            const cerrar = () => document.getElementById("dropdownMenu")?.classList.remove("show");
+            const acciones = [
+                ["menuExcelAnfo", "⬇ Descargar Excel", () => guardarFormularioAnfoYExportarExcel()],
+                ["menuPlanillaAnfo", "📋 Datos faltantes de planilla", () => window.abrirDatosPostura("tiempos")],
+                ["menuInformeAnfo", "📄 Ver informe técnico", () => generarInformeTecnicoHTML()]
+            ];
+            acciones.forEach(([id, texto, ejecutar]) => {
+                if (document.getElementById(id)) return;
+                const item = document.createElement("li"), enlace = document.createElement("a");
+                enlace.id = id; enlace.href = "#"; enlace.textContent = texto;
+                enlace.addEventListener("click", evento => { evento.preventDefault(); cerrar(); ejecutar(); });
+                item.appendChild(enlace); menu.appendChild(item);
+            });
+        }
+        agregarAccionesMenuAnfo();
 
         function sincronizarBotonesTurnoAnfo() {
             const turno = document.getElementById("turnoAnfo").value;

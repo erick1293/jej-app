@@ -1890,11 +1890,25 @@ var rolPersonal = {
   render();
   function agregarIngresoMenu() {
     var menu = document.querySelector('#dropdownMenu ul');
-    if (!menu || menu.querySelector('[data-perforacion-ingreso]')) return;
-    var li = document.createElement('li'), a = document.createElement('a');
-    a.href = '#'; a.dataset.perforacionIngreso = '1'; a.textContent = '⚙️ Ingreso / Editar Datos';
-    a.addEventListener('click', function (e) { e.preventDefault(); var dd = document.getElementById('dropdownMenu'); if (dd) dd.classList.remove('show'); abrirAsistente('postura'); });
-    li.appendChild(a); menu.insertBefore(li, menu.children[1] || null);
+    if (!menu) return;
+    if (!menu.querySelector('[data-perforacion-ingreso]')) {
+      var li = document.createElement('li'), a = document.createElement('a');
+      a.href = '#'; a.dataset.perforacionIngreso = '1'; a.textContent = '⚙️ Ingreso / Editar Datos';
+      a.addEventListener('click', function (e) { e.preventDefault(); var dd = document.getElementById('dropdownMenu'); if (dd) dd.classList.remove('show'); abrirAsistente('postura'); });
+      li.appendChild(a); menu.insertBefore(li, menu.children[1] || null);
+    }
+    var acciones = [
+      ['menuExcelPerforacion', '⬇ Descargar Excel', function () { J.store.saveNow(); J.excel.download(P()); }],
+      ['menuPlanillaPerforacion', '📋 Datos faltantes de planilla', function () { abrirAsistente('plantilla'); }],
+      ['menuInformePerforacion', '📄 Ver informe técnico', function () { J.store.saveNow(); J.informe.abrir(P()); }]
+    ];
+    acciones.forEach(function (accion) {
+      if (document.getElementById(accion[0])) return;
+      var item = document.createElement('li'), enlace = document.createElement('a');
+      enlace.id = accion[0]; enlace.href = '#'; enlace.textContent = accion[1];
+      enlace.addEventListener('click', function (e) { e.preventDefault(); var dd = document.getElementById('dropdownMenu'); if (dd) dd.classList.remove('show'); accion[2](); });
+      item.appendChild(enlace); menu.appendChild(item);
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', agregarIngresoMenu); else agregarIngresoMenu();
   window.addEventListener('beforeunload', function () { J.store.saveNow(); });

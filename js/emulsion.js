@@ -21,6 +21,24 @@
             item.appendChild(enlace);
             menuEmulsion.insertBefore(item, menuEmulsion.children[1] || null);
         }
+        function agregarAccionesMenuEmulsion() {
+            const menu = document.querySelector("#dropdownMenu ul");
+            if (!menu) return;
+            const cerrar = () => document.getElementById("dropdownMenu")?.classList.remove("show");
+            const acciones = [
+                ["menuExcelEmulsion", "⬇ Descargar Excel", () => guardarFormularioEmulsionYExportarExcel()],
+                ["menuPlanillaEmulsion", "📋 Datos faltantes de planilla", () => window.abrirDatosPlantillaEmulsion("tiempos")],
+                ["menuInformeEmulsion", "📄 Ver informe técnico", () => generarInformeTecnicoHTML()]
+            ];
+            acciones.forEach(([id, texto, ejecutar]) => {
+                if (document.getElementById(id)) return;
+                const item = document.createElement("li"), enlace = document.createElement("a");
+                enlace.id = id; enlace.href = "#"; enlace.textContent = texto;
+                enlace.addEventListener("click", evento => { evento.preventDefault(); cerrar(); ejecutar(); });
+                item.appendChild(enlace); menu.appendChild(item);
+            });
+        }
+        agregarAccionesMenuEmulsion();
         function sincronizarBotonesTurnoEmulsion() {
             const turno = document.getElementById("turnoEmulsion").value;
             document.querySelectorAll("[data-turno-emulsion]").forEach(boton => {
@@ -109,6 +127,7 @@
 
             document.getElementById("turnoEmulsion").addEventListener("change", () => {
                 sincronizarBotonesTurnoEmulsion();
+                limpiarAsignacionPersonalTemporal();
                 actualizarListasPorTurno();
                 actualizarResumenUnificado();
                 ejecutarAutosave();
@@ -558,6 +577,11 @@
             const borrador = {
                 trabajos: trabajosGuardados,
                 turno: document.getElementById("turnoEmulsion").value,
+                personalFecha: document.getElementById("fechaEmulsion")?.value || "",
+                personalTurno: document.getElementById("turnoEmulsion")?.value || "A",
+                supJeJ: document.getElementById("modalSupJeJ")?.value || "",
+                supervisorDet: Array.from(document.querySelectorAll('#modalPersonal input[name="supervisorDet"]')).map(input => input.value.trim()).filter(Boolean),
+                responsableDet: Array.from(document.querySelectorAll('#modalPersonal input[name="responsableDet"]')).map(input => input.value.trim()).filter(Boolean),
                 mina: document.getElementById("modalMina").value,
                 nivel: document.getElementById("modalNivel").value,
                 bloque: document.getElementById("modalBloque").value,
@@ -585,6 +609,8 @@
             try {
                 const b = JSON.parse(borradorRaw);
                 if (b.turno === "A" || b.turno === "B") document.getElementById("turnoEmulsion").value = b.turno;
+                const mismaAsignacionDiaria = b.personalFecha === (document.getElementById("fechaEmulsion")?.value || "") &&
+                    b.personalTurno === (document.getElementById("turnoEmulsion")?.value || "A");
                 ["mina", "nivel", "bloque", "numZanja", "calleZanja", "calleUcl", "paradasInicioFin", "detallePanel2", "faseZanja"].forEach(campo => {
                     const control = document.getElementById(({ mina: "modalMina", nivel: "modalNivel", bloque: "modalBloque", numZanja: "numZanja", calleZanja: "calleZanja", calleUcl: "calleUcl", paradasInicioFin: "paradasInicioFin", detallePanel2: "detallePanel2", faseZanja: "faseZanja" })[campo]);
                     if (control && b[campo] !== undefined) control.value = b[campo];
@@ -594,7 +620,14 @@
                 }
                 cambiarNivelModal();
                 actualizarIdTronaduraAuto();
+                limpiarAsignacionPersonalTemporal();
                 actualizarListasPorTurno();
+                if (mismaAsignacionDiaria) {
+                    if (b.supJeJ !== undefined) document.getElementById("modalSupJeJ").value = b.supJeJ;
+                    restaurarGrupoPersonal("supervisorDet", "contenedorSupDetModal", b.supervisorDet);
+                    restaurarGrupoPersonal("responsableDet", "contenedorRespDetModal", b.responsableDet);
+                    actualizarResumenUnificado();
+                }
                 actualizarSelectIdsTrabajo();
             } catch (e) {
                 console.error("Error al cargar borrador", e);
@@ -682,6 +715,27 @@
             const estado = document.getElementById("estadoPersonalEmulsion");
             estado.textContent = completo ? "✓ Completo" : "Pendiente";
             estado.classList.toggle("incompleto", !completo);
+        }
+
+        function limpiarAsignacionPersonalTemporal() {
+            const supJeJ = document.getElementById("modalSupJeJ");
+            if (supJeJ) supJeJ.value = "";
+            ["contenedorSupDetModal", "contenedorRespDetModal"].forEach(id => {
+                const contenedor = document.getElementById(id);
+                if (!contenedor) return;
+                while (contenedor.children.length > 1) contenedor.lastElementChild.remove();
+                contenedor.querySelectorAll("input").forEach(input => { input.value = ""; });
+            });
+        }
+
+        function restaurarGrupoPersonal(name, containerId, valores) {
+            if (!Array.isArray(valores)) return;
+            const contenedor = document.getElementById(containerId);
+            if (!contenedor) return;
+            while (contenedor.children.length > 1) contenedor.lastElementChild.remove();
+            valores.forEach((valor, index) => { if (index > 0) agregarCampoModal(containerId, name, false); });
+            const inputs = Array.from(document.querySelectorAll(`#modalPersonal input[name="${name}"]`));
+            valores.forEach((valor, index) => { if (inputs[index]) inputs[index].value = valor; });
         }
 
         function actualizarListasPorTurno() {

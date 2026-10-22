@@ -23,8 +23,9 @@
 
     function inicializar() {
         var personalMap = {};
+        var guardado = root.localStorage.getItem(STORAGE_KEY);
         try {
-            personalMap = JSON.parse(root.localStorage.getItem(STORAGE_KEY) || '{}');
+            personalMap = JSON.parse(guardado || '{}');
         } catch (error) {
             console.error('No se pudo leer el personal guardado.', error);
         }
@@ -33,13 +34,20 @@
             personalMap = {};
         }
 
-        if (Object.keys(personalMap).length === 0) {
+        if (guardado === null) {
             personalMap = JSON.parse(JSON.stringify(PERSONAL_POR_DEFECTO));
-        } else if (!personalMap.supervisorJeJ) {
-            personalMap.supervisorJeJ = PERSONAL_POR_DEFECTO.supervisorJeJ.map(function (persona) {
-                return { nombre: persona.nombre, turno: persona.turno };
-            });
         }
+
+        ['supervisorJeJ', 'supervisorDet', 'responsableDet'].forEach(function (rol) {
+            if (!Array.isArray(personalMap[rol])) personalMap[rol] = [];
+            personalMap[rol] = personalMap[rol].map(function (persona) {
+                return typeof persona === 'string' ? { nombre: persona.trim(), turno: 'Ambos' } : persona;
+            }).filter(function (persona) {
+                return persona && typeof persona.nombre === 'string' && persona.nombre.trim() && ['A', 'B', 'Ambos'].indexOf(persona.turno || 'Ambos') >= 0;
+            }).map(function (persona) {
+                return { nombre: persona.nombre.trim(), turno: persona.turno || 'Ambos' };
+            });
+        });
 
         try {
             root.localStorage.setItem(STORAGE_KEY, JSON.stringify(personalMap));
@@ -47,6 +55,19 @@
             console.error('No se pudo inicializar el personal guardado.', error);
         }
         return personalMap;
+    }
+
+    function guardar(personalMap) {
+        var limpio = {};
+        ['supervisorJeJ', 'supervisorDet', 'responsableDet'].forEach(function (rol) {
+            limpio[rol] = Array.isArray(personalMap && personalMap[rol]) ? personalMap[rol].map(function (persona) {
+                return { nombre: String(persona.nombre || '').trim(), turno: persona.turno || 'Ambos' };
+            }).filter(function (persona) {
+                return persona.nombre && ['A', 'B', 'Ambos'].indexOf(persona.turno) >= 0;
+            }) : [];
+        });
+        root.localStorage.setItem(STORAGE_KEY, JSON.stringify(limpio));
+        return limpio;
     }
 
     function nombres(rol, turno) {
@@ -61,6 +82,6 @@
         }).filter(Boolean)));
     }
 
-    root.JEJUsuarios = { inicializar: inicializar, nombres: nombres };
+    root.JEJUsuarios = { inicializar: inicializar, guardar: guardar, nombres: nombres };
     inicializar();
 })(window);
